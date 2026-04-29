@@ -13,9 +13,7 @@ export default function Home() {
 
     const res = await fetch("/api/analyze", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ review }),
     });
 
@@ -25,49 +23,94 @@ export default function Home() {
   }
 
   return (
-    <main style={{ padding: 24, maxWidth: 720, margin: "0 auto" }}>
-      <h1>Google評論AI系統</h1>
-      <p>輸入客人的 Google 評論，AI 會自動產生分析與回覆建議。</p>
+    <main style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg,#eef2ff,#f8fafc)",
+      padding: 24,
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <div style={{
+        maxWidth: 760,
+        margin: "0 auto",
+        background: "white",
+        borderRadius: 24,
+        padding: 28,
+        boxShadow: "0 20px 50px rgba(0,0,0,0.08)"
+      }}>
+        <div style={{
+          display: "inline-block",
+          background: "#eef2ff",
+          color: "#4338ca",
+          padding: "8px 14px",
+          borderRadius: 999,
+          fontWeight: 700,
+          marginBottom: 16
+        }}>
+          Google Review AI
+        </div>
 
-      <textarea
-        value={review}
-        onChange={(e) => setReview(e.target.value)}
-        placeholder="請貼上客人的評論，例如：服務很好但等很久"
-        style={{
-          width: "100%",
-          height: 160,
-          padding: 12,
-          fontSize: 16,
-          marginTop: 20,
-        }}
-      />
+        <h1 style={{ fontSize: 36, margin: "8px 0" }}>
+          Google評論AI回覆系統
+        </h1>
 
-      <button
-        onClick={analyzeReview}
-        disabled={loading || !review}
-        style={{
-          marginTop: 16,
-          padding: "12px 20px",
-          fontSize: 16,
-        }}
-      >
-        {loading ? "AI分析中..." : "產生AI回覆"}
-      </button>
+        <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.7 }}>
+          貼上客人的 Google 評論，AI 會自動分析情緒、風險，並產生可直接複製的商家回覆建議。
+        </p>
 
-      {result && (
-        <div
+        <textarea
+          value={review}
+          onChange={(e) => setReview(e.target.value)}
+          placeholder="例如：服務不錯，但等了很久，希望下次可以改善。"
           style={{
+            width: "100%",
+            height: 170,
             marginTop: 24,
             padding: 16,
-            border: "1px solid #ddd",
-            borderRadius: 8,
-            whiteSpace: "pre-wrap",
-            lineHeight: 1.7,
+            fontSize: 16,
+            borderRadius: 16,
+            border: "1px solid #cbd5e1",
+            outline: "none",
+            resize: "vertical",
+            boxSizing: "border-box"
+          }}
+        />
+
+        <button
+          onClick={analyzeReview}
+          disabled={!review || loading}
+          style={{
+            marginTop: 16,
+            width: "100%",
+            padding: "15px 20px",
+            fontSize: 17,
+            fontWeight: 700,
+            borderRadius: 16,
+            border: "none",
+            background: loading || !review ? "#94a3b8" : "#4f46e5",
+            color: "white",
+            cursor: loading || !review ? "not-allowed" : "pointer"
           }}
         >
-          {result}
-        </div>
-      )}
+          {loading ? "AI 分析中..." : "產生 AI 回覆"}
+        </button>
+
+        {result && (
+          <div style={{
+            marginTop: 24,
+            padding: 20,
+            borderRadius: 18,
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            whiteSpace: "pre-wrap",
+            lineHeight: 1.8,
+            fontSize: 16
+          }}>
+            <strong>AI 分析結果：</strong>
+            <br /><br />
+            {result}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
