@@ -18,7 +18,7 @@ export default function Home() {
     });
 
     const data = await res.json();
-    setResult(data.result || data.error || "Error occurred");
+    setResult(data.result || data.error || "發生錯誤");
     setLoading(false);
   }
 
@@ -37,7 +37,6 @@ export default function Home() {
         padding: 28,
         boxShadow: "0 20px 50px rgba(0,0,0,0.08)"
       }}>
-        {/* 標籤 */}
         <div style={{
           display: "inline-block",
           background: "#eef2ff",
@@ -47,24 +46,21 @@ export default function Home() {
           fontWeight: 700,
           marginBottom: 16
         }}>
-          ReviewReply AI
+          Google 評論回覆建議
         </div>
 
-        {/* 標題 */}
         <h1 style={{ fontSize: 36, margin: "8px 0" }}>
-          Google Review Suggestions
+          Google 評論建議系統
         </h1>
 
-        {/* 說明 */}
         <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.7 }}>
-          Paste a customer’s Google review and AI will generate a professional reply suggestion for you.
+          貼上客人的 Google 評論，系統會幫你產生專業、自然、適合公開回覆的建議文字。
         </p>
 
-        {/* 輸入框 */}
         <textarea
           value={review}
           onChange={(e) => setReview(e.target.value)}
-          placeholder="Example: The service was good but I had to wait too long."
+          placeholder="例如：服務不錯，但等了很久，希望下次可以改善。"
           style={{
             width: "100%",
             height: 170,
@@ -79,7 +75,6 @@ export default function Home() {
           }}
         />
 
-        {/* 按鈕 */}
         <button
           onClick={analyzeReview}
           disabled={!review || loading}
@@ -96,10 +91,9 @@ export default function Home() {
             cursor: loading || !review ? "not-allowed" : "pointer"
           }}
         >
-          {loading ? "Analyzing..." : "Generate AI Reply"}
+          {loading ? "產生中..." : "產生回覆建議"}
         </button>
 
-        {/* 結果 */}
         {result && (
           <div style={{
             marginTop: 24,
@@ -111,7 +105,7 @@ export default function Home() {
             lineHeight: 1.8,
             fontSize: 16
           }}>
-            <strong>AI Result:</strong>
+            <strong>建議結果：</strong>
             <br /><br />
             {result}
           </div>
