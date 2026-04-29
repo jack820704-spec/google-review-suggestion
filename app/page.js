@@ -14,26 +14,20 @@ export default function Home() {
     setResult("");
     setCopied(false);
 
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ review, tone })
-      });
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ review, tone })
+    });
 
-      const data = await res.json();
-      setResult(data.result || data.error || "發生錯誤");
-    } catch (error) {
-      setResult("系統發生錯誤，請稍後再試。");
-    }
-
+    const data = await res.json();
+    setResult(data.result || data.error || "發生錯誤");
     setLoading(false);
   }
 
   async function copyResult() {
-    if (!result) return;
     await navigator.clipboard.writeText(result);
     setCopied(true);
   }
@@ -43,40 +37,44 @@ export default function Home() {
       style={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at top left, #c7d2fe, #eef2ff 35%, #f8fafc 80%)",
+          "radial-gradient(circle at top left, #38bdf8 0%, #1e3a8a 32%, #020617 78%)",
         padding: 24,
-        fontFamily: "Arial, sans-serif"
+        fontFamily: "Arial, sans-serif",
+        color: "#0f172a"
       }}
     >
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1050, margin: "0 auto" }}>
         <section
           style={{
-            background: "rgba(255,255,255,0.94)",
+            background: "rgba(255,255,255,0.96)",
             borderRadius: 32,
             padding: 34,
-            boxShadow: "0 30px 80px rgba(30,41,59,0.14)"
+            boxShadow: "0 35px 90px rgba(2,6,23,0.35)",
+            border: "1px solid rgba(255,255,255,0.45)"
           }}
         >
           <div
             style={{
               display: "inline-block",
-              background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
+              background: "linear-gradient(135deg,#0284c7,#2563eb)",
               color: "white",
               padding: "9px 16px",
               borderRadius: 999,
-              fontWeight: 800,
-              marginBottom: 18
+              fontWeight: 900,
+              marginBottom: 18,
+              letterSpacing: "0.3px"
             }}
           >
-            商家評論回覆建議系統
+            ReviewReply Pro
           </div>
 
           <h1
             style={{
-              fontSize: 42,
+              fontSize: 44,
               margin: "8px 0",
               fontWeight: 900,
-              letterSpacing: "-1px"
+              letterSpacing: "-1.2px",
+              color: "#0f172a"
             }}
           >
             Google 評論建議系統
@@ -85,11 +83,11 @@ export default function Home() {
           <p
             style={{
               fontSize: 18,
-              color: "#64748b",
+              color: "#475569",
               lineHeight: 1.8
             }}
           >
-            貼上客人的 Google 評論，系統會依照店家語氣產生專業、自然、可直接公開回覆的建議文字。
+            貼上客人的 Google 評論，系統會依照店家語氣，產生專業、自然、可直接公開回覆的建議文字。
           </p>
 
           <textarea
@@ -98,16 +96,17 @@ export default function Home() {
             placeholder="例如：東西不錯，但等太久，服務人員也沒有主動說明。"
             style={{
               width: "100%",
-              height: 170,
+              height: 175,
               marginTop: 26,
               padding: 18,
               fontSize: 16,
-              borderRadius: 20,
+              borderRadius: 22,
               border: "1px solid #cbd5e1",
               outline: "none",
               resize: "vertical",
               boxSizing: "border-box",
-              background: "#f8fafc"
+              background: "#f8fafc",
+              boxShadow: "inset 0 2px 8px rgba(15,23,42,0.04)"
             }}
           />
 
@@ -139,18 +138,19 @@ export default function Home() {
               width: "100%",
               padding: "17px",
               fontSize: 18,
-              fontWeight: 800,
+              fontWeight: 900,
               borderRadius: 18,
               border: "none",
               background:
                 loading || !review
                   ? "#94a3b8"
-                  : "linear-gradient(135deg,#4f46e5,#7c3aed)",
+                  : "linear-gradient(135deg,#0284c7,#2563eb)",
               color: "white",
               cursor: loading || !review ? "not-allowed" : "pointer",
-              boxShadow: loading
-                ? "none"
-                : "0 14px 30px rgba(79,70,229,0.32)"
+              boxShadow:
+                loading || !review
+                  ? "none"
+                  : "0 16px 36px rgba(37,99,235,0.38)"
             }}
           >
             {loading ? "產生中..." : "產生回覆建議"}
@@ -182,9 +182,9 @@ export default function Home() {
                   padding: 14,
                   borderRadius: 14,
                   border: "none",
-                  background: copied ? "#16a34a" : "#0f172a",
+                  background: copied ? "#16a34a" : "#020617",
                   color: "white",
-                  fontWeight: 800,
+                  fontWeight: 900,
                   fontSize: 16
                 }}
               >
@@ -209,23 +209,25 @@ export default function Home() {
             <div
               key={plan[0]}
               style={{
-                background: "white",
-                borderRadius: 22,
-                padding: 22,
-                boxShadow: "0 18px 45px rgba(15,23,42,0.08)"
+                background: "rgba(255,255,255,0.96)",
+                borderRadius: 24,
+                padding: 24,
+                boxShadow: "0 18px 45px rgba(2,6,23,0.22)",
+                border: "1px solid rgba(255,255,255,0.5)"
               }}
             >
               <h3 style={{ margin: 0, fontSize: 22 }}>{plan[0]}</h3>
               <p
                 style={{
-                  fontSize: 26,
+                  fontSize: 28,
                   fontWeight: 900,
-                  margin: "10px 0"
+                  margin: "10px 0",
+                  color: "#1d4ed8"
                 }}
               >
                 {plan[1]}
               </p>
-              <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+              <p style={{ color: "#475569", lineHeight: 1.7 }}>
                 {plan[2]}
               </p>
             </div>
