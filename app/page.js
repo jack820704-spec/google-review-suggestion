@@ -40,7 +40,6 @@ export default function Home() {
       email,
       password,
     });
-
     if (error) return alert(error.message);
     setUser(data.user);
   }
@@ -96,8 +95,9 @@ export default function Home() {
             </h1>
 
             <p style={desc}>
-              一鍵產生三種不同回覆方式：專業親切、高級品牌、危機處理，
-              幫助商家快速回覆評論、提升形象與回訪率。
+              用 AI 幫商家快速產生三種回覆方式：
+              專業親切 / 高級品牌 / 危機處理，
+              提升顧客信任與回訪率。
             </p>
           </div>
 
@@ -155,10 +155,11 @@ export default function Home() {
           {loading ? "生成中..." : "產生三種回覆"}
         </button>
 
-        {/* 🔥 三種回覆分開 */}
         {result && (
           <div style={resultBox}>
-            <h3 style={{ marginBottom: 20 }}>三種回覆方式</h3>
+            <div style={resultHead}>
+              <b>三種不同回應方式</b>
+            </div>
 
             {(() => {
               const parts = result
@@ -171,25 +172,25 @@ export default function Home() {
                 "危機處理版",
               ];
 
-              return parts.map((text, i) => {
-                const clean = text.replace(/】內容：/, "").trim();
+              return parts.map((text, index) => {
+                const cleanText = text.replace(/】內容：/, "").trim();
 
                 return (
-                  <div key={i} style={singleBox}>
+                  <div key={index} style={singleBox}>
                     <div style={singleHead}>
-                      <span style={tag}>{titles[i]}</span>
+                      <span style={tagTitle}>{titles[index]}</span>
 
                       <button
-                        style={copyBtn}
+                        style={copyBtnSmall}
                         onClick={() =>
-                          navigator.clipboard.writeText(clean)
+                          navigator.clipboard.writeText(cleanText)
                         }
                       >
                         複製
                       </button>
                     </div>
 
-                    <div style={singleText}>{clean}</div>
+                    <div style={singleText}>{cleanText}</div>
                   </div>
                 );
               });
@@ -281,35 +282,44 @@ const resultBox = {
   marginTop: 30,
 };
 
+const resultHead = {
+  marginBottom: 10,
+};
+
 const singleBox = {
-  marginBottom: 20,
-  padding: 15,
-  border: "1px solid #333",
-  borderRadius: 10,
+  marginTop: 18,
+  padding: 16,
+  borderRadius: 14,
+  border: "1px solid rgba(212,175,55,0.2)",
+  background: "rgba(255,255,255,0.03)",
 };
 
 const singleHead = {
   display: "flex",
   justifyContent: "space-between",
+  alignItems: "center",
   marginBottom: 10,
 };
 
-const tag = {
+const tagTitle = {
   color: "#d4af37",
-  fontWeight: "bold",
+  fontWeight: 900,
 };
 
-const copyBtn = {
+const copyBtnSmall = {
   background: "#d4af37",
+  color: "#000",
   border: "none",
-  padding: "5px 10px",
-  borderRadius: 6,
+  padding: "6px 12px",
+  borderRadius: 8,
+  fontWeight: 700,
   cursor: "pointer",
 };
 
 const singleText = {
-  whiteSpace: "pre-wrap",
   color: "#ddd",
+  lineHeight: 1.8,
+  whiteSpace: "pre-wrap",
 };
 
 const logoutBtn = {
