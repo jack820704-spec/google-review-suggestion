@@ -14,7 +14,6 @@ export default function Home() {
   const [password, setPassword] = useState("");
 
   const [review, setReview] = useState("");
-  const [tone, setTone] = useState("專業親切");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -81,7 +80,7 @@ export default function Home() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ text: `語氣：${tone}\n評論：${review}` }),
+      body: JSON.stringify({ text: review }),
     });
 
     const data = await res.json();
@@ -123,29 +122,30 @@ export default function Home() {
             </h1>
 
             <p style={subtitle}>
-              貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議。
-              幫助商家提升品牌形象、降低負評傷害，讓每一次回覆都成為加分機會。
+              貼上顧客評論，系統會直接提供三種不同回應方式：
+              專業親切、高級品牌、危機處理。
+              幫助商家快速處理好評、普通評論與負面評論。
             </p>
 
             <div style={featureGrid}>
               <div style={featureCard}>
-                <b>提升顧客觀感</b>
-                <p>用更有溫度的回覆，提高顧客再次上門意願。</p>
+                <b>專業親切</b>
+                <p>適合大多數日常評論，回覆自然、有禮貌。</p>
               </div>
 
               <div style={featureCard}>
-                <b>負評轉為加分</b>
-                <p>面對負評也能回得得體，展現店家的用心。</p>
+                <b>高級品牌</b>
+                <p>適合醫美、精品、餐飲品牌，提升質感形象。</p>
               </div>
 
               <div style={featureCard}>
-                <b>節省營運時間</b>
-                <p>不用反覆想文案，快速產生可直接使用的內容。</p>
+                <b>危機處理</b>
+                <p>面對負評也能得體回應，降低評論傷害。</p>
               </div>
 
               <div style={featureCard}>
-                <b>適合多種產業</b>
-                <p>餐廳、美容、醫美、旅宿、服務業都能使用。</p>
+                <b>提升效率</b>
+                <p>不用反覆想文案，貼上評論即可產生三種版本。</p>
               </div>
             </div>
 
@@ -182,7 +182,7 @@ export default function Home() {
             <div style={authNote}>
               不用信用卡，註冊即可試用。
               <br />
-              用完後可升級基本方案或專業方案。
+              每次產生會一次給你三種不同回應方式。
             </div>
           </section>
         </div>
@@ -206,34 +206,21 @@ export default function Home() {
         </div>
 
         <div style={usageBox}>
-          <div>
+          <div style={miniBox}>
             <b>免費試用剩餘</b>
             <p>{remaining} 次</p>
           </div>
 
-          <div>
+          <div style={miniBox}>
+            <b>本次輸出</b>
+            <p>三種回應方式</p>
+          </div>
+
+          <div style={miniBox}>
             <b>目前方案</b>
             <p>Free Trial</p>
           </div>
-
-          <div>
-            <b>建議升級</b>
-            <p>基本方案 NT$499/月</p>
-          </div>
         </div>
-
-        <label style={label}>選擇回覆語氣</label>
-        <select
-          style={select}
-          value={tone}
-          onChange={(e) => setTone(e.target.value)}
-        >
-          <option>專業親切</option>
-          <option>溫柔誠懇</option>
-          <option>高級品牌感</option>
-          <option>簡短有禮</option>
-          <option>危機處理</option>
-        </select>
 
         <label style={label}>貼上顧客評論</label>
         <textarea
@@ -245,13 +232,13 @@ export default function Home() {
         />
 
         <button style={btnGold} onClick={generate}>
-          {loading ? "生成中..." : "產生回覆建議"}
+          {loading ? "生成中..." : "產生三種回覆建議"}
         </button>
 
         {result && (
           <div style={resultBox}>
             <div style={resultHead}>
-              <b>建議回覆內容</b>
+              <b>三種不同回應方式</b>
               <button style={copyBtn} onClick={copyText}>
                 {copied ? "已複製" : "一鍵複製"}
               </button>
@@ -379,7 +366,8 @@ const goldText = {
 };
 
 const authCard = {
-  background: "linear-gradient(145deg,rgba(255,255,255,0.09),rgba(255,255,255,0.035))",
+  background:
+    "linear-gradient(145deg,rgba(255,255,255,0.09),rgba(255,255,255,0.035))",
   border: "1px solid rgba(212,175,55,0.18)",
   borderRadius: 26,
   padding: 42,
@@ -443,7 +431,8 @@ const authNote = {
 const appShell = {
   maxWidth: 980,
   margin: "0 auto",
-  background: "linear-gradient(145deg,rgba(255,255,255,0.09),rgba(255,255,255,0.035))",
+  background:
+    "linear-gradient(145deg,rgba(255,255,255,0.09),rgba(255,255,255,0.035))",
   border: "1px solid rgba(212,175,55,0.18)",
   borderRadius: 28,
   padding: 42,
@@ -483,19 +472,19 @@ const usageBox = {
   gap: 14,
 };
 
+const miniBox = {
+  background: "rgba(255,255,255,0.055)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: 16,
+  padding: 16,
+};
+
 const label = {
   display: "block",
   marginTop: 24,
   marginBottom: 8,
   color: "#d4af37",
   fontWeight: 900,
-};
-
-const select = {
-  width: "100%",
-  padding: 15,
-  borderRadius: 12,
-  fontSize: 16,
 };
 
 const textarea = {
