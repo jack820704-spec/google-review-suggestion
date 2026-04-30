@@ -8,9 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "openai": "latest",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "openai": "latest"
+    "react-dom": "latest"
   }
 }
