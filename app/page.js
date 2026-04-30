@@ -32,7 +32,7 @@ export default function Home() {
   async function signUp() {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) return alert(error.message);
-    alert("註冊成功");
+    alert("註冊成功，請登入");
   }
 
   async function signIn() {
@@ -57,6 +57,12 @@ export default function Home() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
+    if (!session) {
+      alert("請先登入");
+      setLoading(false);
+      return;
+    }
 
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -85,7 +91,7 @@ export default function Home() {
       <div style={container}>
         {!user ? (
           <div style={split}>
-            {/* 左側 */}
+            {/* 左側文宣 */}
             <div>
               <h1 style={title}>
                 讓每一則評論回覆，
@@ -94,7 +100,7 @@ export default function Home() {
               </h1>
 
               <p style={subtitle}>
-                貼上評論，立即產生專業回覆建議，
+                貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議，
                 幫助提升品牌形象與顧客回訪率。
               </p>
 
@@ -102,11 +108,13 @@ export default function Home() {
                 <p>✓ 提高顧客再次上門意願</p>
                 <p>✓ 負評轉為加分回應</p>
                 <p>✓ 節省客服時間</p>
-                <p>✓ 適用各類服務業</p>
+                <p>✓ 適用餐廳、美容、醫美等服務業</p>
               </div>
+
+              <p style={cta}>立即開始免費試用</p>
             </div>
 
-            {/* 右側卡片 */}
+            {/* 右側登入卡片 */}
             <div style={card}>
               <h2 style={{ marginBottom: 20 }}>開始免費試用</h2>
 
@@ -136,7 +144,7 @@ export default function Home() {
           </div>
         ) : (
           <div style={card}>
-            <p style={{ color: "#d4af37" }}>
+            <p style={remain}>
               剩餘試用：{Math.max(limit - used, 0)} 次
             </p>
 
@@ -155,7 +163,7 @@ export default function Home() {
               {loading ? "生成中..." : "產生回覆建議"}
             </button>
 
-            {result && <div style={result}>{result}</div>}
+            {result && <div style={resultBox}>{result}</div>}
           </div>
         )}
       </div>
@@ -163,12 +171,11 @@ export default function Home() {
   );
 }
 
-/* ===== 美化重點 ===== */
+/* ===== 樣式 ===== */
 
 const bg = {
   minHeight: "100vh",
-  background:
-    "radial-gradient(circle at top, #0a0a0a, #000)",
+  background: "radial-gradient(circle at top, #0a0a0a, #000)",
   padding: 40,
   fontFamily: "Arial",
   color: "#fff",
@@ -187,7 +194,7 @@ const split = {
 };
 
 const title = {
-  fontSize: 44,
+  fontSize: 42,
   fontWeight: "bold",
   color: "#d4af37",
   lineHeight: 1.3,
@@ -202,6 +209,12 @@ const features = {
   marginTop: 25,
   lineHeight: 2,
   color: "#aaa",
+};
+
+const cta = {
+  marginTop: 20,
+  color: "#d4af37",
+  fontWeight: "bold",
 };
 
 const card = {
@@ -254,7 +267,7 @@ const textarea = {
   borderRadius: 10,
 };
 
-const result = {
+const resultBox = {
   marginTop: 20,
   padding: 15,
   background: "#000",
@@ -263,4 +276,8 @@ const result = {
 
 const logoutBtn = {
   marginBottom: 10,
+};
+
+const remain = {
+  color: "#d4af37",
 };
