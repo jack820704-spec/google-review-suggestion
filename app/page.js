@@ -85,8 +85,8 @@ export default function Home() {
       <div style={container}>
         {!user ? (
           <div style={split}>
-            {/* 左側文宣 */}
-            <div style={left}>
+            {/* 左側 */}
+            <div>
               <h1 style={title}>
                 讓每一則評論回覆，
                 <br />
@@ -94,25 +94,21 @@ export default function Home() {
               </h1>
 
               <p style={subtitle}>
-                貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議，
-                幫助商家提升品牌形象與回訪率。
+                貼上評論，立即產生專業回覆建議，
+                幫助提升品牌形象與顧客回訪率。
               </p>
 
               <div style={features}>
-                <p>✓ 用專業回覆，提高顧客再次上門意願</p>
-                <p>✓ 讓負面評論也能變成加分的回應</p>
-                <p>✓ 節省客服時間，提高營運效率</p>
-                <p>✓ 適用餐廳、美容、醫美與服務業</p>
+                <p>✓ 提高顧客再次上門意願</p>
+                <p>✓ 負評轉為加分回應</p>
+                <p>✓ 節省客服時間</p>
+                <p>✓ 適用各類服務業</p>
               </div>
-
-              <p style={cta}>
-                現在開始免費試用，體驗差別
-              </p>
             </div>
 
-            {/* 右側登入 */}
-            <div style={right}>
-              <h2 style={authTitle}>開始免費試用</h2>
+            {/* 右側卡片 */}
+            <div style={card}>
+              <h2 style={{ marginBottom: 20 }}>開始免費試用</h2>
 
               <input
                 style={input}
@@ -139,8 +135,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div style={appCard}>
-            <p style={remain}>
+          <div style={card}>
+            <p style={{ color: "#d4af37" }}>
               剩餘試用：{Math.max(limit - used, 0)} 次
             </p>
 
@@ -167,15 +163,15 @@ export default function Home() {
   );
 }
 
-/* ====== 樣式 ====== */
+/* ===== 美化重點 ===== */
 
 const bg = {
   minHeight: "100vh",
   background:
-    "linear-gradient(135deg, #000 0%, #0a0a0a 50%, #000 100%)",
-  color: "#fff",
+    "radial-gradient(circle at top, #0a0a0a, #000)",
   padding: 40,
   fontFamily: "Arial",
+  color: "#fff",
 };
 
 const container = {
@@ -185,15 +181,13 @@ const container = {
 
 const split = {
   display: "grid",
-  gridTemplateColumns: "1fr 400px",
-  gap: 40,
+  gridTemplateColumns: "1fr 420px",
+  gap: 50,
   alignItems: "center",
 };
 
-const left = {};
-
 const title = {
-  fontSize: 40,
+  fontSize: 44,
   fontWeight: "bold",
   color: "#d4af37",
   lineHeight: 1.3,
@@ -201,43 +195,36 @@ const title = {
 
 const subtitle = {
   marginTop: 15,
-  color: "#ccc",
-  lineHeight: 1.6,
+  color: "#bbb",
 };
 
 const features = {
   marginTop: 25,
-  color: "#aaa",
   lineHeight: 2,
+  color: "#aaa",
 };
 
-const cta = {
-  marginTop: 20,
-  color: "#d4af37",
-  fontWeight: "bold",
-};
-
-const right = {
-  background: "#111",
+const card = {
+  background: "rgba(255,255,255,0.05)",
+  backdropFilter: "blur(20px)",
+  border: "1px solid rgba(255,255,255,0.1)",
   padding: 30,
   borderRadius: 20,
-};
-
-const authTitle = {
-  marginBottom: 20,
+  boxShadow: "0 0 40px rgba(0,0,0,0.6)",
 };
 
 const input = {
   width: "100%",
   padding: 12,
   marginBottom: 12,
-  borderRadius: 8,
+  borderRadius: 10,
+  border: "none",
 };
 
 const btnGold = {
   width: "100%",
   padding: 14,
-  background: "#d4af37",
+  background: "linear-gradient(135deg,#d4af37,#f5d76e)",
   color: "#000",
   fontWeight: "bold",
   borderRadius: 10,
@@ -260,12 +247,6 @@ const note = {
   color: "#777",
 };
 
-const appCard = {
-  background: "#111",
-  padding: 30,
-  borderRadius: 20,
-};
-
 const textarea = {
   width: "100%",
   marginTop: 20,
@@ -282,8 +263,4 @@ const result = {
 
 const logoutBtn = {
   marginBottom: 10,
-};
-
-const remain = {
-  color: "#d4af37",
 };
