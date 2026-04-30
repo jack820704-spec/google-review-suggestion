@@ -1,50 +1,84 @@
-import OpenAI from "openai";
+import { createClient } from '@supabase/supabase-js'
+import OpenAI from 'openai'
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
 
 export async function POST(req) {
   try {
-    const { review, tone } = await req.json();
+    const { text } = await req.json()
 
-    if (!review) {
-      return Response.json(
-        { error: "請輸入評論內容" },
-        { status: 400 }
-      );
+    // 取得 user（從 header token）
+    const authHeader = req.headers.get('authorization')
+
+    if (!authHeader) {
+      return Response.json({ error: '未登入' })
     }
 
-    const response = await client.responses.create({
-      model: "gpt-4o-mini",
-      input: `你是專業的 Google 商家評論回覆顧問。
+    const token = authHeader.replace('Bearer ', '')
 
-請用繁體中文分析以下評論，並依照「${tone || "專業親切"}」語氣產生內容。
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token)
 
-請輸出：
-1. 評論情緒：好評 / 中立 / 負評
-2. 風險等級：低 / 中 / 高
-3. 建議公開回覆：
-4. 店家改善建議：
+    if (userError || !user) {
+      return Response.json({ error: '無效使用者' })
+    }
 
-要求：
-- 回覆要自然，不要像機器人
-- 不要過度承認法律責任
-- 適合直接貼到 Google 評論回覆
-- 負評要有安撫、道歉、改善承諾
-- 好評要感謝並邀請下次再來
+    // 讀取 profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
 
-評論：
-${review}`
-    });
+    // 如果沒有就建立
+    if (!profile) {
+      await supabase.from('profiles').insert({
+        id: user.id,
+        email: user.email,
+      })
+    }
 
-    return Response.json({
-      result: response.output_text
-    });
-  } catch (error) {
-    return Response.json(
-      { error: "AI分析失敗，請確認 API Key 或額度" },
-      { status: 500 }
-    );
+    const used = profile?.used_count || 0
+    const limit = profile?.trial_limit || 3
+
+    if (used >= limit) {
+      return Response.json({ error: '已達免費次數上限，請升級方案' })
+    }
+
+    // 呼叫 AI
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: '你是專業客服，幫店家回覆Google評論',
+        },
+        {
+          role: 'user',
+          content: text,
+        },
+      ],
+    })
+
+    const result = completion.choices[0].message.content
+
+    // 更新使用次數
+    await supabase
+      .from('profiles')
+      .update({ used_count: used + 1 })
+      .eq('id', user.id)
+
+    return Response.json({ result })
+  } catch (err) {
+    return Response.json({ error: err.message })
   }
 }
