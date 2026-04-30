@@ -78,7 +78,8 @@ export default function Home() {
       <div style={container}>
         {!user ? (
           <div style={split}>
-            <div style={left}>
+            {/* 左 */}
+            <div>
               <h1 style={title}>
                 讓每一則評論回覆，
                 <br />
@@ -86,21 +87,22 @@ export default function Home() {
               </h1>
 
               <p style={subtitle}>
-                貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議，
-                幫助商家提升品牌形象與回訪率。
+                貼上顧客評論，立即產生專業回覆建議，
+                幫助提升品牌形象與顧客回訪率。
               </p>
 
               <div style={features}>
-                <p>✓ 用專業回覆，提高顧客再次上門意願</p>
-                <p>✓ 讓負面評論也能變成加分的回應</p>
-                <p>✓ 節省客服時間，提高營運效率</p>
-                <p>✓ 適用餐廳、美容、醫美與服務業</p>
+                <p>✓ 提高顧客再次上門意願</p>
+                <p>✓ 負評轉為加分回應</p>
+                <p>✓ 節省客服時間</p>
+                <p>✓ 適用餐廳、美容、醫美</p>
               </div>
 
-              <p style={cta}>現在開始免費試用，體驗差別</p>
+              <p style={cta}>立即免費試用</p>
             </div>
 
-            <div style={right}>
+            {/* 右 */}
+            <div style={card}>
               <h2 style={authTitle}>開始免費試用</h2>
 
               <input
@@ -123,20 +125,20 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div style={appCard}>
+          <div style={card}>
             <p style={remain}>剩餘試用：{Math.max(limit - used, 0)} 次</p>
 
-            <button onClick={logout} style={logoutBtn}>登出</button>
+            <button onClick={logout}>登出</button>
 
             <textarea
               style={textarea}
               rows={6}
-              placeholder="貼上顧客評論..."
+              placeholder="貼上評論..."
               onChange={(e) => setReview(e.target.value)}
             />
 
             <button style={btnGold} onClick={generate}>
-              {loading ? "生成中..." : "產生回覆建議"}
+              {loading ? "生成中..." : "產生回覆"}
             </button>
 
             {result && <div style={result}>{result}</div>}
@@ -147,73 +149,77 @@ export default function Home() {
   );
 }
 
+/* ===== 放大關鍵 ===== */
+
 const bg = {
   minHeight: "100vh",
-  background: "linear-gradient(135deg, #000 0%, #0a0a0a 50%, #000 100%)",
+  background: "radial-gradient(circle at top, #0a0a0a, #000)",
+  padding: "60px 80px",
   color: "#fff",
-  padding: 40,
-  fontFamily: "Arial",
 };
 
 const container = {
-  maxWidth: 1100,
-  margin: "0 auto",
+  width: "100%",
 };
 
 const split = {
   display: "grid",
-  gridTemplateColumns: "1fr 400px",
-  gap: 40,
+  gridTemplateColumns: "1.4fr 520px", // 🔥 放大關鍵
+  gap: 80,
   alignItems: "center",
 };
 
-const left = {};
-
 const title = {
-  fontSize: 40,
+  fontSize: 60, // 🔥 大標升級
   fontWeight: "bold",
   color: "#d4af37",
-  lineHeight: 1.3,
+  lineHeight: 1.2,
 };
 
 const subtitle = {
-  marginTop: 15,
-  color: "#ccc",
-  lineHeight: 1.6,
+  marginTop: 20,
+  fontSize: 20,
+  color: "#bbb",
 };
 
 const features = {
-  marginTop: 25,
+  marginTop: 30,
+  fontSize: 18,
+  lineHeight: 2.2,
   color: "#aaa",
-  lineHeight: 2,
 };
 
 const cta = {
-  marginTop: 20,
+  marginTop: 30,
+  fontSize: 20,
   color: "#d4af37",
   fontWeight: "bold",
 };
 
-const right = {
+const card = {
   background: "#111",
-  padding: 30,
+  padding: 40,
   borderRadius: 20,
+  boxShadow: "0 0 40px rgba(0,0,0,0.6)",
 };
 
 const authTitle = {
+  fontSize: 24,
   marginBottom: 20,
 };
 
 const input = {
   width: "100%",
-  padding: 12,
-  marginBottom: 12,
-  borderRadius: 8,
+  padding: 16,
+  fontSize: 16,
+  marginBottom: 15,
+  borderRadius: 10,
 };
 
 const btnGold = {
   width: "100%",
-  padding: 14,
+  padding: 18,
+  fontSize: 16,
   background: "#d4af37",
   color: "#000",
   fontWeight: "bold",
@@ -223,30 +229,24 @@ const btnGold = {
 
 const btnOutline = {
   width: "100%",
-  padding: 12,
+  padding: 16,
   border: "1px solid #d4af37",
-  background: "transparent",
   color: "#d4af37",
+  background: "transparent",
   borderRadius: 10,
   marginTop: 10,
 };
 
 const note = {
   marginTop: 10,
-  fontSize: 13,
+  fontSize: 14,
   color: "#777",
-};
-
-const appCard = {
-  background: "#111",
-  padding: 30,
-  borderRadius: 20,
 };
 
 const textarea = {
   width: "100%",
   marginTop: 20,
-  padding: 12,
+  padding: 16,
   borderRadius: 10,
 };
 
@@ -255,10 +255,6 @@ const result = {
   padding: 15,
   background: "#000",
   borderRadius: 10,
-};
-
-const logoutBtn = {
-  marginBottom: 10,
 };
 
 const remain = {
