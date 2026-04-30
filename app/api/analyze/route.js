@@ -1,128 +1,108 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export default function Home() {
-  const [user, setUser] = useState(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-  const [review, setReview] = useState("");
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+export async function POST(req) {
+  try {
+    const { text } = await req.json();
 
-  const [used, setUsed] = useState(0);
-  const [limit, setLimit] = useState(3);
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) return Response.json({ error: "未登入" });
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  async function checkUser() {
-    const { data } = await supabase.auth.getUser();
-    setUser(data.user || null);
-  }
-
-  async function signUp() {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) return alert(error.message);
-    alert("註冊成功");
-  }
-
-  async function signIn() {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) return alert(error.message);
-    setUser(data.user);
-  }
-
-  async function logout() {
-    await supabase.auth.signOut();
-    setUser(null);
-  }
-
-  async function generate() {
-    if (!review) return alert("請輸入評論");
-
-    setLoading(true);
+    const token = authHeader.replace("Bearer ", "");
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser(token);
 
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ text: review }),
-    });
+    if (!user) return Response.json({ error: "無效使用者" });
 
-    const data = await res.json();
+    let { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-    if (data.error) {
-      alert(data.error);
-    } else {
-      setResult(data.result);
-      setUsed(data.used);
-      setLimit(data.limit);
+    if (!profile) {
+      const { data } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          email: user.email,
+          used_count: 0,
+          trial_limit: 3,
+        })
+        .select()
+        .single();
+
+      profile = data;
     }
 
-    setLoading(false);
+    const used = profile.used_count || 0;
+    const limit = profile.trial_limit || 3;
+
+    if (used >= limit) {
+      return Response.json({ error: "免費次數已用完，請升級方案。" });
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `
+你是專業的 Google 商家評論回覆顧問。
+請針對同一則評論，產生三種不同公開回覆方式。
+
+輸出格式必須固定如下：
+
+【一、專業親切版】
+內容：
+
+【二、高級品牌版】
+內容：
+
+【三、危機處理版】
+內容：
+
+規則：
+1. 使用繁體中文。
+2. 回覆要自然，不要像機器人。
+3. 不要過度承認法律責任。
+4. 負評要安撫、致歉、提出改善態度。
+5. 好評要感謝並邀請再次光臨。
+6. 每個版本都要可以直接貼到 Google 評論回覆。
+7. 不要輸出多餘說明。
+          `,
+        },
+        {
+          role: "user",
+          content: text,
+        },
+      ],
+    });
+
+    const result = completion.choices[0].message.content;
+
+    await supabase
+      .from("profiles")
+      .update({ used_count: used + 1 })
+      .eq("id", user.id);
+
+    return Response.json({
+      result,
+      used: used + 1,
+      limit,
+    });
+  } catch (err) {
+    return Response.json({ error: err.message });
   }
-
-  if (!user) {
-    return (
-      <div style={{ padding: 40 }}>
-        <h2>會員登入 / 註冊</h2>
-        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-        <br /><br />
-        <input type="password" placeholder="密碼" onChange={(e) => setPassword(e.target.value)} />
-        <br /><br />
-        <button onClick={signIn}>登入</button>
-        <button onClick={signUp}>註冊</button>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ padding: 40 }}>
-      <h2>Google 評論建議系統</h2>
-
-      <p>剩餘試用：{limit - used} 次</p>
-
-      <button onClick={logout}>登出</button>
-
-      <br /><br />
-
-      <textarea
-        rows={5}
-        style={{ width: "100%" }}
-        placeholder="貼上評論"
-        onChange={(e) => setReview(e.target.value)}
-      />
-
-      <br /><br />
-
-      <button onClick={generate}>
-        {loading ? "生成中..." : "產生回覆"}
-      </button>
-
-      <br /><br />
-
-      <div>{result}</div>
-    </div>
-  );
 }
