@@ -50,9 +50,15 @@ export default function Home() {
 
     setLoading(true)
 
+    // ✅ 這裡已幫你加上 token
+    const session = await supabase.auth.getSession()
+
     const res = await fetch('/api/analyze', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.data.session.access_token}`,
+      },
       body: JSON.stringify({ text: input }),
     })
 
@@ -67,7 +73,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  // 未登入畫面
+  // 未登入
   if (!user) {
     return (
       <div style={{ padding: 40 }}>
@@ -92,7 +98,7 @@ export default function Home() {
     )
   }
 
-  // 已登入畫面
+  // 已登入
   return (
     <div style={{ padding: 40 }}>
       <h2>Google 評論建議系統</h2>
