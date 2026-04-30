@@ -14,47 +14,45 @@ export async function POST(req) {
   try {
     const { text } = await req.json()
 
-    // 取得 user（從 header token）
     const authHeader = req.headers.get('authorization')
-
-    if (!authHeader) {
-      return Response.json({ error: '未登入' })
-    }
+    if (!authHeader) return Response.json({ error: '未登入' })
 
     const token = authHeader.replace('Bearer ', '')
 
     const {
       data: { user },
-      error: userError,
     } = await supabase.auth.getUser(token)
 
-    if (userError || !user) {
-      return Response.json({ error: '無效使用者' })
-    }
+    if (!user) return Response.json({ error: '無效使用者' })
 
-    // 讀取 profiles
-    const { data: profile } = await supabase
+    // 取得 profile
+    let { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    // 如果沒有就建立
+    // 沒有就建立
     if (!profile) {
-      await supabase.from('profiles').insert({
-        id: user.id,
-        email: user.email,
-      })
+      const { data } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email,
+        })
+        .select()
+        .single()
+
+      profile = data
     }
 
-    const used = profile?.used_count || 0
-    const limit = profile?.trial_limit || 3
+    const used = profile.used_count || 0
+    const limit = profile.trial_limit || 3
 
     if (used >= limit) {
       return Response.json({ error: '已達免費次數上限，請升級方案' })
     }
 
-    // 呼叫 AI
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -71,7 +69,6 @@ export async function POST(req) {
 
     const result = completion.choices[0].message.content
 
-    // 更新使用次數
     await supabase
       .from('profiles')
       .update({ used_count: used + 1 })
