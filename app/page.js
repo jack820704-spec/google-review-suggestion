@@ -32,7 +32,7 @@ export default function Home() {
   async function signUp() {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) return alert(error.message);
-    alert("註冊成功，請登入");
+    alert("註冊成功");
   }
 
   async function signIn() {
@@ -57,12 +57,6 @@ export default function Home() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
-    if (!session) {
-      alert("請先登入");
-      setLoading(false);
-      return;
-    }
 
     const res = await fetch("/api/analyze", {
       method: "POST",
@@ -89,57 +83,68 @@ export default function Home() {
   return (
     <main style={bg}>
       <div style={container}>
-        <section style={hero}>
-          <h1 style={title}>
-            讓每一則評論回覆，都提升顧客對你的好感與信任
-          </h1>
-
-          <p style={subtitle}>
-            貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議，
-            幫助商家提升品牌形象與回訪率。
-          </p>
-
-          <div style={featureBox}>
-            <p>✓ 用專業回覆，提高顧客再次上門的意願</p>
-            <p>✓ 讓負面評論也能變成加分的用心回應</p>
-            <p>✓ 快速產生回覆建議，節省客服時間</p>
-            <p>✓ 適用餐廳、美容、醫美與各類服務業</p>
-          </div>
-        </section>
-
         {!user ? (
-          <section style={authCard}>
-            <h2>開始免費試用</h2>
-            <p>註冊後即可使用 3 次評論回覆建議</p>
+          <div style={split}>
+            {/* 左側文宣 */}
+            <div style={left}>
+              <h1 style={title}>
+                讓每一則評論回覆，
+                <br />
+                都提升顧客對你的好感與信任
+              </h1>
 
-            <input
-              style={input}
-              placeholder="Email"
-              onChange={(e) => setEmail(e.target.value)}
-            />
+              <p style={subtitle}>
+                貼上顧客評論，立即產生自然、專業、可公開使用的回覆建議，
+                幫助商家提升品牌形象與回訪率。
+              </p>
 
-            <input
-              style={input}
-              type="password"
-              placeholder="密碼"
-              onChange={(e) => setPassword(e.target.value)}
-            />
+              <div style={features}>
+                <p>✓ 用專業回覆，提高顧客再次上門意願</p>
+                <p>✓ 讓負面評論也能變成加分的回應</p>
+                <p>✓ 節省客服時間，提高營運效率</p>
+                <p>✓ 適用餐廳、美容、醫美與服務業</p>
+              </div>
 
-            <button style={btnPrimary} onClick={signIn}>
-              登入
-            </button>
+              <p style={cta}>
+                現在開始免費試用，體驗差別
+              </p>
+            </div>
 
-            <button style={btnSecondary} onClick={signUp}>
-              免費註冊
-            </button>
-          </section>
+            {/* 右側登入 */}
+            <div style={right}>
+              <h2 style={authTitle}>開始免費試用</h2>
+
+              <input
+                style={input}
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <input
+                style={input}
+                type="password"
+                placeholder="密碼"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <button style={btnGold} onClick={signIn}>
+                登入
+              </button>
+
+              <button style={btnOutline} onClick={signUp}>
+                免費註冊
+              </button>
+
+              <p style={note}>免費試用 3 次</p>
+            </div>
+          </div>
         ) : (
-          <section style={appCard}>
-            <p style={{ color: "#d4af37" }}>
+          <div style={appCard}>
+            <p style={remain}>
               剩餘試用：{Math.max(limit - used, 0)} 次
             </p>
 
-            <button style={logoutBtn} onClick={logout}>
+            <button onClick={logout} style={logoutBtn}>
               登出
             </button>
 
@@ -150,70 +155,115 @@ export default function Home() {
               onChange={(e) => setReview(e.target.value)}
             />
 
-            <button style={btnPrimary} onClick={generate}>
+            <button style={btnGold} onClick={generate}>
               {loading ? "生成中..." : "產生回覆建議"}
             </button>
 
-            {result && <div style={resultBox}>{result}</div>}
-          </section>
+            {result && <div style={result}>{result}</div>}
+          </div>
         )}
       </div>
     </main>
   );
 }
 
+/* ====== 樣式 ====== */
+
 const bg = {
   minHeight: "100vh",
   background:
-    "radial-gradient(circle at top, #111 0%, #000 60%, #000 100%)",
-  color: "white",
-  padding: 24,
+    "linear-gradient(135deg, #000 0%, #0a0a0a 50%, #000 100%)",
+  color: "#fff",
+  padding: 40,
   fontFamily: "Arial",
 };
 
 const container = {
-  maxWidth: 900,
+  maxWidth: 1100,
   margin: "0 auto",
 };
 
-const hero = {
-  marginBottom: 30,
+const split = {
+  display: "grid",
+  gridTemplateColumns: "1fr 400px",
+  gap: 40,
+  alignItems: "center",
 };
 
+const left = {};
+
 const title = {
-  fontSize: 42,
+  fontSize: 40,
   fontWeight: "bold",
   color: "#d4af37",
+  lineHeight: 1.3,
 };
 
 const subtitle = {
-  marginTop: 10,
+  marginTop: 15,
   color: "#ccc",
+  lineHeight: 1.6,
 };
 
-const featureBox = {
-  marginTop: 20,
-  lineHeight: 1.8,
+const features = {
+  marginTop: 25,
   color: "#aaa",
+  lineHeight: 2,
 };
 
-const authCard = {
+const cta = {
+  marginTop: 20,
+  color: "#d4af37",
+  fontWeight: "bold",
+};
+
+const right = {
   background: "#111",
-  padding: 24,
+  padding: 30,
   borderRadius: 20,
 };
 
-const appCard = {
-  background: "#111",
-  padding: 24,
-  borderRadius: 20,
+const authTitle = {
+  marginBottom: 20,
 };
 
 const input = {
   width: "100%",
   padding: 12,
-  marginTop: 10,
+  marginBottom: 12,
+  borderRadius: 8,
+};
+
+const btnGold = {
+  width: "100%",
+  padding: 14,
+  background: "#d4af37",
+  color: "#000",
+  fontWeight: "bold",
   borderRadius: 10,
+  marginTop: 10,
+};
+
+const btnOutline = {
+  width: "100%",
+  padding: 12,
+  border: "1px solid #d4af37",
+  background: "transparent",
+  color: "#d4af37",
+  borderRadius: 10,
+  marginTop: 10,
+};
+
+const note = {
+  marginTop: 10,
+  fontSize: 13,
+  color: "#777",
+};
+
+const appCard = {
+  background: "#111",
+  padding: 30,
+  borderRadius: 20,
 };
 
 const textarea = {
@@ -223,38 +273,17 @@ const textarea = {
   borderRadius: 10,
 };
 
-const btnPrimary = {
-  width: "100%",
-  marginTop: 15,
-  padding: 14,
-  background: "#d4af37",
-  color: "#000",
-  fontWeight: "bold",
-  borderRadius: 10,
-};
-
-const btnSecondary = {
-  width: "100%",
-  marginTop: 10,
-  padding: 12,
-  background: "transparent",
-  border: "1px solid #d4af37",
-  color: "#d4af37",
-  borderRadius: 10,
-};
-
-const logoutBtn = {
-  marginTop: 10,
-  marginBottom: 10,
-  background: "#333",
-  color: "#fff",
-  padding: 10,
-  borderRadius: 8,
-};
-
-const resultBox = {
+const result = {
   marginTop: 20,
   padding: 15,
   background: "#000",
   borderRadius: 10,
+};
+
+const logoutBtn = {
+  marginBottom: 10,
+};
+
+const remain = {
+  color: "#d4af37",
 };
