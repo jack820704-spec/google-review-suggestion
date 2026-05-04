@@ -8,7 +8,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-/* 🌍 多語系 */
 const LANG = {
   zh: {
     title: "讓每一則評論回覆，都提升顧客對你的好感與信任",
@@ -39,27 +38,24 @@ const LANG = {
   },
 };
 
-/* 🌍 自動判斷語言 */
 function detectLang(text) {
   if (/[\u4e00-\u9fa5]/.test(text)) return "zh";
-  if (/[a-zA-Z]/.test(text)) return "en";
   if (/[ăâđêôơư]/i.test(text)) return "vi";
-  return "zh";
+  return "en";
 }
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [review, setReview] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [used, setUsed] = useState(0);
   const [limit, setLimit] = useState(3);
 
-  const [lang, setLang] = useState("zh");
+  /* 🔥 預設英文 */
+  const [lang, setLang] = useState("en");
 
   useEffect(() => {
     checkUser();
@@ -73,7 +69,7 @@ export default function Home() {
   async function signUp() {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) return alert(error.message);
-    alert("註冊成功");
+    alert("Registered");
   }
 
   async function signIn() {
@@ -91,7 +87,7 @@ export default function Home() {
   }
 
   async function generate() {
-    if (!review) return alert("請輸入評論");
+    if (!review) return alert("Please enter review");
 
     setLoading(true);
 
@@ -131,7 +127,6 @@ export default function Home() {
 
   return (
     <main style={bg}>
-      {/* Header */}
       <div style={header}>
         <div style={brand}>ReviewReply Pro</div>
 
@@ -141,8 +136,8 @@ export default function Home() {
             onChange={(e) => setLang(e.target.value)}
             style={langSelect}
           >
-            <option value="zh">繁中</option>
             <option value="en">EN</option>
+            <option value="zh">繁中</option>
             <option value="vi">VI</option>
           </select>
 
@@ -154,7 +149,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 未登入 */}
       {!user && (
         <div style={split}>
           <div>
@@ -185,7 +179,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* 已登入 */}
       {user && (
         <div style={container}>
           <h1 style={{ color: "#d4af37" }}>{t.title}</h1>
@@ -205,12 +198,11 @@ export default function Home() {
             {loading ? "..." : t.btn}
           </button>
 
-          {/* 三種回覆 */}
           {result && (
             <div style={resultBox}>
               {result.split(/【一、|【二、|【三、/).filter(Boolean).map((text, i) => {
                 const clean = text.replace(/】內容：/, "").trim();
-                const titles = ["專業親切", "高級品牌", "危機處理"];
+                const titles = ["Professional", "Brand", "Crisis"];
 
                 return (
                   <div key={i} style={singleBox}>
@@ -237,77 +229,23 @@ export default function Home() {
   );
 }
 
-/* ===== style ===== */
-
+/* style 不變 */
 const bg = { minHeight: "100vh", background: "#000", color: "#fff", padding: 40 };
-
-const header = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: 40,
-};
-
-const brand = {
-  background: "#d4af37",
-  color: "#000",
-  padding: "8px 16px",
-  borderRadius: 999,
-};
-
-const langSelect = {
-  padding: 8,
-  borderRadius: 8,
-};
-
-const split = {
-  display: "flex",
-  justifyContent: "space-between",
-};
-
+const header = { display: "flex", justifyContent: "space-between", marginBottom: 40 };
+const brand = { background: "#d4af37", color: "#000", padding: "8px 16px", borderRadius: 999 };
+const langSelect = { padding: 8, borderRadius: 8 };
+const split = { display: "flex", justifyContent: "space-between" };
 const title = { color: "#d4af37", fontSize: 36 };
-
 const card = { width: 300 };
-
 const input = { width: "100%", marginTop: 10, padding: 10 };
-
-const btn = {
-  marginTop: 10,
-  width: "100%",
-  padding: 12,
-  background: "#d4af37",
-};
-
-const btnOutline = {
-  ...btn,
-  background: "transparent",
-  border: "1px solid #d4af37",
-  color: "#d4af37",
-};
-
+const btn = { marginTop: 10, width: "100%", padding: 12, background: "#d4af37" };
+const btnOutline = { ...btn, background: "transparent", border: "1px solid #d4af37", color: "#d4af37" };
 const logoutBtn = { padding: 10 };
-
 const container = { maxWidth: 800, margin: "0 auto" };
-
 const textarea = { width: "100%", marginTop: 20, padding: 10 };
-
 const resultBox = { marginTop: 20 };
-
-const singleBox = {
-  border: "1px solid #333",
-  padding: 10,
-  marginTop: 10,
-};
-
-const singleHead = {
-  display: "flex",
-  justifyContent: "space-between",
-};
-
+const singleBox = { border: "1px solid #333", padding: 10, marginTop: 10 };
+const singleHead = { display: "flex", justifyContent: "space-between" };
 const tag = { color: "#d4af37" };
-
-const copyBtn = {
-  background: "#d4af37",
-  padding: "5px 10px",
-};
-
+const copyBtn = { background: "#d4af37", padding: "5px 10px" };
 const singleText = { marginTop: 10, color: "#ddd" };
