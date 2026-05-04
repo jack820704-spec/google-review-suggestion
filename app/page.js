@@ -54,6 +54,14 @@ const TEXT = {
     emptyAlert: "Please enter a review",
     authAlert: "Please enter Email and Password",
     signupOk: "Registration successful. Please login.",
+    monitorTitle: "Add Business for Review Monitoring",
+    monitorDesc: "Enter your Google Maps link and notification email. New reviews will be monitored and reply suggestions can be sent by email.",
+    businessName: "Business name",
+    googleUrl: "Google Maps link",
+    notifyEmail: "Notification email",
+    addBusiness: "Add Business",
+    addBusinessOk: "Business added successfully",
+    addBusinessFail: "Failed to add business",
   },
   zh: {
     tag: "Google 評論回覆建議系統",
@@ -100,6 +108,14 @@ const TEXT = {
     emptyAlert: "請輸入評論",
     authAlert: "請輸入 Email 和密碼",
     signupOk: "註冊成功，請登入",
+    monitorTitle: "新增店家評論監控",
+    monitorDesc: "輸入 Google Maps 連結與通知 Email。之後偵測到新評論時，可寄送評論內容與建議回覆。",
+    businessName: "店家名稱",
+    googleUrl: "Google Maps 連結",
+    notifyEmail: "通知 Email",
+    addBusiness: "新增店家",
+    addBusinessOk: "店家新增成功",
+    addBusinessFail: "店家新增失敗",
   },
   vi: {
     tag: "Hệ thống gợi ý phản hồi Google Review",
@@ -146,6 +162,14 @@ const TEXT = {
     emptyAlert: "Vui lòng nhập đánh giá",
     authAlert: "Vui lòng nhập Email và mật khẩu",
     signupOk: "Đăng ký thành công, vui lòng đăng nhập",
+    monitorTitle: "Thêm cửa hàng để theo dõi đánh giá",
+    monitorDesc: "Nhập liên kết Google Maps và email nhận thông báo.",
+    businessName: "Tên cửa hàng",
+    googleUrl: "Liên kết Google Maps",
+    notifyEmail: "Email thông báo",
+    addBusiness: "Thêm cửa hàng",
+    addBusinessOk: "Đã thêm cửa hàng thành công",
+    addBusinessFail: "Không thể thêm cửa hàng",
   },
 };
 
@@ -169,6 +193,10 @@ export default function Home() {
 
   const [used, setUsed] = useState(0);
   const [limit, setLimit] = useState(3);
+
+  const [businessName, setBusinessName] = useState("");
+  const [googleMapsUrl, setGoogleMapsUrl] = useState("");
+  const [notifyEmail, setNotifyEmail] = useState("");
 
   useEffect(() => {
     checkUser();
@@ -249,14 +277,47 @@ export default function Home() {
     setLoading(false);
   }
 
+  async function addBusiness() {
+    if (!businessName || !googleMapsUrl || !notifyEmail) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert(t.login);
+      return;
+    }
+
+    const { error } = await supabase.from("businesses").insert({
+      user_id: user.id,
+      business_name: businessName,
+      google_maps_url: googleMapsUrl,
+      notify_email: notifyEmail,
+      is_active: true,
+    });
+
+    if (error) {
+      console.log(error);
+      alert(t.addBusinessFail);
+      return;
+    }
+
+    alert(t.addBusinessOk);
+    setBusinessName("");
+    setGoogleMapsUrl("");
+    setNotifyEmail("");
+  }
+
   const remaining = Math.max(limit - used, 0);
 
   function renderResult() {
     if (!result) return null;
 
-    const parts = result
-      .split(/【一、|【二、|【三、/)
-      .filter(Boolean);
+    const parts = result.split(/【一、|【二、|【三、/).filter(Boolean);
 
     return (
       <div style={resultBox}>
@@ -272,7 +333,9 @@ export default function Home() {
           return (
             <div key={index} style={singleBox}>
               <div style={singleHead}>
-                <span style={tagTitle}>{t.titles[index] || `Reply ${index + 1}`}</span>
+                <span style={tagTitle}>
+                  {t.titles[index] || `Reply ${index + 1}`}
+                </span>
 
                 <button
                   style={copyBtn}
@@ -312,9 +375,7 @@ export default function Home() {
         <div style={split}>
           <section>
             <div style={pill}>{t.pill}</div>
-
             <h1 style={title}>{t.title}</h1>
-
             <p style={subtitle}>{t.subtitle}</p>
 
             <div style={featureGrid}>
@@ -322,17 +383,14 @@ export default function Home() {
                 <b>{t.f1}</b>
                 <p>{t.f1d}</p>
               </div>
-
               <div style={featureCard}>
                 <b>{t.f2}</b>
                 <p>{t.f2d}</p>
               </div>
-
               <div style={featureCard}>
                 <b>{t.f3}</b>
                 <p>{t.f3d}</p>
               </div>
-
               <div style={featureCard}>
                 <b>{t.f4}</b>
                 <p>{t.f4d}</p>
@@ -401,9 +459,7 @@ export default function Home() {
       <section style={heroCard}>
         <div>
           <div style={pill}>{t.heroPill}</div>
-
           <h1 style={title}>{t.title}</h1>
-
           <p style={subtitle}>{t.heroSubtitle}</p>
         </div>
 
@@ -412,7 +468,9 @@ export default function Home() {
           <b>{user.email}</b>
 
           <p style={smallLabel}>{t.remaining}</p>
-          <b style={goldBig}>{remaining} / {limit}</b>
+          <b style={goldBig}>
+            {remaining} / {limit}
+          </b>
         </div>
       </section>
 
@@ -432,6 +490,36 @@ export default function Home() {
         </button>
 
         {renderResult()}
+      </section>
+
+      <section style={businessBox}>
+        <h2 style={appTitle}>{t.monitorTitle}</h2>
+        <p style={authDesc}>{t.monitorDesc}</p>
+
+        <input
+          style={input}
+          placeholder={t.businessName}
+          value={businessName}
+          onChange={(e) => setBusinessName(e.target.value)}
+        />
+
+        <input
+          style={input}
+          placeholder={t.googleUrl}
+          value={googleMapsUrl}
+          onChange={(e) => setGoogleMapsUrl(e.target.value)}
+        />
+
+        <input
+          style={input}
+          placeholder={t.notifyEmail}
+          value={notifyEmail}
+          onChange={(e) => setNotifyEmail(e.target.value)}
+        />
+
+        <button style={btnGold} onClick={addBusiness}>
+          {t.addBusiness}
+        </button>
       </section>
 
       <section style={plans}>
@@ -574,6 +662,7 @@ const authTitle = {
 const authDesc = {
   color: "#aaa",
   marginBottom: 24,
+  lineHeight: 1.7,
 };
 
 const input = {
@@ -668,6 +757,11 @@ const appShell = {
   borderRadius: 28,
   padding: 42,
   boxShadow: "0 0 80px rgba(0,0,0,0.7)",
+};
+
+const businessBox = {
+  ...appShell,
+  marginTop: 32,
 };
 
 const appTitle = {
