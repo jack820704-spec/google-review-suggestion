@@ -599,7 +599,7 @@ export default function Home() {
     const toneReq   = tone === "all"
       ? "three distinct styles: SOPHISTICATED, PROFESSIONAL, DIPLOMATIC"
       : `only the ${tone.toUpperCase()} style`;
-    const langNames = { fr: "French", de: "German", it: "Italian", es: "Spanish", en: "English" };
+    const langNames = { fr: "French", de: "German", it: "Italian", es: "Spanish", en: "English", zh: "Traditional Chinese (繁體中文)" };
     const langInstr = lang === "auto"
       ? "Respond in the same language as the review."
       : `Respond in ${langNames[lang]}.`;
@@ -983,6 +983,7 @@ Rules for every reply:
                   <option value="de">German</option>
                   <option value="it">Italian</option>
                   <option value="es">Spanish</option>
+                  <option value="zh">中文（繁體）</option>
                 </select>
               </div>
               <div className="ctrl-row">
