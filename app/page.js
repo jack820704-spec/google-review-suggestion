@@ -56,7 +56,7 @@ body {
 .topnav {
   height: var(--nav-h); min-height: var(--nav-h);
   display: flex; align-items: center;
-  padding: 0 20px; gap: 20px;
+  padding: 0 20px; gap: 16px;
   border-bottom: 1px solid var(--gold-border);
   background: rgba(7,6,10,0.9);
   backdrop-filter: blur(12px);
@@ -89,6 +89,25 @@ body {
   background: var(--pos-fg); animation: pulse 1.8s ease infinite;
 }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+/* Language toggle pill */
+.lang-toggle {
+  display: flex; align-items: center;
+  background: var(--surface); border: 1px solid var(--gold-border);
+  border-radius: 999px; overflow: hidden; flex-shrink: 0;
+}
+.lang-opt {
+  padding: 4px 11px; font-size: 11px; font-weight: 700;
+  cursor: pointer; border: none; background: transparent;
+  color: var(--text2); font-family: inherit;
+  transition: all .18s; letter-spacing: 0.5px;
+}
+.lang-opt.active {
+  background: linear-gradient(135deg, var(--gold-lt), var(--gold));
+  color: #000;
+}
+.lang-opt:not(.active):hover { color: var(--gold); }
+
 .nav-apikey { display: flex; align-items: center; gap: 6px; }
 .nav-apikey input {
   background: var(--surface); border: 1px solid var(--border);
@@ -366,6 +385,170 @@ body {
 `;
 
 /* ═══════════════════════════════════════════════════════
+   I18N
+═══════════════════════════════════════════════════════ */
+const I18N = {
+  en: {
+    liveBadge:       "Live Monitoring",
+    apiPlaceholder:  "sk-ant-api03-… (Anthropic API Key)",
+    overallRating:   "Overall Rating",
+    reviewsUnit:     (n) => `${n.toLocaleString()} reviews`,
+    thisMonth:       "This Month",
+    newReviews:      "New Reviews",
+    vsLastMonth:     "▲ vs last month",
+    responseRate:    "Response Rate",
+    industryAvg:     "Industry: 68%",
+    positiveRate:    "Positive",
+    unanswered:      "Unanswered",
+    filterReviews:   "Filter Reviews",
+    sortBy:          "Sort By",
+    fAll:            "All Reviews",
+    fPositive:       "Positive (4–5★)",
+    fNeutral:        "Neutral (3★)",
+    fNegative:       "Negative (1–2★)",
+    fUnanswered:     "Unanswered",
+    sLatest:         "Most Recent",
+    sLowest:         "Lowest Rating First",
+    sHighest:        "Highest Rating First",
+    sUnanswered:     "Unanswered First",
+    searchPlaceholder: "Search reviews by name or keyword…",
+    reviewCount:     (n) => `${n} review${n !== 1 ? "s" : ""}`,
+    noReviews:       "No reviews match your filters.",
+    sentPositive:    "Positive",
+    sentNeutral:     "Neutral",
+    sentNegative:    "Negative",
+    replied:         "✓ Replied",
+    rpTitle:         "✦ AI Reply Studio",
+    rpSubtitle:      "Select a review to generate three tailored responses",
+    toneLabel:       "Tone",
+    langLabel:       "Language",
+    lengthLabel:     "Length",
+    toneAll:         "All Three Styles",
+    toneSoph:        "Sophisticated Only",
+    tonePro:         "Professional Only",
+    toneDiplo:       "Diplomatic Only",
+    langAuto:        "Auto-detect",
+    langEn:          "English",
+    langFr:          "French",
+    langDe:          "German",
+    langIt:          "Italian",
+    langEs:          "Spanish",
+    langZh:          "中文（繁體）",
+    lenMedium:       "Medium (80–120 words)",
+    lenShort:        "Short (40–60 words)",
+    lenLong:         "Long (150–200 words)",
+    generateBtn:     "✦ Generate AI Replies",
+    generatingBtn:   "Generating…",
+    phNoReview:      "Select any review from the list to generate AI-crafted replies in three distinct styles.",
+    phHasReview:     "Configure the options above and click Generate.",
+    errorTitle:      "⚠ Generation failed",
+    errorHint:       "Check your API key and ensure it has access to claude-haiku-4-5-20251001.",
+    copy:            "Copy",
+    copied:          "Copied!",
+    publish:         "Publish",
+    wordCount:       (n) => `${n} words`,
+    regen:           "↻ Regenerate",
+    styleSoph:       "Sophisticated",
+    styleDescSoph:   "Luxury brand voice · Poetic & refined",
+    stylePro:        "Professional",
+    styleDescPro:    "Warm & genuine · Suitable for most reviews",
+    styleDiplo:      "Diplomatic",
+    styleDescDiplo:  "Crisis handling · Calm & solution-oriented",
+    toastEnterKey:   "Please enter an API key.",
+    toastKeySaved:   "API key saved.",
+    toastSelectReview: "Please select a review first.",
+    toastEnterKey2:  "Please enter your Anthropic API key in the top bar.",
+    toastGenerated:  "Replies generated. ✓",
+    toastPublished:  "✓ Reply marked as published.",
+    toastCopied:     "Copied to clipboard.",
+    toastRegen:      "↻ Regenerated.",
+    toastRegenFail:  "Regeneration failed: ",
+    tsMin:           (n) => `${n}m ago`,
+    tsHour:          (n) => `${n}h ago`,
+    tsDay:           (n) => `${n}d ago`,
+  },
+  zh: {
+    liveBadge:       "即時監控",
+    apiPlaceholder:  "sk-ant-api03-… (Anthropic API Key)",
+    overallRating:   "整體評分",
+    reviewsUnit:     (n) => `${n.toLocaleString()} 則評論`,
+    thisMonth:       "本月統計",
+    newReviews:      "新增評論",
+    vsLastMonth:     "▲ 較上月增加",
+    responseRate:    "回覆率",
+    industryAvg:     "業界平均：68%",
+    positiveRate:    "好評率",
+    unanswered:      "待回覆",
+    filterReviews:   "篩選評論",
+    sortBy:          "排序方式",
+    fAll:            "全部評論",
+    fPositive:       "好評 (4–5★)",
+    fNeutral:        "普通 (3★)",
+    fNegative:       "負評 (1–2★)",
+    fUnanswered:     "未回覆",
+    sLatest:         "最新優先",
+    sLowest:         "最低評分優先",
+    sHighest:        "最高評分優先",
+    sUnanswered:     "未回覆優先",
+    searchPlaceholder: "搜尋評論、姓名或關鍵字…",
+    reviewCount:     (n) => `${n} 則評論`,
+    noReviews:       "沒有符合條件的評論",
+    sentPositive:    "好評",
+    sentNeutral:     "普通",
+    sentNegative:    "負評",
+    replied:         "✓ 已回覆",
+    rpTitle:         "✦ AI 回覆工作室",
+    rpSubtitle:      "選擇評論，一鍵生成三種客製化回覆",
+    toneLabel:       "語氣",
+    langLabel:       "語言",
+    lengthLabel:     "長度",
+    toneAll:         "三種語氣全部",
+    toneSoph:        "僅精緻奢華",
+    tonePro:         "僅專業親切",
+    toneDiplo:       "僅外交圓融",
+    langAuto:        "自動偵測",
+    langEn:          "英文",
+    langFr:          "法文",
+    langDe:          "德文",
+    langIt:          "義大利文",
+    langEs:          "西班牙文",
+    langZh:          "中文（繁體）",
+    lenMedium:       "中等（80–120 字）",
+    lenShort:        "簡短（40–60 字）",
+    lenLong:         "詳細（150–200 字）",
+    generateBtn:     "✦ 生成 AI 回覆",
+    generatingBtn:   "生成中…",
+    phNoReview:      "從左側列表選擇一則評論，即可生成三種 AI 客製化回覆。",
+    phHasReview:     "設定上方選項後，點擊生成按鈕。",
+    errorTitle:      "⚠ 生成失敗",
+    errorHint:       "請確認 API 金鑰是否正確，並確保可存取 claude-haiku-4-5-20251001。",
+    copy:            "複製",
+    copied:          "已複製！",
+    publish:         "發布",
+    wordCount:       (n) => `${n} 字`,
+    regen:           "↻ 重新生成",
+    styleSoph:       "精緻奢華",
+    styleDescSoph:   "高端品牌語氣・詩意精煉",
+    stylePro:        "專業親切",
+    styleDescPro:    "溫暖真誠・適合大多數評論",
+    styleDiplo:      "外交圓融",
+    styleDescDiplo:  "危機處理・冷靜解決導向",
+    toastEnterKey:   "請輸入 API 金鑰",
+    toastKeySaved:   "API 金鑰已儲存",
+    toastSelectReview: "請先選擇一則評論",
+    toastEnterKey2:  "請在上方輸入 Anthropic API 金鑰",
+    toastGenerated:  "回覆已生成 ✓",
+    toastPublished:  "✓ 已標記為發布",
+    toastCopied:     "已複製到剪貼簿",
+    toastRegen:      "↻ 已重新生成",
+    toastRegenFail:  "重新生成失敗：",
+    tsMin:           (n) => `${n} 分鐘前`,
+    tsHour:          (n) => `${n} 小時前`,
+    tsDay:           (n) => `${n} 天前`,
+  },
+};
+
+/* ═══════════════════════════════════════════════════════
    DATA
 ═══════════════════════════════════════════════════════ */
 const LOCATIONS = {
@@ -426,19 +609,8 @@ const BASE_REVIEWS = [
   },
 ];
 
-const REPLY_STYLES = [
-  { key: "sophisticated", label: "Sophisticated", desc: "Luxury brand voice · Poetic & refined"          },
-  { key: "professional",  label: "Professional",  desc: "Warm & genuine · Suitable for most reviews"     },
-  { key: "diplomatic",    label: "Diplomatic",    desc: "Crisis handling · Calm & solution-oriented"     },
-];
-
-const FILTERS = [
-  { key: "all",        label: "All Reviews",     dot: "#888"            },
-  { key: "positive",   label: "Positive (4–5★)", dot: "var(--pos-fg)"  },
-  { key: "neutral",    label: "Neutral (3★)",    dot: "var(--neu-fg)"  },
-  { key: "negative",   label: "Negative (1–2★)", dot: "var(--neg-fg)"  },
-  { key: "unanswered", label: "Unanswered",       dot: "var(--gold)"    },
-];
+/* Reply style keys (labels come from i18n) */
+const REPLY_STYLE_KEYS = ["sophisticated", "professional", "diplomatic"];
 
 /* ═══════════════════════════════════════════════════════
    HELPERS
@@ -455,11 +627,11 @@ function StarsRow({ n }) {
   );
 }
 
-function formatTs(ts) {
+function formatTs(ts, t) {
   const d = (Date.now() - ts) / 1000;
-  if (d < 3600)  return `${Math.floor(d / 60)}m ago`;
-  if (d < 86400) return `${Math.floor(d / 3600)}h ago`;
-  return `${Math.floor(d / 86400)}d ago`;
+  if (d < 3600)  return t.tsMin(Math.floor(d / 60));
+  if (d < 86400) return t.tsHour(Math.floor(d / 3600));
+  return t.tsDay(Math.floor(d / 86400));
 }
 
 function parseReplies(raw) {
@@ -479,6 +651,7 @@ function parseReplies(raw) {
    COMPONENT
 ═══════════════════════════════════════════════════════ */
 export default function Home() {
+  const [uiLang,       setUiLang]       = useState("en");
   const [loc,          setLoc]          = useState("london");
   const [filter,       setFilter]       = useState("all");
   const [selectedId,   setSelectedId]   = useState(null);
@@ -490,7 +663,7 @@ export default function Home() {
   const [tone,         setTone]         = useState("all");
   const [lang,         setLang]         = useState("auto");
   const [length,       setLength]       = useState("medium");
-  const [genState,     setGenState]     = useState("idle"); // idle | loading | done | error
+  const [genState,     setGenState]     = useState("idle");
   const [genError,     setGenError]     = useState("");
   const [genReplies,   setGenReplies]   = useState({});
   const [editReplies,  setEditReplies]  = useState({});
@@ -516,6 +689,9 @@ export default function Home() {
     return () => clearTimeout(t);
   }, [loc]);
 
+  /* Active i18n strings */
+  const t = I18N[uiLang];
+
   const showToast = useCallback((msg) => {
     setToast(msg);
     clearTimeout(toastTimer.current);
@@ -524,6 +700,26 @@ export default function Home() {
 
   /* ── Derived state ── */
   const location = LOCATIONS[loc];
+
+  const replyStyles = [
+    { key: "sophisticated", label: t.styleSoph,  desc: t.styleDescSoph  },
+    { key: "professional",  label: t.stylePro,   desc: t.styleDescPro   },
+    { key: "diplomatic",    label: t.styleDiplo, desc: t.styleDescDiplo },
+  ];
+
+  const filters = [
+    { key: "all",        label: t.fAll,        dot: "#888"           },
+    { key: "positive",   label: t.fPositive,   dot: "var(--pos-fg)" },
+    { key: "neutral",    label: t.fNeutral,    dot: "var(--neu-fg)" },
+    { key: "negative",   label: t.fNegative,   dot: "var(--neg-fg)" },
+    { key: "unanswered", label: t.fUnanswered, dot: "var(--gold)"   },
+  ];
+
+  const sentimentLabel = {
+    positive: t.sentPositive,
+    neutral:  t.sentNeutral,
+    negative: t.sentNegative,
+  };
 
   const filtered = (() => {
     let list = BASE_REVIEWS.filter(r => {
@@ -557,7 +753,7 @@ export default function Home() {
   };
 
   const selectedReview = selectedId ? BASE_REVIEWS.find(r => r.id === selectedId) : null;
-  const activeStyles   = tone === "all" ? REPLY_STYLES : REPLY_STYLES.filter(s => s.key === tone);
+  const activeStyles   = tone === "all" ? replyStyles : replyStyles.filter(s => s.key === tone);
 
   /* ── Handlers ── */
   function handleLocChange(newLoc) {
@@ -579,21 +775,21 @@ export default function Home() {
   }
 
   function handleSaveApiKey() {
-    if (!apiKey.trim()) return showToast("Please enter an API key.");
+    if (!apiKey.trim()) return showToast(t.toastEnterKey);
     localStorage.setItem("rrp_apikey", apiKey.trim());
     setApiKeySaved(true);
-    showToast("API key saved.");
+    showToast(t.toastKeySaved);
   }
 
   function handlePublish(reviewId) {
     setRepliedSet(prev => new Set([...prev, reviewId]));
-    showToast("✓ Reply marked as published.");
+    showToast(t.toastPublished);
   }
 
   async function handleGenerate() {
-    if (!selectedReview) return showToast("Please select a review first.");
+    if (!selectedReview) return showToast(t.toastSelectReview);
     const key = apiKey.trim();
-    if (!key) return showToast("Please enter your Anthropic API key in the top bar.");
+    if (!key) return showToast(t.toastEnterKey2);
 
     const wordRange = { short: "40–60", medium: "80–120", long: "150–200" }[length];
     const toneReq   = tone === "all"
@@ -663,11 +859,9 @@ Rules for every reply:
       setEditReplies({ ...parsed });
       setGenState("done");
 
-      const keys = tone === "all"
-        ? ["sophisticated", "professional", "diplomatic"]
-        : [tone];
+      const keys = tone === "all" ? REPLY_STYLE_KEYS : [tone];
       keys.forEach((k, i) => setTimeout(() => setVisibleCards(p => [...p, k]), i * 130));
-      showToast("Replies generated. ✓");
+      showToast(t.toastGenerated);
     } catch (err) {
       setGenError(err.message);
       setGenState("error");
@@ -677,9 +871,10 @@ Rules for every reply:
   async function handleRegenSingle(styleKey) {
     const key = apiKey.trim();
     if (!key || !selectedReview) return;
-    const wordRange = { short: "40–60", medium: "80–120", long: "150–200" }[length];
-    const styleName = REPLY_STYLES.find(s => s.key === styleKey)?.label || styleKey;
-    const prev      = editReplies[styleKey] || genReplies[styleKey] || "";
+    const wordRange  = { short: "40–60", medium: "80–120", long: "150–200" }[length];
+    const styleNames = { sophisticated: "Sophisticated", professional: "Professional", diplomatic: "Diplomatic" };
+    const styleName  = styleNames[styleKey] || styleKey;
+    const prev       = editReplies[styleKey] || genReplies[styleKey] || "";
     setRegenKey(styleKey);
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -701,9 +896,9 @@ Rules for every reply:
       const data = await resp.json();
       const txt  = data.content?.[0]?.text?.trim() || prev;
       setEditReplies(old => ({ ...old, [styleKey]: txt }));
-      showToast("↻ Regenerated.");
+      showToast(t.toastRegen);
     } catch (err) {
-      showToast("Regeneration failed: " + err.message);
+      showToast(t.toastRegenFail + err.message);
     } finally {
       setRegenKey(null);
     }
@@ -714,7 +909,7 @@ Rules for every reply:
     navigator.clipboard.writeText(text).then(() => {
       setCopiedKey(styleKey);
       setTimeout(() => setCopiedKey(null), 2200);
-      showToast("Copied to clipboard.");
+      showToast(t.toastCopied);
     });
   }
 
@@ -742,18 +937,35 @@ Rules for every reply:
         </div>
 
         <div className="nav-spacer" />
-        <div className="nav-badge live">Live Monitoring</div>
+
+        <div className="nav-badge live">{t.liveBadge}</div>
+
+        {/* ── Language toggle ── */}
+        <div className="lang-toggle">
+          <button
+            className={`lang-opt${uiLang === "en" ? " active" : ""}`}
+            onClick={() => setUiLang("en")}
+          >
+            EN
+          </button>
+          <button
+            className={`lang-opt${uiLang === "zh" ? " active" : ""}`}
+            onClick={() => setUiLang("zh")}
+          >
+            繁中
+          </button>
+        </div>
 
         <div className="nav-apikey">
           <input
             type={apiVis ? "text" : "password"}
             value={apiKey}
-            placeholder="sk-ant-api03-… (Anthropic API Key)"
+            placeholder={t.apiPlaceholder}
             className={apiKeySaved ? "saved" : ""}
             onChange={e => { setApiKey(e.target.value); setApiKeySaved(false); }}
           />
-          <button className="btn-icon" onClick={() => setApiVis(v => !v)} title="Toggle visibility">👁</button>
-          <button className="btn-icon" onClick={handleSaveApiKey} title="Save key">💾</button>
+          <button className="btn-icon" onClick={() => setApiVis(v => !v)}>👁</button>
+          <button className="btn-icon" onClick={handleSaveApiKey}>💾</button>
         </div>
 
         <div className="nav-divider" />
@@ -766,14 +978,13 @@ Rules for every reply:
         {/* ── LEFT PANEL ── */}
         <aside className="left-panel">
 
-          {/* Overall Rating */}
           <div className="lp-section">
-            <div className="lp-label">Overall Rating</div>
+            <div className="lp-label">{t.overallRating}</div>
             <div className="rating-hero">
               <div className="rating-big">{location.avg.toFixed(1)}</div>
               <div className="rating-side">
                 <div className="rating-stars-row">{"★".repeat(Math.round(location.avg))}</div>
-                <div className="rating-count">{location.total.toLocaleString()} reviews</div>
+                <div className="rating-count">{t.reviewsUnit(location.total)}</div>
               </div>
             </div>
             {[5, 4, 3, 2, 1].map((s, i) => {
@@ -794,40 +1005,38 @@ Rules for every reply:
             })}
           </div>
 
-          {/* Stats */}
           <div className="lp-section">
-            <div className="lp-label">This Month</div>
+            <div className="lp-label">{t.thisMonth}</div>
             <div className="stats-grid">
               <div className="stat-box">
                 <div className="stat-box-val">+47</div>
-                <div className="stat-box-lbl">New Reviews</div>
-                <div className="stat-box-trend">▲ vs last month</div>
+                <div className="stat-box-lbl">{t.newReviews}</div>
+                <div className="stat-box-trend">{t.vsLastMonth}</div>
               </div>
               <div className="stat-box">
                 <div className="stat-box-val">
                   {Math.round((1 - counts.unanswered / counts.all) * 100)}%
                 </div>
-                <div className="stat-box-lbl">Response Rate</div>
-                <div className="stat-box-trend">Industry: 68%</div>
+                <div className="stat-box-lbl">{t.responseRate}</div>
+                <div className="stat-box-trend">{t.industryAvg}</div>
               </div>
               <div className="stat-box">
                 <div className="stat-box-val">
                   {Math.round((counts.positive / counts.all) * 100)}%
                 </div>
-                <div className="stat-box-lbl">Positive</div>
+                <div className="stat-box-lbl">{t.positiveRate}</div>
               </div>
               <div className="stat-box">
                 <div className="stat-box-val">{counts.unanswered}</div>
-                <div className="stat-box-lbl">Unanswered</div>
+                <div className="stat-box-lbl">{t.unanswered}</div>
               </div>
             </div>
           </div>
 
-          {/* Filters */}
           <div className="lp-section">
-            <div className="lp-label">Filter Reviews</div>
+            <div className="lp-label">{t.filterReviews}</div>
             <div className="filter-list">
-              {FILTERS.map(f => (
+              {filters.map(f => (
                 <button
                   key={f.key}
                   className={`filter-btn${filter === f.key ? " active" : ""}`}
@@ -843,14 +1052,13 @@ Rules for every reply:
             </div>
           </div>
 
-          {/* Sort */}
           <div className="lp-section">
-            <div className="lp-label">Sort By</div>
+            <div className="lp-label">{t.sortBy}</div>
             <select className="sort-select" value={sortOrder} onChange={e => setSortOrder(e.target.value)}>
-              <option value="latest">Most Recent</option>
-              <option value="lowest">Lowest Rating First</option>
-              <option value="highest">Highest Rating First</option>
-              <option value="unanswered">Unanswered First</option>
+              <option value="latest">{t.sLatest}</option>
+              <option value="lowest">{t.sLowest}</option>
+              <option value="highest">{t.sHighest}</option>
+              <option value="unanswered">{t.sUnanswered}</option>
             </select>
           </div>
 
@@ -864,21 +1072,19 @@ Rules for every reply:
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search reviews by name or keyword…"
+                placeholder={t.searchPlaceholder}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <span className="cp-count">
-              {filtered.length} review{filtered.length !== 1 ? "s" : ""}
-            </span>
+            <span className="cp-count">{t.reviewCount(filtered.length)}</span>
           </div>
 
           <div className="review-list">
             {filtered.length === 0 ? (
               <div className="empty-state">
                 <div className="icon">🔍</div>
-                <p>No reviews match your filters.</p>
+                <p>{t.noReviews}</p>
               </div>
             ) : (
               filtered.map(r => {
@@ -904,21 +1110,23 @@ Rules for every reply:
                         <div className="rc-name">
                           {r.lang === "fr" ? "🇫🇷 " : ""}{r.name}
                         </div>
-                        <div className="rc-date">{formatTs(r.ts)} · Google Maps</div>
+                        <div className="rc-date">
+                          {formatTs(r.ts, t)} · Google Maps
+                        </div>
                       </div>
                       <div className="rc-right">
                         <StarsRow n={r.stars} />
                         <span className={`sentiment-badge ${r.sentiment}`}>
-                          {r.sentiment.charAt(0).toUpperCase() + r.sentiment.slice(1)}
+                          {sentimentLabel[r.sentiment]}
                         </span>
                       </div>
                     </div>
                     <div className="rc-text">{r.text}</div>
                     <div className="rc-footer">
-                      {r.tags.map(t => (
-                        <span key={t} className="rc-tag">{t}</span>
+                      {r.tags.map(tag => (
+                        <span key={tag} className="rc-tag">{tag}</span>
                       ))}
-                      {isReplied && <span className="rc-replied">✓ Replied</span>}
+                      {isReplied && <span className="rc-replied">{t.replied}</span>}
                     </div>
                   </div>
                 );
@@ -931,11 +1139,10 @@ Rules for every reply:
         <aside className="right-panel">
 
           <div className="rp-header">
-            <div className="rp-title">✦ AI Reply Studio</div>
-            <div className="rp-subtitle">Select a review to generate three tailored responses</div>
+            <div className="rp-title">{t.rpTitle}</div>
+            <div className="rp-subtitle">{t.rpSubtitle}</div>
           </div>
 
-          {/* Selected review preview */}
           {selectedReview && (
             <div className="rp-review-preview">
               <div className="rp-preview-top">
@@ -953,7 +1160,7 @@ Rules for every reply:
                 <div style={{ flex: 1 }}>
                   <div className="rp-preview-name">{selectedReview.name}</div>
                   <div className="rc-date">
-                    {formatTs(selectedReview.ts)} · {location.name}, {location.city}
+                    {formatTs(selectedReview.ts, t)} · {location.name}, {location.city}
                   </div>
                 </div>
                 <StarsRow n={selectedReview.stars} />
@@ -962,64 +1169,56 @@ Rules for every reply:
             </div>
           )}
 
-          {/* Controls */}
           {selectedReview && (
             <div className="rp-controls">
               <div className="ctrl-row">
-                <span className="ctrl-label">Tone</span>
+                <span className="ctrl-label">{t.toneLabel}</span>
                 <select className="ctrl-select" value={tone} onChange={e => setTone(e.target.value)}>
-                  <option value="all">All Three Styles</option>
-                  <option value="sophisticated">Sophisticated Only</option>
-                  <option value="professional">Professional Only</option>
-                  <option value="diplomatic">Diplomatic Only</option>
+                  <option value="all">{t.toneAll}</option>
+                  <option value="sophisticated">{t.toneSoph}</option>
+                  <option value="professional">{t.tonePro}</option>
+                  <option value="diplomatic">{t.toneDiplo}</option>
                 </select>
               </div>
               <div className="ctrl-row">
-                <span className="ctrl-label">Language</span>
+                <span className="ctrl-label">{t.langLabel}</span>
                 <select className="ctrl-select" value={lang} onChange={e => setLang(e.target.value)}>
-                  <option value="auto">Auto-detect</option>
-                  <option value="en">English</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                  <option value="it">Italian</option>
-                  <option value="es">Spanish</option>
-                  <option value="zh">中文（繁體）</option>
+                  <option value="auto">{t.langAuto}</option>
+                  <option value="en">{t.langEn}</option>
+                  <option value="fr">{t.langFr}</option>
+                  <option value="de">{t.langDe}</option>
+                  <option value="it">{t.langIt}</option>
+                  <option value="es">{t.langEs}</option>
+                  <option value="zh">{t.langZh}</option>
                 </select>
               </div>
               <div className="ctrl-row">
-                <span className="ctrl-label">Length</span>
+                <span className="ctrl-label">{t.lengthLabel}</span>
                 <select className="ctrl-select" value={length} onChange={e => setLength(e.target.value)}>
-                  <option value="medium">Medium (80–120 words)</option>
-                  <option value="short">Short (40–60 words)</option>
-                  <option value="long">Long (150–200 words)</option>
+                  <option value="medium">{t.lenMedium}</option>
+                  <option value="short">{t.lenShort}</option>
+                  <option value="long">{t.lenLong}</option>
                 </select>
               </div>
               <button className="gen-btn" onClick={handleGenerate} disabled={genState === "loading"}>
                 {genState === "loading" ? (
-                  <><span>Generating…</span><div className="spinner" /></>
+                  <><span>{t.generatingBtn}</span><div className="spinner" /></>
                 ) : (
-                  <span>✦ Generate AI Replies</span>
+                  <span>{t.generateBtn}</span>
                 )}
               </button>
             </div>
           )}
 
-          {/* Reply area */}
           <div className="rp-replies">
 
-            {/* Idle placeholder */}
             {genState === "idle" && (
               <div className="reply-placeholder">
                 <div className="icon">✦</div>
-                {selectedReview ? (
-                  <p>Configure the options above<br />and click Generate.</p>
-                ) : (
-                  <p>Select any review from the list<br />to generate AI-crafted replies<br />in three distinct styles.</p>
-                )}
+                <p>{selectedReview ? t.phHasReview : t.phNoReview}</p>
               </div>
             )}
 
-            {/* Loading skeletons */}
             {genState === "loading" && [0, 1, 2].map(i => (
               <div key={i} className="skeleton-card">
                 <div className="skel" style={{ height: "14px", width: "40%", marginBottom: "4px" }} />
@@ -1030,17 +1229,13 @@ Rules for every reply:
               </div>
             ))}
 
-            {/* Error */}
             {genState === "error" && (
               <div className="error-banner">
-                <strong>⚠ Generation failed</strong>
-                {genError}
-                <br /><br />
-                Check your API key and ensure it has access to claude-haiku-4-5-20251001.
+                <strong>{t.errorTitle}</strong>
+                {genError}<br /><br />{t.errorHint}
               </div>
             )}
 
-            {/* Reply cards */}
             {genState === "done" && activeStyles.map(s => {
               const text  = editReplies[s.key] || genReplies[s.key] || "";
               const wc    = text.trim().split(/\s+/).filter(Boolean).length;
@@ -1060,33 +1255,33 @@ Rules for every reply:
                         className={`btn-sm${copiedKey === s.key ? " copied" : ""}`}
                         onClick={() => handleCopy(s.key)}
                       >
-                        {copiedKey === s.key ? "Copied!" : "Copy"}
+                        {copiedKey === s.key ? t.copied : t.copy}
                       </button>
                       <button
                         className="btn-sm gold"
                         onClick={() => handlePublish(selectedId)}
                       >
-                        Publish
+                        {t.publish}
                       </button>
                     </div>
                   </div>
 
                   <textarea
                     className="reply-textarea"
-                    value={isReg ? "Regenerating…" : text}
+                    value={isReg ? t.generatingBtn : text}
                     disabled={isReg}
                     rows={6}
                     onChange={e => setEditReplies(old => ({ ...old, [s.key]: e.target.value }))}
                   />
 
                   <div className="reply-card-foot">
-                    <span className="char-count">{wc} words</span>
+                    <span className="char-count">{t.wordCount(wc)}</span>
                     <button
                       className="btn-sm"
                       onClick={() => handleRegenSingle(s.key)}
                       disabled={!!regenKey}
                     >
-                      {isReg ? "…" : "↻ Regenerate"}
+                      {isReg ? "…" : t.regen}
                     </button>
                   </div>
                 </div>
@@ -1097,7 +1292,6 @@ Rules for every reply:
         </aside>
       </div>
 
-      {/* Toast */}
       {toast && <div className="toast-box">{toast}</div>}
     </>
   );
