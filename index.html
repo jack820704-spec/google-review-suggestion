@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReviewReply Pro — AI-Powered Google Review System for Fine Dining</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:       #d4af37;
+      --gold-light: #f7e08a;
+      --gold-dim:   rgba(212,175,55,0.18);
+      --bg:         #050505;
+      --surface:    rgba(255,255,255,0.055);
+      --border:     rgba(255,255,255,0.08);
+      --border-gold:rgba(212,175,55,0.22);
+      --text:       #e8e8e8;
+      --muted:      #888;
+      --red:        #e05555;
+      --green:      #4ec94e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: radial-gradient(ellipse at 15% 15%, rgba(212,175,55,0.12) 0%, transparent 40%),
+                  radial-gradient(ellipse at 85% 80%, rgba(180,120,30,0.08) 0%, transparent 40%),
+                  linear-gradient(160deg, #060606 0%, #0a0a0a 50%, #030303 100%);
+      color: var(--text);
+      font-family: 'Georgia', 'Times New Roman', serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+
+    /* ── Top Nav ── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 60px;
+      background: rgba(5,5,5,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-gold);
+    }
+    .nav-brand {
+      font-size: 20px; font-weight: 700; letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 32px; align-items: center; font-family: Arial, sans-serif; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 14px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      color: #000; border: none; padding: 10px 22px;
+      border-radius: 999px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: Arial, sans-serif;
+      transition: opacity .2s;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 1200px; margin: 0 auto;
+      padding: 100px 60px 80px;
+      display: grid; grid-template-columns: 1fr 480px; gap: 80px; align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border-gold); color: var(--gold);
+      padding: 8px 16px; border-radius: 999px;
+      font-size: 13px; font-family: Arial, sans-serif; font-weight: 700;
+      margin-bottom: 28px; letter-spacing: 1px;
+    }
+    .hero-badge::before { content: '★'; }
+    .hero h1 {
+      font-size: 52px; line-height: 1.2; color: var(--gold);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 24px;
+    }
+    .hero h1 span { color: #fff; }
+    .hero p {
+      color: #bbb; font-size: 18px; line-height: 1.9;
+      font-family: Arial, sans-serif; max-width: 520px;
+    }
+    .hero-stats {
+      display: flex; gap: 32px; margin-top: 40px;
+    }
+    .stat-item { display: flex; flex-direction: column; }
+    .stat-num {
+      font-size: 32px; font-weight: 700; color: var(--gold);
+      font-family: Arial, sans-serif;
+    }
+    .stat-lbl { font-size: 13px; color: var(--muted); font-family: Arial, sans-serif; }
+
+    /* ── Demo Card ── */
+    .hero-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+      border: 1px solid var(--border-gold);
+      border-radius: 28px; padding: 36px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(212,175,55,0.06);
+    }
+    .card-label {
+      font-size: 11px; letter-spacing: 3px; color: var(--gold);
+      text-transform: uppercase; font-family: Arial, sans-serif; margin-bottom: 16px;
+    }
+    .mini-review {
+      background: rgba(0,0,0,0.35); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px; margin-bottom: 14px;
+    }
+    .mini-review .stars { color: var(--gold); font-size: 13px; margin-bottom: 8px; }
+    .mini-review .author { font-size: 12px; color: var(--muted); font-family: Arial, sans-serif; margin-bottom: 6px; }
+    .mini-review .text { font-size: 14px; color: #ccc; font-family: Arial, sans-serif; line-height: 1.6; }
+    .ai-response {
+      background: var(--gold-dim); border: 1px solid var(--border-gold);
+      border-radius: 14px; padding: 16px; margin-top: 10px;
+    }
+    .ai-label { font-size: 11px; color: var(--gold); letter-spacing: 2px; font-family: Arial, sans-serif; margin-bottom: 6px; }
+    .ai-text { font-size: 13px; color: #ddd; font-family: Arial, sans-serif; line-height: 1.7; }
+    .typing-cursor {
+      display: inline-block; width: 2px; height: 14px;
+      background: var(--gold); margin-left: 2px; vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Section wrapper ── */
+    .section { max-width: 1200px; margin: 0 auto; padding: 80px 60px; }
+    .section-tag {
+      font-size: 11px; letter-spacing: 4px; color: var(--gold);
+      text-transform: uppercase; font-family: Arial, sans-serif; margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: 38px; color: #fff; font-weight: 700; margin-bottom: 16px;
+    }
+    .section-title span { color: var(--gold); }
+    .section-sub {
+      color: #999; font-size: 17px; max-width: 580px;
+      font-family: Arial, sans-serif; line-height: 1.8;
+    }
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      max-width: 1200px; margin: 0 auto;
+    }
+
+    /* ── Dashboard ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px; margin-top: 48px;
+    }
+
+    /* Sidebar */
+    .dash-sidebar {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .metric-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 24px;
+    }
+    .metric-card.gold-border { border-color: var(--border-gold); }
+    .metric-label { font-size: 12px; color: var(--muted); font-family: Arial, sans-serif; letter-spacing: 1px; margin-bottom: 8px; }
+    .metric-value { font-size: 36px; font-weight: 700; color: var(--gold); font-family: Arial, sans-serif; }
+    .metric-sub { font-size: 12px; color: #4ec94e; font-family: Arial, sans-serif; margin-top: 4px; }
+    .metric-sub.red { color: var(--red); }
+
+    .rating-bar-group { margin-top: 16px; }
+    .rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-family: Arial, sans-serif; font-size: 13px; }
+    .rating-row .star-lbl { color: var(--gold); width: 20px; }
+    .bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 4px; transition: width 1s ease; }
+    .bar-count { color: var(--muted); width: 22px; text-align: right; }
+
+    .filter-group { display: flex; flex-direction: column; gap: 8px; }
+    .filter-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); padding: 10px 16px; border-radius: 12px;
+      cursor: pointer; font-family: Arial, sans-serif; font-size: 14px;
+      text-align: left; transition: all .2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--border-gold); color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    /* Review Feed */
+    .review-feed { display: flex; flex-direction: column; gap: 16px; }
+    .review-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 24px;
+      transition: border-color .25s, box-shadow .25s;
+      cursor: pointer;
+    }
+    .review-card:hover {
+      border-color: var(--border-gold);
+      box-shadow: 0 8px 40px rgba(212,175,55,0.08);
+    }
+    .review-card.expanded { border-color: var(--border-gold); }
+    .rc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .rc-author { display: flex; align-items: center; gap: 12px; }
+    .rc-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; font-family: Arial, sans-serif;
+      flex-shrink: 0;
+    }
+    .rc-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+    .rc-meta { font-size: 12px; color: var(--muted); font-family: Arial, sans-serif; }
+    .rc-stars { color: var(--gold); font-size: 16px; }
+    .rc-stars.low { color: var(--red); }
+    .rc-stars.mid { color: #f0a020; }
+    .rc-badge {
+      font-size: 11px; padding: 4px 10px; border-radius: 999px;
+      font-family: Arial, sans-serif; font-weight: 700;
+    }
+    .rc-badge.positive { background: rgba(78,201,78,0.15); color: #4ec94e; border: 1px solid rgba(78,201,78,0.3); }
+    .rc-badge.neutral  { background: rgba(240,160,32,0.15); color: #f0a020; border: 1px solid rgba(240,160,32,0.3); }
+    .rc-badge.negative { background: rgba(224,85,85,0.15); color: var(--red); border: 1px solid rgba(224,85,85,0.3); }
+    .rc-body { font-size: 15px; color: #ccc; font-family: Arial, sans-serif; line-height: 1.8; margin-bottom: 14px; }
+    .rc-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .rc-btn {
+      padding: 8px 16px; border-radius: 10px; font-size: 13px;
+      font-family: Arial, sans-serif; font-weight: 700;
+      cursor: pointer; border: 1px solid; transition: all .2s;
+    }
+    .rc-btn.primary {
+      background: linear-gradient(135deg, #f7e08a, var(--gold));
+      color: #000; border-color: transparent;
+    }
+    .rc-btn.primary:hover { opacity: .85; }
+    .rc-btn.ghost {
+      background: transparent; color: var(--muted); border-color: var(--border);
+    }
+    .rc-btn.ghost:hover { border-color: var(--border-gold); color: var(--gold); }
+
+    /* Reply Panel */
+    .reply-panel {
+      display: none; margin-top: 16px;
+      border-top: 1px solid var(--border); padding-top: 16px;
+    }
+    .reply-panel.open { display: block; }
+    .reply-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .reply-tab {
+      padding: 8px 16px; border-radius: 10px; font-size: 13px;
+      font-family: Arial, sans-serif; font-weight: 700; cursor: pointer;
+      border: 1px solid var(--border); color: var(--muted); background: transparent;
+      transition: all .2s;
+    }
+    .reply-tab.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .reply-content {
+      background: rgba(0,0,0,0.35); border: 1px solid var(--border-gold);
+      border-radius: 14px; padding: 18px;
+      font-size: 14px; font-family: Arial, sans-serif; color: #ddd; line-height: 1.8;
+      min-height: 100px; white-space: pre-wrap;
+    }
+    .reply-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+
+    /* ── AI Generator ── */
+    .generator-wrap {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px;
+    }
+    .gen-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+      border: 1px solid var(--border-gold); border-radius: 28px; padding: 36px;
+    }
+    .gen-label { font-size: 13px; color: var(--gold); font-family: Arial, sans-serif; font-weight: 700; margin-bottom: 10px; }
+    .gen-textarea {
+      width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      border-radius: 14px; color: var(--text); font-family: Arial, sans-serif;
+      font-size: 15px; padding: 16px; resize: vertical; min-height: 140px;
+      outline: none; transition: border-color .2s; line-height: 1.7;
+    }
+    .gen-textarea:focus { border-color: var(--border-gold); }
+    .gen-options { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+    .gen-opt {
+      padding: 8px 14px; border-radius: 10px; font-size: 13px;
+      font-family: Arial, sans-serif; cursor: pointer;
+      border: 1px solid var(--border); color: var(--muted); background: transparent;
+      transition: all .2s;
+    }
+    .gen-opt.active { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+    .gen-btn {
+      width: 100%; padding: 16px; border-radius: 14px; border: none;
+      background: linear-gradient(135deg, #f7e08a, var(--gold));
+      color: #000; font-size: 16px; font-weight: 700; font-family: Arial, sans-serif;
+      cursor: pointer; transition: opacity .2s; display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .gen-btn:hover { opacity: .88; }
+    .gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .gen-results { display: flex; flex-direction: column; gap: 16px; }
+    .result-card {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-gold);
+      border-radius: 16px; padding: 20px; opacity: 0; transform: translateY(12px);
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .result-card.visible { opacity: 1; transform: translateY(0); }
+    .result-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .result-style { font-size: 13px; color: var(--gold); font-family: Arial, sans-serif; font-weight: 700; }
+    .copy-btn {
+      padding: 6px 14px; border-radius: 8px; font-size: 12px;
+      font-family: Arial, sans-serif; font-weight: 700; cursor: pointer;
+      background: var(--gold); color: #000; border: none; transition: opacity .2s;
+    }
+    .copy-btn:hover { opacity: .8; }
+    .copy-btn.copied { background: #4ec94e; color: #fff; }
+    .result-text { font-size: 14px; color: #ccc; font-family: Arial, sans-serif; line-height: 1.8; }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      margin-top: 48px;
+    }
+    .feat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 22px; padding: 28px;
+      transition: border-color .25s, transform .25s;
+    }
+    .feat-card:hover { border-color: var(--border-gold); transform: translateY(-4px); }
+    .feat-icon { font-size: 28px; margin-bottom: 14px; }
+    .feat-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 8px; font-family: Arial, sans-serif; }
+    .feat-desc { font-size: 14px; color: #999; font-family: Arial, sans-serif; line-height: 1.7; }
+
+    /* ── Pricing ── */
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+      margin-top: 48px; align-items: start;
+    }
+    .price-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 24px; padding: 36px; position: relative;
+    }
+    .price-card.featured {
+      background: linear-gradient(145deg, rgba(212,175,55,0.12), rgba(212,175,55,0.04));
+      border-color: var(--border-gold);
+      box-shadow: 0 0 60px rgba(212,175,55,0.12);
+    }
+    .price-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #f7e08a, var(--gold));
+      color: #000; font-size: 11px; font-weight: 700; font-family: Arial, sans-serif;
+      padding: 5px 16px; border-radius: 999px; letter-spacing: 1px;
+    }
+    .price-tier { font-size: 13px; color: var(--muted); font-family: Arial, sans-serif; letter-spacing: 2px; margin-bottom: 12px; }
+    .price-amount { font-size: 42px; font-weight: 700; color: var(--gold); font-family: Arial, sans-serif; }
+    .price-amount span { font-size: 16px; color: var(--muted); }
+    .price-desc { font-size: 14px; color: #999; font-family: Arial, sans-serif; margin: 14px 0 22px; line-height: 1.7; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .price-features li { font-size: 14px; color: #bbb; font-family: Arial, sans-serif; display: flex; align-items: center; gap: 8px; }
+    .price-features li::before { content: '✓'; color: var(--gold); font-weight: 700; }
+    .price-btn {
+      width: 100%; padding: 14px; border-radius: 12px; font-size: 15px;
+      font-weight: 700; font-family: Arial, sans-serif; cursor: pointer;
+      border: 1px solid var(--border-gold); background: transparent; color: var(--gold);
+      transition: all .2s;
+    }
+    .price-btn:hover { background: var(--gold-dim); }
+    .price-card.featured .price-btn {
+      background: linear-gradient(135deg, #f7e08a, var(--gold));
+      color: #000; border-color: transparent;
+    }
+    .price-card.featured .price-btn:hover { opacity: .88; }
+
+    /* ── Testimonials ── */
+    .testimonial-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+      margin-top: 48px;
+    }
+    .testi-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 26px;
+    }
+    .testi-stars { color: var(--gold); margin-bottom: 12px; }
+    .testi-text { font-size: 15px; color: #ccc; font-family: Arial, sans-serif; line-height: 1.8; margin-bottom: 18px; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--gold-dim); border: 1px solid var(--border-gold);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--gold); font-family: Arial, sans-serif;
+    }
+    .testi-name { font-size: 14px; font-weight: 700; font-family: Arial, sans-serif; }
+    .testi-role { font-size: 12px; color: var(--muted); font-family: Arial, sans-serif; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 60px;
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+    }
+    .footer-brand { font-size: 18px; letter-spacing: 2px; color: var(--gold); margin-bottom: 14px; font-weight: 700; }
+    .footer-desc { font-size: 14px; color: var(--muted); font-family: Arial, sans-serif; line-height: 1.8; max-width: 280px; }
+    .footer-col-title { font-size: 12px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; font-family: Arial, sans-serif; margin-bottom: 14px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col li a { font-size: 14px; color: var(--muted); text-decoration: none; font-family: Arial, sans-serif; transition: color .2s; }
+    .footer-col li a:hover { color: var(--gold); }
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto;
+      border-top: 1px solid var(--border); padding: 24px 60px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; color: var(--muted); font-family: Arial, sans-serif;
+    }
+
+    /* ── Notification Toast ── */
+    #toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: linear-gradient(135deg, rgba(20,20,20,0.98), rgba(10,10,10,0.98));
+      border: 1px solid var(--border-gold); border-radius: 14px;
+      padding: 14px 22px; font-size: 14px; font-family: Arial, sans-serif;
+      color: var(--gold); display: none; z-index: 999;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Loader ── */
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000; border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; padding: 60px 32px; }
+      .hero-card { display: none; }
+      .nav { padding: 16px 32px; }
+      .nav-links { display: none; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .generator-wrap { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      footer { grid-template-columns: 1fr 1fr; padding: 40px 32px; }
+      .section { padding: 60px 32px; }
+      .footer-bottom { padding: 24px 32px; flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ NAV ════════════════ -->
+<nav class="nav">
+  <div class="nav-brand">REVIEWREPLY PRO</div>
+  <div class="nav-links">
+    <a href="#dashboard">Dashboard</a>
+    <a href="#generator">AI Generator</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <button class="nav-cta" onclick="showToast('Welcome! Start your free trial.')">Start Free Trial</button>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero">
+  <div>
+    <div class="hero-badge">AI-Powered for Fine Dining &amp; Luxury Hospitality</div>
+    <h1>Turn Every <span>Google Review</span><br>Into Guest Loyalty</h1>
+    <p>Monitor, analyze, and respond to Google reviews with AI-crafted replies tailored for Michelin-starred restaurants and luxury dining brands. Three distinct response styles, instantly generated.</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-num">94%</span>
+        <span class="stat-lbl">Response Rate</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">3x</span>
+        <span class="stat-lbl">Faster Replies</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">4.8★</span>
+        <span class="stat-lbl">Avg. Rating Lift</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="card-label">Live Review Intelligence</div>
+
+    <div class="mini-review">
+      <div class="stars">★★★★★</div>
+      <div class="author">William H. · 3 hours ago · Google</div>
+      <div class="text">"An extraordinary tasting menu. The sommelier's pairing was impeccable — truly a world-class experience."</div>
+      <div class="ai-response">
+        <div class="ai-label">✦ AI REPLY — LUXURY BRAND</div>
+        <div class="ai-text" id="heroTyping">We are deeply honoured by your generous words, William...</div>
+      </div>
+    </div>
+
+    <div class="mini-review" style="border-color:rgba(224,85,85,0.25)">
+      <div class="stars" style="color:#f0a020">★★★☆☆</div>
+      <div class="author">Sophie M. · 1 day ago · Google</div>
+      <div class="text">"Elegant ambiance but the service felt a bit rushed during the main course."</div>
+      <div class="ai-response" style="background:rgba(224,85,85,0.08);border-color:rgba(224,85,85,0.25)">
+        <div class="ai-label" style="color:#f0a020">✦ AI REPLY — CRISIS HANDLING</div>
+        <div class="ai-text">Thank you for your candid feedback, Sophie. We sincerely apologise that the pace of service disrupted your evening...</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ════════════════ DASHBOARD ════════════════ -->
+<section class="section" id="dashboard">
+  <div class="section-tag">Review Intelligence Dashboard</div>
+  <h2 class="section-title">Monitor Every Review, <span>Across All Locations</span></h2>
+  <p class="section-sub">Real-time review tracking with AI sentiment analysis, rating breakdowns, and one-click response generation.</p>
+
+  <div class="dashboard-grid">
+    <!-- Sidebar -->
+    <div class="dash-sidebar">
+      <div class="metric-card gold-border">
+        <div class="metric-label">AVERAGE RATING</div>
+        <div class="metric-value">4.7</div>
+        <div class="metric-sub">▲ +0.2 this month</div>
+        <div class="rating-bar-group" id="ratingBars"></div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">TOTAL REVIEWS</div>
+        <div class="metric-value">1,284</div>
+        <div class="metric-sub">▲ +47 this week</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">RESPONSE RATE</div>
+        <div class="metric-value">94%</div>
+        <div class="metric-sub">Industry avg: 68%</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">FILTER BY SENTIMENT</div>
+        <div class="filter-group" style="margin-top:12px">
+          <button class="filter-btn active" onclick="filterReviews('all', this)">All Reviews</button>
+          <button class="filter-btn" onclick="filterReviews('positive', this)">★★★★★ Positive</button>
+          <button class="filter-btn" onclick="filterReviews('neutral', this)">★★★☆☆ Neutral</button>
+          <button class="filter-btn" onclick="filterReviews('negative', this)">★★☆☆☆ Negative</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Feed -->
+    <div class="review-feed" id="reviewFeed"></div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ════════════════ AI GENERATOR ════════════════ -->
+<section class="section" id="generator">
+  <div class="section-tag">AI Reply Generator</div>
+  <h2 class="section-title">Three <span>Distinct Reply Styles</span>,<br>Instantly Generated</h2>
+  <p class="section-sub">Paste any guest review and receive professionally crafted responses from three strategic angles — all in seconds.</p>
+
+  <div class="generator-wrap">
+    <!-- Input -->
+    <div class="gen-card">
+      <div class="gen-label">PASTE GUEST REVIEW</div>
+      <textarea class="gen-textarea" id="genInput" placeholder="e.g. The duck confit was divine, but our reservation was delayed by 20 minutes without explanation. The wine list, however, was exceptional."></textarea>
+
+      <div class="gen-label" style="margin-top:20px">REPLY STYLE</div>
+      <div class="gen-options">
+        <button class="gen-opt active" onclick="selectStyle(this,'professional')">Professional</button>
+        <button class="gen-opt" onclick="selectStyle(this,'luxury')">Luxury Brand</button>
+        <button class="gen-opt" onclick="selectStyle(this,'crisis')">Crisis Handling</button>
+        <button class="gen-opt" onclick="selectStyle(this,'all')">All Three</button>
+      </div>
+
+      <div class="gen-label" style="margin-top:16px">RESTAURANT</div>
+      <select class="gen-textarea" id="restSelect" style="min-height:auto;padding:12px;cursor:pointer;resize:none">
+        <option value="maison">Maison Laurent — London</option>
+        <option value="terrace">The Terrace — New York</option>
+        <option value="villa">Villa Rosso — Paris</option>
+        <option value="atelier">Atelier Blanc — Amsterdam</option>
+      </select>
+
+      <button class="gen-btn" id="genBtn" onclick="generateReplies()" style="margin-top:20px">
+        <span id="genBtnText">✦ Generate AI Replies</span>
+        <div class="spinner" id="genSpinner" style="display:none"></div>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div class="gen-results" id="genResults">
+      <div style="color:var(--muted);font-family:Arial,sans-serif;font-size:15px;text-align:center;padding:60px 0;opacity:.6">
+        Generated replies will appear here.<br>Three styles. Zero effort.
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ════════════════ FEATURES ════════════════ -->
+<section class="section" id="features">
+  <div class="section-tag">Platform Capabilities</div>
+  <h2 class="section-title">Everything Your <span>Fine Dining Brand</span> Needs</h2>
+  <p class="section-sub">Built for restaurants where every guest interaction shapes long-term reputation.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">📡</div>
+      <div class="feat-title">Real-Time Monitoring</div>
+      <div class="feat-desc">Instant alerts the moment a new Google review goes live. Never miss a guest voice — positive or critical.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">✦</div>
+      <div class="feat-title">AI-Crafted Replies</div>
+      <div class="feat-desc">Three reply styles — Professional, Luxury Brand, and Crisis Handling — generated in under 3 seconds by advanced AI.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Sentiment Analytics</div>
+      <div class="feat-desc">Track sentiment trends, rating shifts, and guest satisfaction scores across all your locations with rich dashboards.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌍</div>
+      <div class="feat-title">Multilingual Support</div>
+      <div class="feat-desc">Auto-detect review language and reply in English, French, German, Italian, Spanish, Japanese, and more.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🏨</div>
+      <div class="feat-title">Multi-Location</div>
+      <div class="feat-desc">Manage review streams for all your restaurants from a single dashboard. Perfect for groups and hotel F&amp;B outlets.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔔</div>
+      <div class="feat-title">Critical Review Alerts</div>
+      <div class="feat-desc">Immediate email &amp; SMS alerts for 1–2 star reviews so your team can respond before the story spreads.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ════════════════ PRICING ════════════════ -->
+<section class="section" id="pricing">
+  <div class="section-tag">Simple Pricing</div>
+  <h2 class="section-title">Plans Sized for <span>Every Restaurant</span></h2>
+  <p class="section-sub">No long-term contracts. Upgrade or downgrade anytime.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">ESSENTIALS</div>
+      <div class="price-amount">$49<span>/mo</span></div>
+      <div class="price-desc">Ideal for independent fine-dining restaurants managing their own reputation.</div>
+      <ul class="price-features">
+        <li>100 AI reply generations/mo</li>
+        <li>1 location</li>
+        <li>Real-time monitoring</li>
+        <li>Email alerts</li>
+        <li>3 reply styles</li>
+      </ul>
+      <button class="price-btn" onclick="showToast('Starting your Essentials trial...')">Get Started</button>
+    </div>
+
+    <div class="price-card featured">
+      <div class="price-badge">MOST POPULAR</div>
+      <div class="price-tier">SIGNATURE</div>
+      <div class="price-amount">$129<span>/mo</span></div>
+      <div class="price-desc">For acclaimed restaurants and boutique hotel groups serious about guest experience.</div>
+      <ul class="price-features">
+        <li>Unlimited AI replies</li>
+        <li>Up to 5 locations</li>
+        <li>Priority critical alerts (SMS)</li>
+        <li>Weekly sentiment reports</li>
+        <li>Multilingual replies</li>
+        <li>Team access (3 users)</li>
+      </ul>
+      <button class="price-btn" onclick="showToast('Starting your Signature trial...')">Start Free Trial</button>
+    </div>
+
+    <div class="price-card">
+      <div class="price-tier">GRAND CRU</div>
+      <div class="price-amount" style="font-size:32px">Custom</div>
+      <div class="price-desc">For restaurant groups, luxury hotels, and Michelin-starred portfolios with complex needs.</div>
+      <ul class="price-features">
+        <li>Unlimited locations</li>
+        <li>Dedicated account manager</li>
+        <li>Custom AI brand voice</li>
+        <li>API &amp; PMS integration</li>
+        <li>Executive reporting</li>
+        <li>SLA guarantee</li>
+      </ul>
+      <button class="price-btn" onclick="showToast('Our team will reach out within 24 hours.')">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ════════════════ TESTIMONIALS ════════════════ -->
+<section class="section">
+  <div class="section-tag">Guest Success Stories</div>
+  <h2 class="section-title">Trusted by <span>Award-Winning</span> Restaurants</h2>
+
+  <div class="testimonial-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"ReviewReply Pro transformed how we manage our online reputation. The Luxury Brand style perfectly captures our voice — guests have even commented on how thoughtful our replies are."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">JM</div>
+        <div>
+          <div class="testi-name">Jean-Michel Blanc</div>
+          <div class="testi-role">Executive Chef, Maison Laurent · London</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"We went from 61% to 96% response rate in one month. The crisis handling style saved us from a PR nightmare after a particularly difficult negative review."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">SR</div>
+        <div>
+          <div class="testi-name">Sarah Reynolds</div>
+          <div class="testi-role">GM, The Terrace Group · New York</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"Managing six restaurant brands from a single dashboard is a game-changer. The multilingual support is invaluable — our Paris location gets reviews in eight different languages."</div>
+      <div class="testi-author">
+        <div class="testi-avatar">CP</div>
+        <div>
+          <div class="testi-name">Clara Petersen</div>
+          <div class="testi-role">Marketing Director, Villa Group · Paris &amp; Amsterdam</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<hr class="divider" />
+<footer>
+  <div>
+    <div class="footer-brand">REVIEWREPLY PRO</div>
+    <div class="footer-desc">AI-powered Google review management built for the world's finest restaurants and luxury hospitality brands.</div>
+  </div>
+  <div class="footer-col">
+    <div class="footer-col-title">Product</div>
+    <ul>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#generator">AI Generator</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <div class="footer-col-title">Company</div>
+    <ul>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Blog</a></li>
+      <li><a href="#">Careers</a></li>
+      <li><a href="#">Press</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <div class="footer-col-title">Legal</div>
+    <ul>
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">Terms of Service</a></li>
+      <li><a href="#">Cookie Policy</a></li>
+      <li><a href="#">GDPR</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span>© 2026 ReviewReply Pro. All rights reserved.</span>
+  <span>Crafted for exceptional hospitality.</span>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ── Data ── */
+const reviews = [
+  {
+    id: 1, name: "William Harrison", initials: "WH", color: "#b8860b",
+    stars: 5, sentiment: "positive", date: "3 hours ago",
+    text: "An extraordinary dining experience from start to finish. The tasting menu was a masterclass in modern European cuisine — each course told a story. The sommelier's pairing choices were inspired, and the service was impeccably attentive without being intrusive. Already planning our next visit.",
+    replied: false,
+    replies: {
+      professional: "Dear William, Thank you so much for this wonderful review. We are thrilled that every element of your tasting menu experience resonated — from the courses to the wine pairings. Your kind words mean a great deal to our entire team, and we look forward to welcoming you back very soon.",
+      luxury: "Dear William, We are deeply honoured by your generous words. Crafting moments that feel truly extraordinary is at the heart of everything we do, and knowing that our tasting journey — each pairing, each course — resonated with you in this way is profoundly gratifying. We shall look forward to the pleasure of your company once more.",
+      crisis: "Dear William, Thank you for taking the time to share such a thoughtful account of your evening with us. It is a privilege to read. We hope to see you again soon."
+    }
+  },
+  {
+    id: 2, name: "Sophie Marchetti", initials: "SM", color: "#8b5e3c",
+    stars: 3, sentiment: "neutral", date: "1 day ago",
+    text: "Elegant ambiance and the food was genuinely impressive — the halibut was perfectly executed. However, service felt rushed during the main course and our waiter seemed distracted. For the price point, the experience should be flawless throughout. Would consider returning if service improves.",
+    replied: false,
+    replies: {
+      professional: "Dear Sophie, Thank you for your honest and considered feedback. We are delighted the halibut met your expectations, but we sincerely apologise that the service rhythm during your main course fell short. This is not the standard we hold ourselves to, and your comments have been shared directly with our floor team. We hope you will give us the opportunity to show you a flawless experience.",
+      luxury: "Dear Sophie, Your feedback is a gift we receive with the utmost sincerity. While we are gratified that the cuisine spoke to you, we are genuinely sorry that the pace and attentiveness of service created a dissonance in your evening. Our commitment is to seamless, unhurried hospitality, and on this occasion we fell short. We would be honoured to welcome you back and demonstrate the full measure of our dedication.",
+      crisis: "Dear Sophie, Thank you for your candid and balanced review. We sincerely apologise that service did not match the quality of the cuisine you experienced. We take this feedback seriously and have addressed it with our team. We would genuinely welcome the chance to restore your confidence in us."
+    }
+  },
+  {
+    id: 3, name: "Richard Blackwood", initials: "RB", color: "#5a3e6e",
+    stars: 1, sentiment: "negative", date: "2 days ago",
+    text: "Booked three months in advance for our anniversary. Arrived on time and waited 45 minutes before being seated. No apology, no explanation. The food was decent but the evening was ruined. Management seemed indifferent. This level of disrespect for guests' time is unacceptable at these prices.",
+    replied: false,
+    replies: {
+      professional: "Dear Richard, We are sincerely sorry for the unacceptable delay on what should have been a celebratory evening. A 45-minute wait without acknowledgement is a serious failure on our part, and we understand entirely why this affected your experience. We would very much like to speak with you directly to make this right. Please contact us at your convenience.",
+      luxury: "Dear Richard, Please accept our most sincere and unreserved apologies. Your anniversary deserved nothing less than a perfect welcome, and we failed you. We are deeply sorry for the wait and, most importantly, for the absence of any proper acknowledgement from our team. This is contrary to everything we stand for, and we would be honoured to have the opportunity to restore your trust in us personally.",
+      crisis: "Dear Richard, We hear you, and we are truly sorry. What you experienced — especially on a special occasion — was wrong. There is no satisfactory explanation for a 45-minute wait without a proper apology. We would sincerely like to make this right and invite you to reach out to us directly. Your experience matters deeply to us."
+    }
+  },
+  {
+    id: 4, name: "Camille Fontaine", initials: "CF", color: "#2e6b4f",
+    stars: 5, sentiment: "positive", date: "3 days ago",
+    text: "We celebrated our 10th anniversary here and it exceeded every expectation. The staff arranged a beautiful floral arrangement and a personalised menu card. The chef even came to our table. Remarkable attention to detail and the most memorable meal we've had in years. Absolutely flawless.",
+    replied: true,
+    replies: {
+      professional: "Dear Camille, Congratulations on your 10th anniversary — what a milestone to celebrate! It was our absolute pleasure to be part of your special evening. Your kind words about our team's attention to detail are deeply appreciated. We hope to be part of many more milestones to come.",
+      luxury: "Dear Camille, It was a privilege to share in the celebration of your tenth anniversary, and hearing that the evening exceeded your expectations fills our entire team with profound joy. Personal milestones deserve extraordinary care, and we are gratified that every detail — the florals, the menu, the visit from our chef — contributed to a truly memorable evening. With warmest regards.",
+      crisis: "Dear Camille, Thank you for your beautiful message. We are so glad your anniversary was everything you hoped for."
+    }
+  },
+  {
+    id: 5, name: "Thomas Eriksen", initials: "TE", color: "#3b5998",
+    stars: 4, sentiment: "positive", date: "5 days ago",
+    text: "Consistently excellent food — the venison was the best I've had outside of Scandinavia. Service was warm and professional. Only slight gripe is the noise level on a Friday evening; the acoustics make conversation difficult. Food and service: 5 stars. Ambiance: 3 stars. Would return.",
+    replied: false,
+    replies: {
+      professional: "Dear Thomas, Thank you for such a detailed and thoughtful review, and we are delighted the venison met such a high benchmark. Your feedback about acoustics on busy evenings is genuinely valuable — it is something we continue to work on. We hope to welcome you back on a quieter evening to enjoy the full experience.",
+      luxury: "Dear Thomas, Your kind words about our venison are tremendously gratifying — achieving that standard is something our kitchen takes great pride in. We appreciate your candour regarding the acoustic experience on Friday evenings; creating an environment that is both vibrant and intimate is a balance we are always refining. We look forward to welcoming you back.",
+      crisis: "Dear Thomas, Thank you for the honest, well-balanced review. We're glad the venison and service landed well. The acoustics point is noted — we're working on it."
+    }
+  }
+];
+
+let selectedStyle = 'professional';
+let currentFilter = 'all';
+
+/* ── Render Rating Bars ── */
+function renderRatingBars() {
+  const counts = [0, 0, 34, 187, 312, 751]; // index = stars
+  const total = counts.reduce((a,b) => a+b, 0);
+  let html = '';
+  for (let s = 5; s >= 1; s--) {
+    const pct = Math.round((counts[s] / total) * 100);
+    html += `
+      <div class="rating-row">
+        <span class="star-lbl">${s}</span>
+        <div class="bar-track"><div class="bar-fill" data-pct="${pct}" style="width:0%"></div></div>
+        <span class="bar-count">${counts[s] > 99 ? Math.round(counts[s]/10)/100+'k' : counts[s]}</span>
+      </div>`;
+  }
+  document.getElementById('ratingBars').innerHTML = html;
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 300);
+}
+
+/* ── Render Reviews ── */
+function starsHtml(n) {
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function sentimentClass(s) {
+  return s === 'positive' ? 'positive' : s === 'neutral' ? 'neutral' : 'negative';
+}
+
+function renderReviews() {
+  const feed = document.getElementById('reviewFeed');
+  const filtered = reviews.filter(r =>
+    currentFilter === 'all' ? true :
+    currentFilter === 'positive' ? r.stars >= 4 :
+    currentFilter === 'neutral' ? r.stars === 3 :
+    r.stars <= 2
+  );
+
+  if (filtered.length === 0) {
+    feed.innerHTML = '<div style="color:var(--muted);font-family:Arial,sans-serif;padding:40px;text-align:center">No reviews match this filter.</div>';
+    return;
+  }
+
+  feed.innerHTML = filtered.map(r => `
+    <div class="review-card ${r.replied ? '' : ''}" id="rc-${r.id}" onclick="toggleCard(${r.id})">
+      <div class="rc-top">
+        <div class="rc-author">
+          <div class="rc-avatar" style="background:${r.color}22;border:1px solid ${r.color}44;color:${r.color}">${r.initials}</div>
+          <div>
+            <div class="rc-name">${r.name}</div>
+            <div class="rc-meta">${r.date} · Google Maps</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="rc-badge ${sentimentClass(r.sentiment)}">${r.sentiment.charAt(0).toUpperCase()+r.sentiment.slice(1)}</span>
+          ${r.replied ? '<span style="font-size:11px;color:#4ec94e;font-family:Arial,sans-serif">✓ Replied</span>' : ''}
+        </div>
+      </div>
+      <div class="rc-stars ${r.stars <= 2 ? 'low' : r.stars === 3 ? 'mid' : ''}">${starsHtml(r.stars)}</div>
+      <div class="rc-body" style="margin-top:10px">${r.text}</div>
+      <div class="rc-actions">
+        <button class="rc-btn primary" onclick="openReplyPanel(event, ${r.id})">✦ Generate Reply</button>
+        <button class="rc-btn ghost" onclick="copyReview(event, ${r.id})">Copy Review</button>
+        ${!r.replied ? `<button class="rc-btn ghost" onclick="markReplied(event, ${r.id})">Mark Replied</button>` : ''}
+      </div>
+      <div class="reply-panel" id="rp-${r.id}">
+        <div class="reply-tabs">
+          <button class="reply-tab active" onclick="switchTab(event, ${r.id}, 'professional')">Professional</button>
+          <button class="reply-tab" onclick="switchTab(event, ${r.id}, 'luxury')">Luxury Brand</button>
+          <button class="reply-tab" onclick="switchTab(event, ${r.id}, 'crisis')">Crisis Handling</button>
+        </div>
+        <div class="reply-content" id="rc-text-${r.id}">${r.replies.professional}</div>
+        <div class="reply-footer">
+          <button class="rc-btn ghost" onclick="copyReplyText(event, ${r.id})">Copy Reply</button>
+          <button class="rc-btn primary" onclick="publishReply(event, ${r.id})">Publish Reply</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(id) { /* expand handled by buttons */ }
+
+function openReplyPanel(e, id) {
+  e.stopPropagation();
+  const panel = document.getElementById('rp-' + id);
+  const isOpen = panel.classList.contains('open');
+  // close all
+  document.querySelectorAll('.reply-panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) panel.classList.add('open');
+}
+
+function switchTab(e, id, style) {
+  e.stopPropagation();
+  const panel = document.getElementById('rp-' + id);
+  panel.querySelectorAll('.reply-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const review = reviews.find(r => r.id === id);
+  document.getElementById('rc-text-' + id).textContent = review.replies[style];
+}
+
+function copyReview(e, id) {
+  e.stopPropagation();
+  const review = reviews.find(r => r.id === id);
+  navigator.clipboard.writeText(review.text).then(() => showToast('Review copied to clipboard.'));
+}
+
+function copyReplyText(e, id) {
+  e.stopPropagation();
+  const text = document.getElementById('rc-text-' + id).textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('Reply copied to clipboard.'));
+}
+
+function markReplied(e, id) {
+  e.stopPropagation();
+  const r = reviews.find(r => r.id === id);
+  r.replied = true;
+  renderReviews();
+  showToast('Marked as replied. ✓');
+}
+
+function publishReply(e, id) {
+  e.stopPropagation();
+  const r = reviews.find(r => r.id === id);
+  r.replied = true;
+  renderReviews();
+  showToast('Reply published to Google Maps. ✓');
+}
+
+function filterReviews(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReviews();
+}
+
+/* ── Generator ── */
+function selectStyle(btn, style) {
+  document.querySelectorAll('.gen-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedStyle = style;
+}
+
+const aiReplies = {
+  professional: {
+    prefix: "Dear Guest,\n\nThank you for taking the time to share your experience with us. ",
+    middle: "Your feedback is invaluable and has been shared with our entire team. We are committed to continuously refining every aspect of our service to ensure each visit exceeds expectations. ",
+    suffix: "\n\nWe look forward to welcoming you back soon.\n\nWarm regards,\nThe Management Team"
+  },
+  luxury: {
+    prefix: "Dear Guest,\n\nWe are deeply grateful for your thoughtful reflection on your evening with us. ",
+    middle: "Crafting moments of genuine excellence is at the very heart of our philosophy, and your words serve as both inspiration and responsibility. We shall ensure your observations are addressed with the care they deserve. ",
+    suffix: "\n\nWith warmest regards and in anticipation of your return,\nThe Management"
+  },
+  crisis: {
+    prefix: "Dear Guest,\n\nThank you for your honest feedback. We hear you. ",
+    middle: "What you experienced does not reflect the standards we hold ourselves to, and we sincerely apologise. Your account has been reviewed seriously by our management team and we are taking direct action. ",
+    suffix: "\n\nWe would welcome the opportunity to speak with you directly. Please do not hesitate to reach out.\n\nSincerely,\nThe Management Team"
+  }
+};
+
+function buildReply(style, reviewText) {
+  const tpl = aiReplies[style];
+  // Simple heuristic additions based on review content
+  const isNeg = reviewText.match(/wait|delay|slow|rude|disappoint|worst|never|terrible|awful|bad|poor|wrong|mistake/i);
+  const isPos = reviewText.match(/amazing|fantastic|excellent|perfect|outstanding|wonderful|exceptional|incredible|best|loved/i);
+  let context = '';
+  if (isNeg) context = 'We understand that falling short of expectations is particularly disappointing given the level of care we strive for. ';
+  else if (isPos) context = 'Knowing that our team\'s passion translated into a truly memorable moment for you is a source of great pride. ';
+  else context = 'Your balanced perspective helps us understand both our strengths and the areas where we can grow. ';
+  return tpl.prefix + context + tpl.middle + tpl.suffix;
+}
+
+async function generateReplies() {
+  const text = document.getElementById('genInput').value.trim();
+  if (!text) { showToast('Please enter a guest review first.'); return; }
+
+  const btn = document.getElementById('genBtn');
+  const btnText = document.getElementById('genBtnText');
+  const spinner = document.getElementById('genSpinner');
+  btn.disabled = true;
+  btnText.textContent = 'Generating...';
+  spinner.style.display = 'block';
+
+  await new Promise(r => setTimeout(r, 1400));
+
+  const styles = selectedStyle === 'all'
+    ? ['professional', 'luxury', 'crisis']
+    : [selectedStyle];
+
+  const styleLabels = {
+    professional: '✦ Professional',
+    luxury: '✦ Luxury Brand',
+    crisis: '✦ Crisis Handling'
+  };
+
+  const container = document.getElementById('genResults');
+  container.innerHTML = '';
+
+  for (let i = 0; i < styles.length; i++) {
+    const s = styles[i];
+    const reply = buildReply(s, text);
+    const div = document.createElement('div');
+    div.className = 'result-card';
+    div.innerHTML = `
+      <div class="result-card-head">
+        <span class="result-style">${styleLabels[s]}</span>
+        <button class="copy-btn" onclick="copyResult(this, \`${reply.replace(/`/g,"'")}\`)">Copy</button>
+      </div>
+      <div class="result-text">${reply.replace(/\n/g,'<br>')}</div>
+    `;
+    container.appendChild(div);
+    await new Promise(r => setTimeout(r, 150 * i));
+    div.classList.add('visible');
+  }
+
+  btn.disabled = false;
+  btnText.textContent = '✦ Generate AI Replies';
+  spinner.style.display = 'none';
+  showToast(styles.length + ' repl' + (styles.length > 1 ? 'ies' : 'y') + ' generated. ✓');
+}
+
+function copyResult(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+/* ── Hero typing effect ── */
+function heroTyping() {
+  const el = document.getElementById('heroTyping');
+  const full = "We are deeply honoured by your generous words, William. Knowing that the tasting journey — each course, each pairing — resonated so fully is a source of profound pride for our entire team. We look forward with great anticipation to welcoming you once more.";
+  el.textContent = '';
+  const cursor = document.createElement('span');
+  cursor.className = 'typing-cursor';
+  el.appendChild(cursor);
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < full.length) {
+      el.insertBefore(document.createTextNode(full[i]), cursor);
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => cursor.remove(), 2000);
+    }
+  }, 28);
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.display = 'none'; }, 3200);
+}
+
+/* ── Init ── */
+renderRatingBars();
+renderReviews();
+setTimeout(heroTyping, 800);
+</script>
+</body>
+</html>
