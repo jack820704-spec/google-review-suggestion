@@ -132,7 +132,6 @@ export default function OnboardingPage() {
         rating_goal_months: parseInt(info.target_months),
         crisis_alerts: notif.crisis_alerts,
         weekly_report: notif.weekly_report,
-        onboarding_completed: true,
         google_connected: googleConnected,
         plan: "free_trial",
         used_count: 0,

@@ -56,10 +56,10 @@ export async function proxy(request) {
     if (pathname.startsWith("/dashboard")) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("onboarding_completed")
+        .select("restaurant_name")
         .eq("id", user.id)
         .single();
-      if (profile && profile.onboarding_completed === false) {
+      if (!profile?.restaurant_name) {
         return NextResponse.redirect(new URL("/onboarding", request.url));
       }
     }
@@ -70,10 +70,10 @@ export async function proxy(request) {
   if (pathname === "/login" && user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("onboarding_completed")
+      .select("restaurant_name")
       .eq("id", user.id)
       .single();
-    if (!profile || profile.onboarding_completed === false)
+    if (!profile?.restaurant_name)
       return NextResponse.redirect(new URL("/onboarding", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
