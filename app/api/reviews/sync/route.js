@@ -73,7 +73,7 @@ export async function POST(req) {
         const { data: newReview } = await db.from("reviews").insert({
           user_id: profile.id,
           reviewer_name: gr.reviewer?.displayName || "Anonymous",
-          rating,
+          stars: rating,
           content,
           sentiment,
           is_crisis: false,
@@ -90,9 +90,9 @@ export async function POST(req) {
 
           // Check for crisis (3+ negative in 24h)
           const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-          const { count } = await db.from("reviews").select("id", { count: "exact" }).eq("user_id", profile.id).lte("rating", 2).gte("review_date", since);
+          const { count } = await db.from("reviews").select("id", { count: "exact" }).eq("user_id", profile.id).lte("stars", 2).gte("review_date", since);
           const isCrisis = count >= 3;
-          if (isCrisis) await db.from("reviews").update({ is_crisis: true }).eq("user_id", profile.id).lte("rating", 2).gte("review_date", since);
+          if (isCrisis) await db.from("reviews").update({ is_crisis: true }).eq("user_id", profile.id).lte("stars", 2).gte("review_date", since);
 
           // Notify if notifications enabled
           if (profile.email_notifications !== false) {

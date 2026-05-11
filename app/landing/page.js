@@ -696,7 +696,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="landing" />
 
       {/* NAV */}
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>

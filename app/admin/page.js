@@ -75,7 +75,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="admin" />
       <div className="topbar">
         <a className="logo" href="/dashboard"><span className="logo-icon">✦</span>Revuly</a>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -112,7 +112,7 @@ export default function AdminPage() {
                     <td>{u.email}</td>
                     <td>{u.restaurant_name || <span style={{color:"var(--text3)"}}>—</span>}</td>
                     <td><span className={`plan-tag plan-${u.plan || "free_trial"}`}>{getPlan(u.plan).name}</span></td>
-                    <td>{u.reply_count || 0}</td>
+                    <td>{u.used_count || 0}</td>
                     <td>{u.created_at ? new Date(u.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"2-digit"}) : "—"}</td>
                     <td>
                       <select className="plan-select" value={u.plan || "free_trial"} onChange={(e) => updatePlan(u.id, e.target.value)}>

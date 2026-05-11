@@ -96,7 +96,7 @@ export default function SettingsPage() {
   const update = (key, val) => setProfile((p) => ({ ...p, [key]: val }));
   const planKey = profile?.plan || "free_trial";
   const plan = getPlan(planKey);
-  const pct = usagePercent(planKey, profile?.reply_count || 0);
+  const pct = usagePercent(planKey, profile?.used_count || 0);
   const canCustomKw = canUseFeature(planKey, "custom_keywords");
 
   const handleSave = async () => {
@@ -107,10 +107,8 @@ export default function SettingsPage() {
       restaurant_type: profile.restaurant_type,
       city: profile.city,
       country: profile.country,
-      target_rating: profile.target_rating,
-      target_months: profile.target_months,
-      email_notifications: profile.email_notifications,
-      notification_frequency: profile.notification_frequency,
+      rating_goal: profile.rating_goal,
+      rating_goal_months: profile.rating_goal_months,
       crisis_alerts: profile.crisis_alerts,
       weekly_report: profile.weekly_report,
       custom_keywords: profile.custom_keywords || [],
@@ -141,7 +139,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="settings" />
       <div className="topbar">
         <a className="logo" href="/dashboard"><span className="logo-icon">✦</span>Revuly</a>
         <div className="topbar-right">
@@ -167,8 +165,8 @@ export default function SettingsPage() {
               <div className="form-group"><label>Country</label><input className="form-input" value={profile.country || ""} onChange={(e) => update("country", e.target.value)} /></div>
             </div>
             <div className="form-row">
-              <div className="form-group"><label>Target Rating</label><select className="form-select" value={profile.target_rating || "4.8"} onChange={(e) => update("target_rating", e.target.value)}>{["4.5","4.6","4.7","4.8","4.9","5.0"].map((r) => <option key={r}>{r} ★</option>)}</select></div>
-              <div className="form-group"><label>Target Timeline</label><select className="form-select" value={profile.target_months || "6"} onChange={(e) => update("target_months", e.target.value)}>{["3","6","9","12"].map((m) => <option key={m}>{m} months</option>)}</select></div>
+              <div className="form-group"><label>Target Rating</label><select className="form-select" value={profile.rating_goal || "4.8"} onChange={(e) => update("rating_goal", e.target.value)}>{["4.5","4.6","4.7","4.8","4.9","5.0"].map((r) => <option key={r}>{r} ★</option>)}</select></div>
+              <div className="form-group"><label>Target Timeline</label><select className="form-select" value={profile.rating_goal_months || "6"} onChange={(e) => update("rating_goal_months", e.target.value)}>{["3","6","9","12"].map((m) => <option key={m}>{m} months</option>)}</select></div>
             </div>
           </div>
         </div>
@@ -248,7 +246,7 @@ export default function SettingsPage() {
               <div><div className="plan-name">{plan.name}</div><div className="plan-price">{plan.price === 0 ? "Free Trial" : `$${plan.price}/month`}</div></div>
               {planKey !== "pro" && <button className="btn-upgrade" onClick={() => window.location.href = "/#pricing"}>Upgrade Plan</button>}
             </div>
-            <div style={{fontSize:13,color:"var(--text2)",marginBottom:6}}>AI Replies: {profile.reply_count || 0} / {plan.reply_limit === Infinity ? "Unlimited" : plan.reply_limit} used this period</div>
+            <div style={{fontSize:13,color:"var(--text2)",marginBottom:6}}>AI Replies: {profile.used_count || 0} / {plan.reply_limit === Infinity ? "Unlimited" : plan.reply_limit} used this period</div>
             {plan.reply_limit !== Infinity && (
               <div className="usage-bar-wrap">
                 <div className="usage-bar-fill" style={{width:`${pct}%`,background:pct>=80?(pct>=100?"var(--neg)":"var(--neu-fg)"):"linear-gradient(90deg,var(--gold-dim),var(--gold-lt))"}} />

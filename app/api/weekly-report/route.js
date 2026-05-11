@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 function avgRating(reviews) {
   if (!reviews.length) return 0;
-  return (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1);
+  return (reviews.reduce((s, r) => s + (r.stars || 0), 0) / reviews.length).toFixed(1);
 }
 
 function topKeywords(reviews) {

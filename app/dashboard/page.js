@@ -215,8 +215,10 @@ export default function DashboardPage() {
   const [kwFilter, setKwFilter] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
-  const [newReview, setNewReview] = useState({ reviewer_name: "", rating: 5, content: "" });
+  const [newReview, setNewReview] = useState({ reviewer_name: "", stars: 5, content: "" });
   const [savingReview, setSavingReview] = useState(false);
+  const [modalError, setModalError] = useState("");
+  const [generateError, setGenerateError] = useState("");
   const supabase = createClient();
 
   const loadData = useCallback(async () => {
@@ -237,7 +239,7 @@ export default function DashboardPage() {
 
   const plan = getPlan(profile?.plan || "free_trial");
   const planKey = profile?.plan || "free_trial";
-  const usedCount = profile?.reply_count || 0;
+  const usedCount = profile?.used_count || 0;
   const pct = usagePercent(planKey, usedCount);
   const overLimit = isOverLimit(planKey, usedCount);
 
@@ -252,37 +254,36 @@ export default function DashboardPage() {
         if (!allKw.some((kw) => text.includes(kw))) return false;
       }
     }
-    if (filter === "positive") return r.rating >= 4;
-    if (filter === "negative") return r.rating <= 2;
+    if (filter === "positive") return r.stars >= 4;
+    if (filter === "negative") return r.stars <= 2;
     if (filter === "unanswered") return !r.replied;
     if (filter === "crisis") return r.is_crisis;
     return true;
   });
 
-  const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1) : "—";
+  const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + (r.stars || 0), 0) / reviews.length).toFixed(1) : "—";
   const replyRate = reviews.length > 0 ? Math.round((reviews.filter((r) => r.replied).length / reviews.length) * 100) : 0;
 
   const handleGenerate = async () => {
     if (!selectedReview || overLimit) return;
     setGenerating(true);
+    setGenerateError("");
     try {
       const res = await fetch("/api/generate-reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          review: selectedReview,
-          profile,
-          lang: activeLang,
-        }),
+        body: JSON.stringify({ review: selectedReview, profile, lang: activeLang }),
       });
       const data = await res.json();
+      if (data.error) { setGenerateError(data.error); return; }
       if (data.replies) {
         setReplies((prev) => ({ ...prev, [selectedReview.id]: data.replies }));
-        // Increment usage
         const { data: { user } } = await supabase.auth.getUser();
-        await supabase.from("profiles").update({ reply_count: usedCount + 1 }).eq("id", user.id);
-        setProfile((p) => ({ ...p, reply_count: usedCount + 1 }));
+        await supabase.from("profiles").update({ used_count: usedCount + 1 }).eq("id", user.id);
+        setProfile((p) => ({ ...p, used_count: usedCount + 1 }));
       }
+    } catch (err) {
+      setGenerateError(err.message);
     } finally {
       setGenerating(false);
     }
@@ -309,12 +310,13 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setSavingReview(true);
-    const sentiment = detectSentiment(newReview.rating);
-    const isCrisis = newReview.rating <= 2;
-    const { data } = await supabase.from("reviews").insert({
+    setModalError("");
+    const sentiment = detectSentiment(newReview.stars);
+    const isCrisis = newReview.stars <= 2;
+    const { data, error } = await supabase.from("reviews").insert({
       user_id: user.id,
       reviewer_name: newReview.reviewer_name || "Anonymous",
-      rating: newReview.rating,
+      stars: newReview.stars,
       content: newReview.content,
       sentiment,
       is_crisis: isCrisis,
@@ -322,10 +324,15 @@ export default function DashboardPage() {
       source: "manual",
       review_date: new Date().toISOString(),
     }).select().single();
+    setSavingReview(false);
+    if (error) {
+      setModalError(error.message);
+      return;
+    }
     if (data) setReviews((prev) => [data, ...prev]);
     setShowAddModal(false);
-    setNewReview({ reviewer_name: "", rating: 5, content: "" });
-    setSavingReview(false);
+    setNewReview({ reviewer_name: "", stars: 5, content: "" });
+    setModalError("");
   };
 
   const handleLogout = async () => {
@@ -338,7 +345,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="dashboard" />
 
       {/* TOPBAR */}
       <div className="topbar">
@@ -381,9 +388,9 @@ export default function DashboardPage() {
           <div className="section-label">Filters</div>
           {[
             { key: "all", label: "All Reviews", dot: "#555", count: reviews.length },
-            { key: "positive", label: "Positive", dot: "var(--pos-fg)", count: reviews.filter((r) => r.rating >= 4).length },
-            { key: "neutral", label: "Neutral", dot: "var(--neu-fg)", count: reviews.filter((r) => r.rating === 3).length },
-            { key: "negative", label: "Negative", dot: "var(--neg-fg)", count: reviews.filter((r) => r.rating <= 2).length },
+            { key: "positive", label: "Positive", dot: "var(--pos-fg)", count: reviews.filter((r) => r.stars >= 4).length },
+            { key: "neutral", label: "Neutral", dot: "var(--neu-fg)", count: reviews.filter((r) => r.stars === 3).length },
+            { key: "negative", label: "Negative", dot: "var(--neg-fg)", count: reviews.filter((r) => r.stars <= 2).length },
             { key: "unanswered", label: "Unanswered", dot: "var(--gold)", count: reviews.filter((r) => !r.replied).length },
             { key: "crisis", label: "🚨 Crisis", dot: "var(--neg-fg)", count: reviews.filter((r) => r.is_crisis).length },
           ].map((f) => (
@@ -445,7 +452,7 @@ export default function DashboardPage() {
             <div key={review.id} className={`review-card${selectedReview?.id === review.id ? " selected" : ""}${review.is_crisis ? " crisis" : ""}`} onClick={() => setSelectedReview(review)}>
               <div className="review-meta">
                 <span className="review-name">{review.reviewer_name}</span>
-                <span className="stars">{starsDisplay(review.rating)}</span>
+                <span className="stars">{starsDisplay(review.stars)}</span>
                 <span className="review-date">{new Date(review.review_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                 <span className={`sentiment-tag sent-${review.sentiment}`}>{review.sentiment}</span>
                 {review.is_crisis && <span className="crisis-tag">🚨 Crisis</span>}
@@ -472,7 +479,7 @@ export default function DashboardPage() {
               <div className="editor-header">
                 <div className="editor-review-name">{selectedReview.reviewer_name}</div>
                 <div className="editor-review-meta">
-                  <span className="stars" style={{fontSize:13}}>{starsDisplay(selectedReview.rating)}</span>
+                  <span className="stars" style={{fontSize:13}}>{starsDisplay(selectedReview.stars)}</span>
                   <span className={`sentiment-tag sent-${selectedReview.sentiment}`}>{selectedReview.sentiment}</span>
                 </div>
               </div>
@@ -502,6 +509,7 @@ export default function DashboardPage() {
                 <button className="btn-generate" onClick={handleGenerate} disabled={generating || overLimit}>
                   {generating ? "Generating…" : currentReplies ? "Regenerate All Replies" : "✦ Generate AI Replies"}
                 </button>
+                {generateError && <div style={{marginTop:10,padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:12.5,color:"var(--neg-fg)"}}>{generateError}</div>}
               </div>
 
               {currentReplies && (
@@ -537,6 +545,7 @@ export default function DashboardPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Add Review</h3>
             <p className="modal-sub">Manually add a customer review to generate AI reply suggestions.</p>
+            {modalError && <div style={{padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:13,color:"var(--neg-fg)",marginBottom:14}}>{modalError}</div>}
             <div className="modal-group">
               <label className="modal-label">Reviewer Name</label>
               <input className="modal-input" placeholder="e.g. James T." value={newReview.reviewer_name} onChange={(e) => setNewReview({ ...newReview, reviewer_name: e.target.value })} />
@@ -545,7 +554,7 @@ export default function DashboardPage() {
               <label className="modal-label">Star Rating</label>
               <div className="star-select">
                 {[1,2,3,4,5].map((n) => (
-                  <button key={n} className={`star-btn${newReview.rating >= n ? " active" : ""}`} onClick={() => setNewReview({ ...newReview, rating: n })}>★</button>
+                  <button key={n} className={`star-btn${newReview.stars >= n ? " active" : ""}`} onClick={() => setNewReview({ ...newReview, stars: n })}>★</button>
                 ))}
               </div>
             </div>

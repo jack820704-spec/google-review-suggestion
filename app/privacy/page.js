@@ -30,7 +30,7 @@ const CSS = `
 export default function PrivacyPage() {
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="privacy" />
       <nav className="nav">
         <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
         <a className="nav-back" href="/">← Back to Home</a>

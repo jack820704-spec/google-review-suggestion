@@ -105,7 +105,7 @@ export default function LoginPage() {
             email: data.user.email,
             full_name: name,
             plan: "free_trial",
-            reply_count: 0,
+            used_count: 0,
             onboarding_completed: false,
           });
           setSuccess("Account created! Check your email to confirm, then continue.");
@@ -130,7 +130,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="login" />
       <div className="layout">
         {/* LEFT: BRAND PANEL */}
         <div className="brand-panel">

@@ -121,18 +121,23 @@ export default function OnboardingPage() {
     if (!user) return;
     setLoading(true); setError("");
     try {
-      await supabase.from("profiles").upsert({
+      const { error: upsertError } = await supabase.from("profiles").upsert({
         id: user.id,
         email: user.email,
-        ...info,
-        target_rating: parseFloat(info.target_rating),
-        target_months: parseInt(info.target_months),
-        ...notif,
+        restaurant_name: info.restaurant_name,
+        restaurant_type: info.restaurant_type,
+        city: info.city,
+        country: info.country,
+        rating_goal: parseFloat(info.target_rating),
+        rating_goal_months: parseInt(info.target_months),
+        crisis_alerts: notif.crisis_alerts,
+        weekly_report: notif.weekly_report,
         onboarding_completed: true,
         google_connected: googleConnected,
         plan: "free_trial",
-        reply_count: 0,
+        used_count: 0,
       });
+      if (upsertError) throw upsertError;
 
       // Send welcome email
       await fetch("/api/email/welcome", {
@@ -153,7 +158,7 @@ export default function OnboardingPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="onboarding" />
       <div className="page">
         <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
 

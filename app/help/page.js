@@ -83,7 +83,7 @@ export default function HelpPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="help" />
       <div className="topbar">
         <a className="logo" href="/dashboard"><span className="logo-icon">✦</span>Revuly Help Centre</a>
         <div style={{display:"flex",gap:10}}>

@@ -35,7 +35,7 @@ export async function GET(req) {
           email: user.email,
           full_name: user.user_metadata?.full_name || "",
           plan: "free_trial",
-          reply_count: 0,
+          used_count: 0,
           onboarding_completed: false,
         });
         return NextResponse.redirect(new URL("/onboarding", req.url));

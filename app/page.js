@@ -215,7 +215,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="home" />
 
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
         <a className="logo" href="#"><span className="logo-icon">✦</span>Revuly</a>

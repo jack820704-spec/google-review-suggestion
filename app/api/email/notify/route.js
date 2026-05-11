@@ -51,7 +51,7 @@ function buildEmail({ restaurantName, review, replies, isCrisis }) {
         </div>
         <div>
           <div style="font-size:14px;font-weight:700;color:#f0ede6">${review.reviewer_name || "Anonymous"}</div>
-          <div style="font-size:13px;color:#c9a84c">${starsHtml(review.rating)} · ${new Date(review.review_date || Date.now()).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</div>
+          <div style="font-size:13px;color:#c9a84c">${starsHtml(review.stars)} · ${new Date(review.review_date || Date.now()).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</div>
         </div>
       </div>
       <div style="padding:14px;background:rgba(255,255,255,0.03);border-left:3px solid rgba(201,168,76,0.4);border-radius:0 6px 6px 0">
@@ -90,8 +90,8 @@ export async function POST(req) {
     if (!to || !review) return Response.json({ error: "Missing required fields" }, { status: 400 });
 
     const subject = isCrisis
-      ? `🚨 Crisis Alert — New ${review.rating}★ review at ${restaurantName}`
-      : `⭐ New ${review.rating}★ review at ${restaurantName}`;
+      ? `🚨 Crisis Alert — New ${review.stars}★ review at ${restaurantName}`
+      : `⭐ New ${review.stars}★ review at ${restaurantName}`;
 
     const { data, error } = await resend.emails.send({
       from: "Revuly <notifications@revuly.com>",

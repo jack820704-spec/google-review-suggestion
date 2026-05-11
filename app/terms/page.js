@@ -26,7 +26,7 @@ const CSS = `
 export default function TermsPage() {
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="terms" />
       <nav className="nav">
         <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
         <a className="nav-back" href="/">← Back to Home</a>
