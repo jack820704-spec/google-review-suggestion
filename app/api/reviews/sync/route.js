@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase-server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function generateReplies(review, profile) {
   const ctx = `${profile.restaurant_name}, a ${profile.restaurant_type} in ${profile.city}, ${profile.country}`;
@@ -13,13 +13,15 @@ async function generateReplies(review, profile) {
   };
   const entries = await Promise.all(
     Object.entries(styles).map(async ([key, styleNote]) => {
-      const r = await client.messages.create({
-        model: "claude-haiku-4-5-20251001",
+      const r = await client.chat.completions.create({
+        model: "gpt-4o-mini",
         max_tokens: 250,
-        system,
-        messages: [{ role: "user", content: `Review: "${review.content}"\n\n${styleNote}` }],
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: `Review: "${review.content}"\n\n${styleNote}` },
+        ],
       });
-      return [key, r.content[0].text.trim()];
+      return [key, r.choices[0].message.content.trim()];
     })
   );
   return Object.fromEntries(entries);

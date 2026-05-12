@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { createServiceClient } from "@/lib/supabase-server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const LANG_MAP = { en: "English", zh: "Traditional Chinese", vi: "Vietnamese", fr: "French", es: "Spanish", ja: "Japanese" };
 
@@ -30,12 +30,14 @@ Write in ${outputLang}.`;
 
     const [warmReply, professionalReply, briefReply] = await Promise.all(
       Object.entries(STYLES).map(([, styleInstruction]) =>
-        client.messages.create({
-          model: "claude-haiku-4-5-20251001",
+        client.chat.completions.create({
+          model: "gpt-4o-mini",
           max_tokens: 300,
-          system: systemPrompt,
-          messages: [{ role: "user", content: `Review: "${review.content}"\n\n${styleInstruction}` }],
-        }).then((r) => r.content[0].text.trim())
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: `Review: "${review.content}"\n\n${styleInstruction}` },
+          ],
+        }).then((r) => r.choices[0].message.content.trim())
       )
     );
 
