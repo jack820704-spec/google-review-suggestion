@@ -1,9 +1,7 @@
 import { createServiceClient } from "@/lib/supabase-server";
 import OpenAI from "openai";
-import { Resend } from "resend";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 function extractUserId(toAddresses) {
   for (const addr of toAddresses) {
@@ -11,6 +9,14 @@ function extractUserId(toAddresses) {
     if (match) return match[1];
   }
   return null;
+}
+
+async function fetchFullEmail(emailId) {
+  const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, {
+    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+  });
+  if (!res.ok) return null;
+  return res.json();
 }
 
 async function parseReviewFromEmail(subject, text, html) {
@@ -68,10 +74,9 @@ export async function POST(req) {
   try {
     const payload = await req.json();
 
-    // Resend inbound format: { type, data: { from, to, subject, text, html } }
-    // or flat: { from, to, subject, text, html }
-    const email = payload.data || payload;
-    const toRaw = email.to || [];
+    // Resend email.received webhook: { type, data: { email_id, from, to, subject, ... } }
+    const meta = payload.data || payload;
+    const toRaw = meta.to || [];
     const toArray = Array.isArray(toRaw) ? toRaw : [toRaw];
 
     const userId = extractUserId(toArray);
@@ -82,10 +87,14 @@ export async function POST(req) {
     const { data: profile } = await db.from("profiles").select("*").eq("id", userId).single();
     if (!profile) return Response.json({ error: "User not found" }, { status: 404 });
 
+    // Fetch full email content from Resend API (webhook only contains metadata)
+    const emailId = meta.email_id || meta.id;
+    const full = emailId ? await fetchFullEmail(emailId) : null;
+
     const parsed = await parseReviewFromEmail(
-      email.subject || "",
-      email.text || "",
-      email.html || ""
+      full?.subject || meta.subject || "",
+      full?.text || "",
+      full?.html || ""
     );
 
     if (!parsed.is_review_email) {
