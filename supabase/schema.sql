@@ -20,20 +20,20 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   country                TEXT,
 
   -- Rating goal
-  target_rating          NUMERIC(2,1) DEFAULT 4.8,
-  target_months          INTEGER      DEFAULT 6,
+  rating_goal            NUMERIC(2,1) DEFAULT 4.8,
+  rating_goal_months     INTEGER      DEFAULT 6,
 
   -- Plan & usage
   plan                   TEXT        NOT NULL DEFAULT 'free_trial'
                            CHECK (plan IN ('free_trial','starter','growth','pro')),
-  reply_count            INTEGER     NOT NULL DEFAULT 0,
-
-  -- Onboarding flow
-  onboarding_completed   BOOLEAN     NOT NULL DEFAULT FALSE,
+  used_count             INTEGER     NOT NULL DEFAULT 0,
 
   -- Google Business connection
   google_connected       BOOLEAN     NOT NULL DEFAULT FALSE,
   google_location_name   TEXT,
+
+  -- Inbound email forwarding (derived: user-[id]@reviews.revuly.com, stored for reference)
+  inbound_email          TEXT,
 
   -- Email notification preferences
   email_notifications    BOOLEAN     NOT NULL DEFAULT TRUE,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 COMMENT ON TABLE  public.profiles IS 'One row per auth user. Extended profile data for Revuly.';
 COMMENT ON COLUMN public.profiles.plan IS 'free_trial | starter | growth | pro';
-COMMENT ON COLUMN public.profiles.reply_count IS 'AI replies consumed this billing period (reset monthly via cron)';
+COMMENT ON COLUMN public.profiles.used_count IS 'AI replies consumed this billing period (reset monthly via cron)';
 COMMENT ON COLUMN public.profiles.custom_keywords IS 'User-defined keywords for Keyword Intelligence (Growth/Pro)';
 
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.reviews (
 
   -- Review content
   reviewer_name    TEXT        NOT NULL DEFAULT 'Anonymous',
-  rating           INTEGER     NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  stars            INTEGER     NOT NULL CHECK (stars BETWEEN 1 AND 5),
   content          TEXT        NOT NULL DEFAULT '',
   source           TEXT        NOT NULL DEFAULT 'manual'
                      CHECK (source IN ('manual','google')),
@@ -151,7 +151,7 @@ COMMENT ON COLUMN public.google_connections.refresh_token IS 'Long-lived token u
 -- Reviews — most queries filter or sort by these
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id     ON public.reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_date        ON public.reviews(review_date DESC);
-CREATE INDEX IF NOT EXISTS idx_reviews_rating      ON public.reviews(rating);
+CREATE INDEX IF NOT EXISTS idx_reviews_stars       ON public.reviews(stars);
 CREATE INDEX IF NOT EXISTS idx_reviews_sentiment   ON public.reviews(sentiment);
 CREATE INDEX IF NOT EXISTS idx_reviews_replied     ON public.reviews(replied) WHERE replied = FALSE;
 CREATE INDEX IF NOT EXISTS idx_reviews_crisis      ON public.reviews(is_crisis) WHERE is_crisis = TRUE;
@@ -308,11 +308,11 @@ CREATE POLICY "google: user can delete own"
 
 
 -- ============================================================
--- OPTIONAL: Reset reply_count monthly (run via cron job)
+-- OPTIONAL: Reset used_count monthly (run via cron job)
 --   Call this from /api/cron/reset-usage with CRON_SECRET
 --   Schedule: 1st of every month at 00:00 UTC
 -- ============================================================
--- UPDATE public.profiles SET reply_count = 0;
+-- UPDATE public.profiles SET used_count = 0;
 
 
 -- ============================================================

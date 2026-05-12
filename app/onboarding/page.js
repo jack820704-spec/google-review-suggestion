@@ -87,7 +87,7 @@ export default function OnboardingPage() {
   const [user, setUser] = useState(null);
   const supabase = createClient();
 
-  const [info, setInfo] = useState({ restaurant_name: "", restaurant_type: "Fine Dining", city: "", country: "", target_rating: "4.8", target_months: "6" });
+  const [info, setInfo] = useState({ restaurant_name: "", restaurant_type: "Fine Dining", city: "", country: "", rating_goal: "4.8", rating_goal_months: "6" });
   const [googleConnected, setGoogleConnected] = useState(false);
   const [notif, setNotif] = useState({ email_notifications: true, notification_frequency: "immediately", crisis_alerts: true, weekly_report: false });
 
@@ -128,8 +128,8 @@ export default function OnboardingPage() {
         restaurant_type: info.restaurant_type,
         city: info.city,
         country: info.country,
-        rating_goal: parseFloat(info.target_rating),
-        rating_goal_months: parseInt(info.target_months),
+        rating_goal: parseFloat(info.rating_goal),
+        rating_goal_months: parseInt(info.rating_goal_months),
         crisis_alerts: notif.crisis_alerts,
         weekly_report: notif.weekly_report,
         google_connected: googleConnected,
@@ -202,15 +202,15 @@ export default function OnboardingPage() {
               <div className="goal-row">
                 <div>
                   <label style={{marginBottom:6}}>Target Rating</label>
-                  <select className="form-select" value={info.target_rating} onChange={(e) => setInfo({ ...info, target_rating: e.target.value })}>
-                    {["4.5","4.6","4.7","4.8","4.9","5.0"].map((r) => <option key={r}>{r} ★</option>)}
+                  <select className="form-select" value={info.rating_goal} onChange={(e) => setInfo({ ...info, rating_goal: e.target.value })}>
+                    {["4.5","4.6","4.7","4.8","4.9","5.0"].map((r) => <option key={r} value={r}>{r} ★</option>)}
                   </select>
                 </div>
                 <div className="goal-sep">within</div>
                 <div>
                   <label style={{marginBottom:6}}>Months</label>
-                  <select className="form-select" value={info.target_months} onChange={(e) => setInfo({ ...info, target_months: e.target.value })}>
-                    {["3","6","9","12"].map((m) => <option key={m}>{m} months</option>)}
+                  <select className="form-select" value={info.rating_goal_months} onChange={(e) => setInfo({ ...info, rating_goal_months: e.target.value })}>
+                    {["3","6","9","12"].map((m) => <option key={m} value={m}>{m} months</option>)}
                   </select>
                 </div>
               </div>

@@ -28,7 +28,7 @@ export async function GET(req) {
 
     if (!error && user) {
       // Ensure profile exists
-      const { data: profile } = await supabase.from("profiles").select("onboarding_completed").eq("id", user.id).single();
+      const { data: profile } = await supabase.from("profiles").select("restaurant_name").eq("id", user.id).single();
       if (!profile) {
         await supabase.from("profiles").insert({
           id: user.id,
@@ -36,11 +36,10 @@ export async function GET(req) {
           full_name: user.user_metadata?.full_name || "",
           plan: "free_trial",
           used_count: 0,
-          onboarding_completed: false,
         });
         return NextResponse.redirect(new URL("/onboarding", req.url));
       }
-      if (!profile.onboarding_completed) {
+      if (!profile.restaurant_name) {
         return NextResponse.redirect(new URL("/onboarding", req.url));
       }
       return NextResponse.redirect(new URL(next, req.url));

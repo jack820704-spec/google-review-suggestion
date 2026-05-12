@@ -10,9 +10,9 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'free_trial'
   CHECK (plan IN ('free_trial','starter','growth','pro'));
 
--- Usage counter (new name, keep old columns untouched)
+-- Usage counter
 ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS reply_count INTEGER NOT NULL DEFAULT 0;
+  ADD COLUMN IF NOT EXISTS used_count INTEGER NOT NULL DEFAULT 0;
 
 -- Full name
 ALTER TABLE public.profiles
@@ -27,10 +27,10 @@ ALTER TABLE public.profiles
 
 -- Rating goal
 ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS target_rating NUMERIC(2,1) DEFAULT 4.8;
+  ADD COLUMN IF NOT EXISTS rating_goal NUMERIC(2,1) DEFAULT 4.8;
 
 ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS target_months INTEGER DEFAULT 6;
+  ADD COLUMN IF NOT EXISTS rating_goal_months INTEGER DEFAULT 6;
 
 -- Notification options missing from old schema
 ALTER TABLE public.profiles
@@ -49,6 +49,10 @@ ALTER TABLE public.profiles
 
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS google_location_name TEXT;
+
+-- Inbound email forwarding address
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS inbound_email TEXT;
 
 -- Admin / account management
 ALTER TABLE public.profiles

@@ -106,7 +106,6 @@ export default function LoginPage() {
             full_name: name,
             plan: "free_trial",
             used_count: 0,
-            onboarding_completed: false,
           });
           setSuccess("Account created! Check your email to confirm, then continue.");
           setTimeout(() => { window.location.href = "/onboarding"; }, 1500);
