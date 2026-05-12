@@ -102,7 +102,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true); setSuccess("");
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("profiles").update({
+    const { error } = await supabase.from("profiles").update({
       restaurant_name: profile.restaurant_name,
       restaurant_type: profile.restaurant_type,
       city: profile.city,
@@ -114,8 +114,12 @@ export default function SettingsPage() {
       custom_keywords: profile.custom_keywords || [],
     }).eq("id", user.id);
     setSaving(false);
-    setSuccess("Settings saved successfully.");
-    setTimeout(() => setSuccess(""), 3000);
+    if (error) {
+      setSuccess("❌ " + error.message);
+    } else {
+      setSuccess("Settings saved successfully.");
+      setTimeout(() => setSuccess(""), 3000);
+    }
   };
 
   const addKw = () => {
