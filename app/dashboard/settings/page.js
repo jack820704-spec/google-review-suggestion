@@ -82,6 +82,8 @@ const CSS = `
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];
 const FREQ_OPTIONS = [{ value:"immediately",label:"Immediately" },{ value:"daily",label:"Daily Digest" },{ value:"weekly",label:"Weekly Only" }];
 
+const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "reviews.revuly.dev";
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
   const [userId, setUserId] = useState("");
@@ -97,7 +99,12 @@ export default function SettingsPage() {
       if (!user) { window.location.href = "/login"; return; }
       setUserId(user.id);
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(data || {});
+      const derived = `user-${user.id}@${INBOUND_DOMAIN}`;
+      // Persist derived inbound_email if it's missing or stale
+      if (data && data.inbound_email !== derived) {
+        await supabase.from("profiles").update({ inbound_email: derived }).eq("id", user.id);
+      }
+      setProfile({ ...(data || {}), inbound_email: derived });
       setLoading(false);
     });
   }, []);
@@ -137,7 +144,7 @@ export default function SettingsPage() {
     }
   };
 
-  const inboundEmail = userId ? `user-${userId}@reviews.revuly.com` : "";
+  const inboundEmail = userId ? `user-${userId}@${INBOUND_DOMAIN}` : "";
   const copyInbound = () => {
     navigator.clipboard.writeText(inboundEmail);
     setCopied(true);
@@ -219,19 +226,21 @@ export default function SettingsPage() {
           <div className="section-header">Auto-Import via Email Forwarding</div>
           <div className="card">
             <p style={{fontSize:13.5,color:"var(--text2)",marginBottom:14,lineHeight:1.6}}>
-              Forward Google review notification emails to your unique Revuly address below.
-              Reviews will be automatically parsed and AI reply suggestions generated instantly.
+              Forward your Google review notification emails to your unique Revuly address below.
+              Each new review is parsed automatically, three AI reply suggestions are generated, and
+              we email them straight to you.
             </p>
             <div className="inbound-email-box">
               <span className="inbound-email-addr">{inboundEmail}</span>
               <button className="btn-copy" onClick={copyInbound}>{copied ? "Copied ✓" : "Copy"}</button>
             </div>
-            <p style={{fontSize:12,fontWeight:700,letterSpacing:".3px",color:"var(--text3)",textTransform:"uppercase",marginBottom:8}}>Setup Instructions</p>
+            <p style={{fontSize:12,fontWeight:700,letterSpacing:".3px",color:"var(--text3)",textTransform:"uppercase",marginBottom:8}}>Gmail Setup (recommended)</p>
             <ol className="inbound-steps">
-              <li>Go to <strong style={{color:"var(--text1)"}}>Gmail → Settings → See all settings → Forwarding and POP/IMAP</strong></li>
-              <li>Click <strong style={{color:"var(--text1)"}}>Add a forwarding address</strong> and paste the address above</li>
-              <li>Create a filter: <em style={{color:"var(--text2)"}}>From: noreply@google.com, Subject: "New review"</em></li>
-              <li>Set the filter action to <strong style={{color:"var(--text1)"}}>Forward to</strong> this address</li>
+              <li>Open <strong style={{color:"var(--text1)"}}>Gmail → ⚙️ Settings → See all settings → Forwarding and POP/IMAP</strong></li>
+              <li>Click <strong style={{color:"var(--text1)"}}>Add a forwarding address</strong> and paste the address above, then confirm via the verification email we forward back to you</li>
+              <li>Go to the <strong style={{color:"var(--text1)"}}>Filters and Blocked Addresses</strong> tab and click <strong style={{color:"var(--text1)"}}>Create a new filter</strong></li>
+              <li>Set <em style={{color:"var(--text2)"}}>From: noreply-business-profile@google.com</em> and <em style={{color:"var(--text2)"}}>Subject contains: review</em>, then click <strong style={{color:"var(--text1)"}}>Create filter</strong></li>
+              <li>Choose <strong style={{color:"var(--text1)"}}>Forward it to:</strong> and select your Revuly address — done. New Google reviews now flow into Revuly automatically.</li>
             </ol>
           </div>
         </div>

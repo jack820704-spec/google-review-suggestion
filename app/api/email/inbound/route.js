@@ -1,14 +1,44 @@
 import { createServiceClient } from "@/lib/supabase-server";
 import OpenAI from "openai";
+import crypto from "crypto";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "reviews.revuly.dev";
+
 function extractUserId(toAddresses) {
+  const domainEscaped = INBOUND_DOMAIN.replace(/\./g, "\\.");
+  const re = new RegExp(`user-([0-9a-f-]{36})@${domainEscaped}`, "i");
   for (const addr of toAddresses) {
-    const match = String(addr).match(/user-([0-9a-f-]{36})@reviews\.revuly\.com/i);
+    const match = String(addr).match(re);
     if (match) return match[1];
   }
   return null;
+}
+
+// Verify Resend (Svix-format) webhook signature
+function verifySignature(req, rawBody) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) return true; // skip verification if not configured
+
+  const svixId = req.headers.get("svix-id");
+  const svixTimestamp = req.headers.get("svix-timestamp");
+  const svixSignature = req.headers.get("svix-signature");
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
+
+  const secretBytes = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+  const signedPayload = `${svixId}.${svixTimestamp}.${rawBody}`;
+  const expected = crypto.createHmac("sha256", secretBytes).update(signedPayload).digest("base64");
+
+  return svixSignature.split(" ").some((part) => {
+    const sig = part.split(",")[1];
+    if (!sig) return false;
+    try {
+      return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+    } catch {
+      return false;
+    }
+  });
 }
 
 async function fetchFullEmail(emailId) {
@@ -23,20 +53,21 @@ async function parseReviewFromEmail(subject, text, html) {
   const body = text || (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   const r = await openai.chat.completions.create({
     model: "gpt-4o-mini",
-    max_tokens: 300,
+    max_tokens: 400,
     response_format: { type: "json_object" },
     messages: [
       {
         role: "system",
-        content: `Extract Google Business review data from this email. Return JSON:
+        content: `Extract Google Business review data from this forwarded email. Return JSON ONLY:
 {
   "reviewer_name": string (name of reviewer, "Anonymous" if unknown),
-  "stars": integer 1-5 (rating from review, 3 if unclear),
+  "stars": integer 1-5 (star rating; 3 if unclear),
   "content": string (the actual review text, "" if none),
-  "is_review_email": boolean (true if this is a review notification)
-}`,
+  "is_review_email": boolean (true ONLY if this is a Google Business review notification with a star rating)
+}
+Look for cues such as "New review", "left a review", a star rating, or sender noreply@google.com / business notifications.`,
       },
-      { role: "user", content: `Subject: ${subject}\n\n${body.slice(0, 2500)}` },
+      { role: "user", content: `Subject: ${subject}\n\n${body.slice(0, 3000)}` },
     ],
   });
   try {
@@ -47,12 +78,12 @@ async function parseReviewFromEmail(subject, text, html) {
 }
 
 async function generateReplies(reviewContent, profile) {
-  const ctx = `${profile.restaurant_name}, a ${profile.restaurant_type || "restaurant"} in ${profile.city || ""}, ${profile.country || ""}`;
-  const system = `You are the owner of ${ctx}. Write a reply as if you personally read this review tonight after closing. Sound genuine, specific, 60-100 words.`;
+  const ctx = `${profile.restaurant_name || "our restaurant"}, a ${profile.restaurant_type || "restaurant"} in ${profile.city || ""}${profile.country ? ", " + profile.country : ""}`;
+  const system = `You are the owner of ${ctx}. Write a reply as if you personally read this review tonight after closing. Sound genuine and specific. 60-100 words.`;
   const styles = {
-    warm: "Warm & Personal style — casual, genuine, like the owner speaking directly.",
+    warm: "Warm & Personal style — casual, genuine, like the owner speaking directly to the guest.",
     professional: "Professional & Gracious style — polished, elegant, refined.",
-    brief: "Brief & Direct style — 2-3 sentences only.",
+    brief: "Brief & Direct style — only 2-3 sentences.",
   };
   const entries = await Promise.all(
     Object.entries(styles).map(async ([key, styleNote]) => {
@@ -72,9 +103,15 @@ async function generateReplies(reviewContent, profile) {
 
 export async function POST(req) {
   try {
-    const payload = await req.json();
+    const rawBody = await req.text();
 
-    // Resend email.received webhook: { type, data: { email_id, from, to, subject, ... } }
+    if (!verifySignature(req, rawBody)) {
+      return Response.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    const payload = JSON.parse(rawBody);
+
+    // Resend email.received webhook payload
     const meta = payload.data || payload;
     const toRaw = meta.to || [];
     const toArray = Array.isArray(toRaw) ? toRaw : [toRaw];
@@ -87,15 +124,15 @@ export async function POST(req) {
     const { data: profile } = await db.from("profiles").select("*").eq("id", userId).single();
     if (!profile) return Response.json({ error: "User not found" }, { status: 404 });
 
-    // Fetch full email content from Resend API (webhook only contains metadata)
+    // Resend's webhook only contains metadata, fetch the full email body
     const emailId = meta.email_id || meta.id;
     const full = emailId ? await fetchFullEmail(emailId) : null;
 
-    const parsed = await parseReviewFromEmail(
-      full?.subject || meta.subject || "",
-      full?.text || "",
-      full?.html || ""
-    );
+    const subject = full?.subject || meta.subject || "";
+    const text = full?.text || meta.text || "";
+    const html = full?.html || meta.html || "";
+
+    const parsed = await parseReviewFromEmail(subject, text, html);
 
     if (!parsed.is_review_email) {
       return Response.json({ skipped: true, reason: "Not a review notification email" });
@@ -130,7 +167,7 @@ export async function POST(req) {
       replies,
     });
 
-    // Crisis check: 3+ negative in last 24h
+    // Crisis check: 3+ low-rating reviews in last 24h
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { count } = await db
       .from("reviews")
@@ -144,7 +181,7 @@ export async function POST(req) {
         .eq("user_id", userId).lte("stars", 2).gte("review_date", since);
     }
 
-    // Notify user
+    // Notify the user
     if (profile.email_notifications !== false) {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/notify`, {
         method: "POST",
