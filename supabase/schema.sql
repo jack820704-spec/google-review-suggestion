@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   google_connected       BOOLEAN     NOT NULL DEFAULT FALSE,
   google_location_name   TEXT,
 
-  -- Inbound email forwarding (derived: user-[id]@reviews.revuly.dev, stored for reference)
+  -- Inbound email forwarding (derived: user-[id]@mail.revuly.dev, stored for reference)
   inbound_email          TEXT,
 
   -- Email notification preferences
