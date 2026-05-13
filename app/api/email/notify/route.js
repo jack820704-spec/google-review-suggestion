@@ -94,7 +94,7 @@ export async function POST(req) {
       : `⭐ New ${review.stars}★ review at ${restaurantName}`;
 
     const { data, error } = await resend.emails.send({
-      from: "Revuly <notifications@revuly.com>",
+      from: "Revuly <notifications@revuly.dev>",
       to,
       subject,
       html: buildEmail({ restaurantName, review, replies, isCrisis }),

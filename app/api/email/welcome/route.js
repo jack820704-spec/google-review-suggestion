@@ -52,7 +52,7 @@ export async function POST(req) {
 </body></html>`;
 
     const { error } = await resend.emails.send({
-      from: "Revuly <welcome@revuly.com>",
+      from: "Revuly <welcome@revuly.dev>",
       to: email,
       subject: "Welcome to Revuly! You're all set 🎉",
       html,

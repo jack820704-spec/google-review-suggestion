@@ -66,7 +66,7 @@ export async function POST(req) {
 
     try {
       await resend.emails.send({
-        from: "Revuly Reports <reports@revuly.com>",
+        from: "Revuly Reports <reports@revuly.dev>",
         to: profile.email,
         subject: `📊 Weekly Report — ${profile.restaurant_name} (${thisWeekRevs?.length || 0} reviews)`,
         html,
