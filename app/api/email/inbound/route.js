@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "mail.revuly.dev";
+const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "revuly.dev";
 
 // Tag every log line so it's easy to grep in Vercel / local logs
 const log = (...args) => console.log("[inbound]", ...args);
