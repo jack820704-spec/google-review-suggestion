@@ -1,19 +1,31 @@
-// /api/places/sync — cron-triggered Google Places auto sync
-// Schedule: every 6 hours (see vercel.json crons)
+// /api/places/sync — daily cron entrypoint with tiered logic per plan.
+//
 // Auth: Authorization: Bearer ${CRON_SECRET}
-// Flow per Growth/Pro user with a place_id:
-//   1. GET place details (incl. up to 5 reviews) via Places API New
-//   2. For each review: skip if google_review_id already exists
-//   3. New review → generate 3 AI reply suggestions via OpenAI
-//   4. Insert review row + reply_suggestions row
-//   5. Send notify email via Resend (respects email_notifications + frequency)
+//
+// Per-plan behavior:
+//   Free Trial   — Skip entirely once place_first_sync_done = true.
+//                  (Initial 5-review digest happens at /api/places/connect time.)
+//   Starter      — If not first-synced yet, do the 5-review digest.
+//                  Otherwise, process at most ONE new review per day (the most recent unseen).
+//                  Single notify email per review.
+//   Growth       — If not first-synced yet, do the 5-review digest.
+//                  Otherwise, process ALL new reviews. Single notify email per review.
+//                  Crisis alerts when stars <= 2.
+//   Pro          — Everything Growth does, plus:
+//                    * Scan for unanswered reviews older than 24h.
+//                    * Send a reminder email (max once every 7 days per review).
 
-import OpenAI from "openai";
-import { Resend } from "resend";
 import { createServiceClient } from "@/lib/supabase-server";
+import {
+  fetchPlaceDetails,
+  getOpenAI,
+  getResend,
+  ingestReview,
+} from "@/lib/places-sync";
+import { sendDigestEmail } from "@/app/api/email/digest/route";
 
-const PLACES_DETAILS_URL = "https://places.googleapis.com/v1/places";
-const LANG_MAP = { en: "English", zh: "Traditional Chinese", vi: "Vietnamese", fr: "French", es: "Spanish", ja: "Japanese" };
+const REMINDER_COOLDOWN_DAYS = 7;
+const UNREPLIED_AGE_HOURS = 24;
 
 function unauthorized() {
   return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,85 +35,11 @@ function log(...args) {
   console.log("[places/sync]", ...args);
 }
 
-function googleRatingToStars(g) {
-  // Places API v1 returns rating as a number 1–5 OR a string enum like "FIVE", "FOUR" depending on field.
-  // The review-level rating is numeric 1-5 — but defensive parse anyway.
-  if (typeof g === "number") return Math.max(1, Math.min(5, Math.round(g)));
-  if (typeof g === "string") {
-    const map = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 };
-    if (map[g]) return map[g];
-    const n = parseInt(g, 10);
-    if (!isNaN(n)) return Math.max(1, Math.min(5, n));
-  }
-  return 3;
-}
-
-function sentimentFromStars(stars) {
-  if (stars >= 4) return "positive";
-  if (stars <= 2) return "negative";
-  return "neutral";
-}
-
-async function fetchPlaceDetails(placeId, apiKey) {
-  const url = `${PLACES_DETAILS_URL}/${encodeURIComponent(placeId)}`;
-  const res = await fetch(url, {
-    headers: {
-      "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": "id,displayName,rating,userRatingCount,reviews",
-    },
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error?.message || `Places details ${res.status}`);
-  }
-  return data;
-}
-
-async function generateReplies({ openai, restaurantCtx, content }) {
-  const systemPrompt = `You are the owner of ${restaurantCtx}.
-Write a reply as if you personally read this review tonight after closing.
-Sound genuine, warm, and specific to what the reviewer mentioned.
-Never use corporate PR language. Use first person naturally.
-For positive reviews: thank them genuinely and reference a specific detail they mentioned.
-For negative reviews: apologize sincerely without excuses, acknowledge the specific issue, promise improvement, invite direct contact.
-Keep each reply to 60-100 words.
-Write in ${LANG_MAP.en}.`;
-
-  const STYLES = {
-    warm: "Write in a Warm & Personal style — like the owner personally read this tonight. Casual, genuine, specific to their experience.",
-    professional: "Write in a Professional & Gracious style — polished, elegant, refined brand voice.",
-    brief: "Write in a Brief & Direct style — 2-3 short sentences only. Punchy and impactful.",
-  };
-
-  const [warm, professional, brief] = await Promise.all(
-    Object.values(STYLES).map((styleInstruction) =>
-      openai.chat.completions
-        .create({
-          model: "gpt-4o-mini",
-          max_tokens: 300,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: `Review: "${content}"\n\n${styleInstruction}` },
-          ],
-        })
-        .then((r) => r.choices[0].message.content.trim())
-    )
-  );
-
-  return { warm, professional, brief };
-}
-
-export async function POST(req) {
-  return runSync(req);
-}
-
-// Allow GET as well so Vercel Cron (which uses GET) can trigger it.
-export async function GET(req) {
-  return runSync(req);
-}
+export async function POST(req) { return runSync(req); }
+export async function GET(req) { return runSync(req); }
 
 async function runSync(req) {
-  // ── Auth ────────────────────────────────────────────────
+  // ── Auth ──────────────────────────────────────────────
   const auth = req.headers.get("authorization") || "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
   const cronSecret = process.env.CRON_SECRET;
@@ -112,14 +50,15 @@ async function runSync(req) {
   if (!placesKey) return Response.json({ error: "GOOGLE_PLACES_API_KEY not configured" }, { status: 500 });
 
   const supa = createServiceClient();
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const openai = getOpenAI();
+  const resend = getResend();
 
-  // ── Fetch eligible users ────────────────────────────────
+  // ── Eligible users (any plan, has place_id) ──────────
   const { data: profiles, error: profilesErr } = await supa
     .from("profiles")
-    .select("id, email, plan, restaurant_name, restaurant_type, city, country, place_id, email_notifications, notification_frequency, crisis_alerts")
-    .in("plan", ["growth", "pro"])
+    .select(
+      "id, email, plan, restaurant_name, restaurant_type, city, country, place_id, place_name, email_notifications, notification_frequency, crisis_alerts, place_first_sync_done"
+    )
     .not("place_id", "is", null);
 
   if (profilesErr) {
@@ -127,17 +66,30 @@ async function runSync(req) {
     return Response.json({ error: profilesErr.message }, { status: 500 });
   }
 
-  log(`processing ${profiles?.length || 0} users`);
-
-  const summary = { users: profiles?.length || 0, new_reviews: 0, emails_sent: 0, errors: [] };
+  const summary = {
+    users_seen: profiles?.length || 0,
+    initial_digests: 0,
+    new_reviews: 0,
+    notify_emails: 0,
+    reminder_emails: 0,
+    skipped_free_trial: 0,
+    errors: [],
+  };
 
   for (const profile of profiles || []) {
+    const plan = profile.plan || "free_trial";
+
+    // ── Free Trial: only run if first sync hasn't happened yet ──
+    if (plan === "free_trial" && profile.place_first_sync_done) {
+      summary.skipped_free_trial++;
+      continue;
+    }
+
     try {
       const details = await fetchPlaceDetails(profile.place_id, placesKey);
-      const reviews = details.reviews || [];
-      log(`user ${profile.id} (${profile.place_id}): ${reviews.length} reviews fetched`);
+      const reviewsFromGoogle = details.reviews || [];
 
-      // Refresh cached rating/count
+      // Refresh cached rating snapshot
       if (typeof details.rating === "number" || typeof details.userRatingCount === "number") {
         await supa
           .from("profiles")
@@ -148,105 +100,168 @@ async function runSync(req) {
           .eq("id", profile.id);
       }
 
-      const restaurantCtx = `${profile.restaurant_name || "our restaurant"}, a ${profile.restaurant_type || "restaurant"} in ${profile.city || "our city"}, ${profile.country || ""}`;
+      // ──────────────────────────────────────────────────────
+      // BRANCH A — Initial sync (any plan, first time)
+      // Process up to 5 reviews and send ONE digest email.
+      // ──────────────────────────────────────────────────────
+      if (!profile.place_first_sync_done) {
+        const digestItems = [];
+        for (const gr of reviewsFromGoogle.slice(0, 5)) {
+          try {
+            const result = await ingestReview({ supa, openai, profile, googleReview: gr });
+            if (result) {
+              digestItems.push({
+                review: {
+                  reviewer_name: result.review.reviewer_name,
+                  stars: result.review.stars,
+                  content: result.review.content,
+                },
+                replies: result.replies,
+              });
+            }
+          } catch (err) {
+            log("initial ingest failed:", err.message);
+            summary.errors.push({ user: profile.id, error: err.message });
+          }
+        }
 
-      for (const review of reviews) {
-        const googleReviewId = review.name; // e.g. "places/<placeId>/reviews/<reviewId>" — globally unique
-        if (!googleReviewId) continue;
+        summary.new_reviews += digestItems.length;
 
-        // Dedup
+        if (digestItems.length > 0 && profile.email && profile.email_notifications !== false) {
+          try {
+            await sendDigestEmail({
+              to: profile.email,
+              restaurantName: profile.restaurant_name || profile.place_name || "your restaurant",
+              items: digestItems,
+              isInitialSync: true,
+            });
+            summary.initial_digests++;
+          } catch (mailErr) {
+            log("initial digest email failed:", mailErr.message);
+            summary.errors.push({ user: profile.id, error: mailErr.message });
+          }
+        }
+
+        await supa.from("profiles").update({ place_first_sync_done: true }).eq("id", profile.id);
+        log(`user ${profile.id}: initial digest sent (${digestItems.length} reviews)`);
+        continue;
+      }
+
+      // Free Trial reaches here only if first sync was already done — handled above.
+      // For Starter/Growth/Pro past initial:
+
+      // Pre-filter to new reviews and sort by publishTime DESC
+      const candidates = [];
+      for (const gr of reviewsFromGoogle) {
+        if (!gr.name) continue;
         const { data: existing } = await supa
           .from("reviews")
           .select("id")
-          .eq("google_review_id", googleReviewId)
+          .eq("google_review_id", gr.name)
           .maybeSingle();
+        if (!existing) candidates.push(gr);
+      }
+      candidates.sort((a, b) => new Date(b.publishTime || 0) - new Date(a.publishTime || 0));
 
-        if (existing) continue;
+      // ──────────────────────────────────────────────────────
+      // BRANCH B — Starter: at most 1 new review per cron run
+      // ──────────────────────────────────────────────────────
+      let toProcess = candidates;
+      if (plan === "starter") {
+        toProcess = candidates.slice(0, 1);
+      }
 
-        const stars = googleRatingToStars(review.rating);
-        const content =
-          review.text?.text ||
-          review.originalText?.text ||
-          "";
-        if (!content.trim()) continue;
-
-        const reviewerName = review.authorAttribution?.displayName || "Anonymous";
-        const reviewDate = review.publishTime || new Date().toISOString();
-
-        // Generate AI replies
-        let replies = null;
+      // ──────────────────────────────────────────────────────
+      // BRANCH C — Growth & Pro: process all new reviews
+      // ──────────────────────────────────────────────────────
+      for (const gr of toProcess) {
         try {
-          replies = await generateReplies({ openai, restaurantCtx, content });
-        } catch (genErr) {
-          log("generateReplies failed:", genErr.message);
+          const result = await ingestReview({ supa, openai, profile, googleReview: gr });
+          if (!result) continue;
+          summary.new_reviews++;
+
+          // Per-review notify email (matches existing /api/email/notify shape)
+          const isCrisis = result.isCrisis;
+          const wantsImmediate = profile.email_notifications && profile.notification_frequency === "immediately";
+          const crisisOverride = isCrisis && profile.crisis_alerts;
+          if (profile.email && result.replies && (wantsImmediate || crisisOverride)) {
+            try {
+              await resend.emails.send({
+                from: "Revuly <notifications@revuly.dev>",
+                to: profile.email,
+                subject: isCrisis
+                  ? `🚨 Crisis Alert — New ${result.review.stars}★ review at ${profile.restaurant_name || "your restaurant"}`
+                  : `⭐ New ${result.review.stars}★ review at ${profile.restaurant_name || "your restaurant"}`,
+                html: buildNotifyHtml({
+                  restaurantName: profile.restaurant_name || profile.place_name || "your restaurant",
+                  review: result.review,
+                  replies: result.replies,
+                  isCrisis,
+                }),
+              });
+              summary.notify_emails++;
+            } catch (mailErr) {
+              log("notify email failed:", mailErr.message);
+            }
+          }
+        } catch (err) {
+          log("ingest failed:", err.message);
+          summary.errors.push({ user: profile.id, error: err.message });
         }
+      }
 
-        const sentiment = sentimentFromStars(stars);
-        const isCrisis = stars <= 2;
+      // ──────────────────────────────────────────────────────
+      // BRANCH D — Pro extra: unanswered-review reminders
+      // ──────────────────────────────────────────────────────
+      if (plan === "pro") {
+        const cutoff = new Date(Date.now() - UNREPLIED_AGE_HOURS * 3600 * 1000).toISOString();
+        const cooldownAgo = new Date(Date.now() - REMINDER_COOLDOWN_DAYS * 86400 * 1000).toISOString();
 
-        // Insert review
-        const { data: insertedReview, error: insertErr } = await supa
+        const { data: stale } = await supa
           .from("reviews")
-          .insert({
-            user_id: profile.id,
-            reviewer_name: reviewerName,
-            stars,
-            content,
-            source: "google",
-            sentiment,
-            is_crisis: isCrisis,
-            replied: false,
-            google_review_id: googleReviewId,
-            review_date: reviewDate,
-          })
-          .select()
-          .single();
+          .select("id, reviewer_name, stars, content, review_date, reminder_sent_at")
+          .eq("user_id", profile.id)
+          .eq("replied", false)
+          .lte("review_date", cutoff)
+          .order("review_date", { ascending: true })
+          .limit(10);
 
-        if (insertErr) {
-          // Race condition or unique violation — skip silently
-          if (insertErr.code === "23505") continue;
-          log("insert review failed:", insertErr.message);
-          summary.errors.push({ user: profile.id, error: insertErr.message });
-          continue;
-        }
+        const dueReminders = (stale || []).filter(
+          (r) => !r.reminder_sent_at || r.reminder_sent_at < cooldownAgo
+        );
 
-        summary.new_reviews++;
+        if (dueReminders.length > 0 && profile.email) {
+          // Hydrate replies if we have them on file
+          const reviewIds = dueReminders.map((r) => r.id);
+          const { data: suggestions } = await supa
+            .from("reply_suggestions")
+            .select("review_id, replies")
+            .in("review_id", reviewIds);
+          const repliesByReview = {};
+          (suggestions || []).forEach((s) => { repliesByReview[s.review_id] = s.replies; });
 
-        // Store reply suggestions
-        if (replies) {
-          await supa.from("reply_suggestions").insert({
-            review_id: insertedReview.id,
-            user_id: profile.id,
-            replies,
-            lang: "en",
-          });
-        }
+          const items = dueReminders.map((r) => ({
+            review: { reviewer_name: r.reviewer_name, stars: r.stars, content: r.content },
+            replies: repliesByReview[r.id] || {},
+          }));
 
-        // Notify email — skip if user opted out, or non-immediate frequency, or no email
-        const wantsImmediate = profile.email_notifications && profile.notification_frequency === "immediately";
-        const crisisOverride = isCrisis && profile.crisis_alerts;
-        if (profile.email && (wantsImmediate || crisisOverride) && replies) {
           try {
-            const { error: emailErr } = await resend.emails.send({
+            await resend.emails.send({
               from: "Revuly <notifications@revuly.dev>",
               to: profile.email,
-              subject: isCrisis
-                ? `🚨 Crisis Alert — New ${stars}★ review at ${profile.restaurant_name || "your restaurant"}`
-                : `⭐ New ${stars}★ review at ${profile.restaurant_name || "your restaurant"}`,
-              html: buildEmailHtml({
-                restaurantName: profile.restaurant_name || "your restaurant",
-                review: { reviewer_name: reviewerName, stars, content, review_date: reviewDate },
-                replies,
-                isCrisis,
+              subject: `⏰ ${dueReminders.length} unanswered review${dueReminders.length === 1 ? "" : "s"} — ${profile.restaurant_name || "your restaurant"}`,
+              html: buildReminderHtml({
+                restaurantName: profile.restaurant_name || profile.place_name || "your restaurant",
+                items,
               }),
             });
-            if (emailErr) {
-              log("resend error:", emailErr);
-            } else {
-              summary.emails_sent++;
-            }
+            summary.reminder_emails++;
+            await supa
+              .from("reviews")
+              .update({ reminder_sent_at: new Date().toISOString() })
+              .in("id", reviewIds);
           } catch (mailErr) {
-            log("email send threw:", mailErr.message);
+            log("reminder email failed:", mailErr.message);
           }
         }
       }
@@ -260,19 +275,25 @@ async function runSync(req) {
   return Response.json({ ok: true, ...summary });
 }
 
+// ──────────────────────────────────────────────────────────
+// Email templates — kept local so this route is self-contained
+// for the per-review notify and Pro reminder cases.
+// (Multi-review digest reuses /api/email/digest's sendDigestEmail.)
+// ──────────────────────────────────────────────────────────
+
 function starsHtml(n) {
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
 
-function buildEmailHtml({ restaurantName, review, replies, isCrisis }) {
+function buildNotifyHtml({ restaurantName, review, replies, isCrisis }) {
   const styleNames = { warm: "Warm & Personal", professional: "Professional & Gracious", brief: "Brief & Direct" };
   const repliesHtml = Object.entries(replies || {})
     .map(
       ([style, text]) => `
-      <div style="margin-bottom:20px;padding:16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c9a84c;margin-bottom:10px">${styleNames[style] || style}</div>
-        <div style="font-size:14px;line-height:1.7;color:#a09888">${text}</div>
-      </div>`
+        <div style="margin-bottom:20px;padding:16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c9a84c;margin-bottom:10px">${styleNames[style] || style}</div>
+          <div style="font-size:14px;line-height:1.7;color:#a09888">${text}</div>
+        </div>`
     )
     .join("");
 
@@ -290,7 +311,7 @@ function buildEmailHtml({ restaurantName, review, replies, isCrisis }) {
     </div>
     ${crisisBanner}
     <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f0ede6;margin:0 0 6px">${isCrisis ? "🚨" : "⭐"} New Google Review — ${restaurantName}</h1>
-    <p style="font-size:13px;color:#5a5550;margin:0 0 28px">Synced automatically from Google Places · ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
+    <p style="font-size:13px;color:#5a5550;margin:0 0 28px">${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</p>
     <div style="background:#1c1c22;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:28px">
       <div style="font-size:14px;font-weight:700;color:#f0ede6;margin-bottom:4px">${review.reviewer_name}</div>
       <div style="font-size:13px;color:#c9a84c;margin-bottom:12px">${starsHtml(review.stars)}</div>
@@ -307,6 +328,55 @@ function buildEmailHtml({ restaurantName, review, replies, isCrisis }) {
     </div>
     <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;text-align:center">
       <p style="font-size:12px;color:#5a5550;margin:0">Revuly · AI-Powered Reputation Management · <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings" style="color:#5a5550;text-decoration:none">Manage notifications</a></p>
+    </div>
+  </div>
+</body></html>`;
+}
+
+function buildReminderHtml({ restaurantName, items }) {
+  const styleNames = { warm: "Warm & Personal", professional: "Professional & Gracious", brief: "Brief & Direct" };
+
+  const blocks = items.map(({ review, replies }, idx) => {
+    const repliesHtml = Object.entries(replies || {})
+      .map(
+        ([style, text]) => `
+          <div style="margin-bottom:12px;padding:12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c9a84c;margin-bottom:6px">${styleNames[style] || style}</div>
+            <div style="font-size:13px;line-height:1.65;color:#a09888">${text}</div>
+          </div>`
+      )
+      .join("");
+
+    return `
+      <div style="margin-bottom:24px;padding:20px;background:#1c1c22;border:1px solid rgba(255,255,255,0.08);border-radius:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:22px;height:22px;border-radius:50%;background:rgba(224,96,96,.18);text-align:center;line-height:22px;color:#fca5a5;font-weight:700;font-size:12px">${idx + 1}</div>
+          <div style="font-size:13.5px;font-weight:700;color:#f0ede6">${review.reviewer_name || "Anonymous"}</div>
+          <div style="font-size:12.5px;color:#c9a84c;margin-left:auto">${starsHtml(review.stars)}</div>
+        </div>
+        <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border-left:3px solid rgba(224,96,96,0.4);border-radius:0 6px 6px 0;margin-bottom:14px">
+          <p style="font-size:13.5px;line-height:1.7;color:#a09888;margin:0;font-style:italic">"${review.content}"</p>
+        </div>
+        ${Object.keys(replies || {}).length > 0 ? `<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#5a5550;margin-bottom:8px">💬 AI Suggested Replies (Ready)</div>${repliesHtml}` : ""}
+      </div>`;
+  }).join("");
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#0a0a0b;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif">
+  <div style="max-width:640px;margin:0 auto;padding:32px 24px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#8a6e2f,#c9a84c);border-radius:8px;text-align:center;line-height:32px;font-size:16px">✦</div>
+      <span style="font-size:20px;font-weight:700;color:#e8c96a;font-family:Georgia,serif">Revuly</span>
+    </div>
+    <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f0ede6;margin:0 0 6px">⏰ ${items.length} review${items.length === 1 ? "" : "s"} still waiting for a reply</h1>
+    <p style="font-size:13.5px;color:#a09888;margin:0 0 24px;line-height:1.65">These reviews at <strong style="color:#e8c96a">${restaurantName}</strong> are 24+ hours old and haven't been replied to yet. AI replies are already drafted — just pick one and post it on Google.</p>
+    ${blocks}
+    <div style="text-align:center;margin:28px 0">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#e8c96a,#c9a84c);color:#000;font-weight:700;font-size:14px;border-radius:10px;text-decoration:none">Open Dashboard →</a>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:20px;text-align:center">
+      <p style="font-size:12px;color:#5a5550;margin:0">Pro plan reminder · <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings" style="color:#5a5550;text-decoration:none">Manage notifications</a></p>
     </div>
   </div>
 </body></html>`;

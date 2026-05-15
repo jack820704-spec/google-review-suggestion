@@ -216,36 +216,59 @@ export default function SettingsPage() {
   const handlePlacesSelect = async (result) => {
     setPlacesSaving(true);
     setPlacesError("");
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("profiles").update({
-      place_id: result.place_id,
-      place_name: result.name,
-      place_address: result.address,
-      place_rating: result.rating,
-      place_user_rating_count: result.user_rating_count,
-    }).eq("id", user.id);
-    setPlacesSaving(false);
-    if (error) { setPlacesError(error.message); return; }
-    setProfile((p) => ({
-      ...p,
-      place_id: result.place_id,
-      place_name: result.name,
-      place_address: result.address,
-      place_rating: result.rating,
-      place_user_rating_count: result.user_rating_count,
-    }));
-    setPlacesResults(null);
-    setPlacesQuery("");
+    try {
+      // Calls the server route which saves place_id AND pulls the initial 5-review digest.
+      const res = await fetch("/api/places/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          place_id: result.place_id,
+          place_name: result.name,
+          place_address: result.address,
+          place_rating: result.rating,
+          place_user_rating_count: result.user_rating_count,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setPlacesError(data.error || "Failed to connect");
+        return;
+      }
+      setProfile((p) => ({
+        ...p,
+        place_id: result.place_id,
+        place_name: result.name,
+        place_address: result.address,
+        place_rating: result.rating,
+        place_user_rating_count: result.user_rating_count,
+        place_first_sync_done: true,
+      }));
+      setPlacesResults(null);
+      setPlacesQuery("");
+      if (data.new_reviews > 0) {
+        setSuccess(`✓ Connected. We've synced ${data.new_reviews} review${data.new_reviews === 1 ? "" : "s"}${data.email_sent ? " and emailed AI replies to you" : ""}.`);
+        setTimeout(() => setSuccess(""), 5000);
+      } else if (data.alreadySynced) {
+        setSuccess("✓ Connected.");
+        setTimeout(() => setSuccess(""), 3000);
+      }
+    } catch (err) {
+      setPlacesError(err.message);
+    } finally {
+      setPlacesSaving(false);
+    }
   };
 
   const handlePlacesDisconnect = async () => {
     setPlacesSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
+    // Reset place_first_sync_done so a fresh initial digest fires if they reconnect later.
     await supabase.from("profiles").update({
       place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null,
+      place_first_sync_done: false,
     }).eq("id", user.id);
     setPlacesSaving(false);
-    setProfile((p) => ({ ...p, place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null }));
+    setProfile((p) => ({ ...p, place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null, place_first_sync_done: false }));
   };
 
   const handleDeleteAccount = async () => {
