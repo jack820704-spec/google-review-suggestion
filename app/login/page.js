@@ -120,9 +120,13 @@ export default function LoginPage() {
 
   const handleGoogle = async () => {
     setError("");
+    // Use the configured app URL so the callback always lands on the canonical
+    // host (https://revuly.dev) — avoids www vs apex cookie/redirect mismatches.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ||
+      (typeof window !== "undefined" ? window.location.origin : "");
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      options: { redirectTo: `${appUrl}/api/auth/google/callback` },
     });
     if (err) setError(err.message);
   };

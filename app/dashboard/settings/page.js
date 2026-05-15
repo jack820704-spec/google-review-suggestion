@@ -368,7 +368,7 @@ export default function SettingsPage() {
                 {profile.google_connected ? "Connected" : "Not Connected"}
                 {profile.google_location_name && <span style={{color:"var(--text2)",fontSize:13}}> — {profile.google_location_name}</span>}
               </div>
-              <button className="btn-connect" onClick={() => { const params = new URLSearchParams({ client_id: "770454655106-5p8d5f78dobbsmjfq329reqmn19pc5rr.apps.googleusercontent.com", redirect_uri: `${window.location.origin}/api/auth/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/business.manage email profile", access_type: "offline", prompt: "consent" }); window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`; }}>
+              <button className="btn-connect" onClick={() => { const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin; const params = new URLSearchParams({ client_id: "770454655106-5p8d5f78dobbsmjfq329reqmn19pc5rr.apps.googleusercontent.com", redirect_uri: `${appUrl}/api/auth/google/callback`, response_type: "code", scope: "https://www.googleapis.com/auth/business.manage email profile", access_type: "offline", prompt: "consent", state: "business_link" }); window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`; }}>
                 {profile.google_connected ? "Reconnect" : "Connect Google Business"}
               </button>
             </div>
