@@ -77,6 +77,30 @@ const CSS = `
   .btn-copy:hover{background:rgba(201,168,76,.1)}
   .inbound-steps{margin:0;padding:0 0 0 18px;font-size:13px;color:var(--text2);line-height:2}
   .inbound-steps li{margin:0}
+
+  /* PLACES SEARCH */
+  .places-search-row{display:flex;gap:10px;margin-bottom:12px}
+  .places-search-input{flex:1;padding:10px 13px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);font-size:14px;font-family:inherit;color:var(--text1);outline:none;transition:border-color .2s}
+  .places-search-input:focus{border-color:var(--gold-border)}
+  .places-search-input::placeholder{color:var(--text3)}
+  .btn-places-search{padding:10px 18px;border-radius:var(--r);font-size:13.5px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;white-space:nowrap}
+  .btn-places-search:disabled{opacity:.6;cursor:not-allowed}
+  .places-results{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .places-result{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .18s}
+  .places-result:hover{border-color:var(--gold-border);background:rgba(201,168,76,.04)}
+  .places-result-name{font-size:14px;font-weight:700;color:var(--text1);margin-bottom:3px}
+  .places-result-meta{font-size:12px;color:var(--gold);margin-bottom:4px}
+  .places-result-addr{font-size:12.5px;color:var(--text2);line-height:1.5}
+  .places-connected{background:rgba(93,186,122,.06);border:1px solid rgba(93,186,122,.25);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .places-connected-icon{width:34px;height:34px;border-radius:50%;background:rgba(93,186,122,.18);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--pos);flex-shrink:0}
+  .places-connected-info{flex:1;min-width:0}
+  .places-connected-name{font-size:14px;font-weight:700;color:var(--text1)}
+  .places-connected-meta{font-size:12.5px;color:var(--gold);margin-top:2px}
+  .places-connected-addr{font-size:12px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .btn-disconnect-places{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+  .btn-disconnect-places:hover{border-color:rgba(224,96,96,.35);color:var(--neg)}
+  .places-err{padding:8px 12px;background:rgba(224,96,96,.1);border:1px solid rgba(224,96,96,.25);border-radius:8px;font-size:12.5px;color:var(--neg);margin-top:8px}
+  .places-locked{font-size:12.5px;color:var(--text3);font-style:italic}
 `;
 
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];
@@ -92,6 +116,11 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState("");
   const [copied, setCopied] = useState(false);
   const [newKw, setNewKw] = useState("");
+  const [placesQuery, setPlacesQuery] = useState("");
+  const [placesResults, setPlacesResults] = useState(null); // null = not searched, [] = no matches
+  const [placesSearching, setPlacesSearching] = useState(false);
+  const [placesSaving, setPlacesSaving] = useState(false);
+  const [placesError, setPlacesError] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -159,6 +188,66 @@ export default function SettingsPage() {
 
   const removeKw = (kw) => update("custom_keywords", (profile.custom_keywords || []).filter((k) => k !== kw));
 
+  const canAutoSync = canUseFeature(planKey, "auto_sync");
+
+  const handlePlacesSearch = async () => {
+    setPlacesError("");
+    setPlacesResults(null);
+    const name = (placesQuery || profile.restaurant_name || "").trim();
+    if (!name) { setPlacesError("Enter a restaurant name to search"); return; }
+    setPlacesSearching(true);
+    try {
+      const res = await fetch("/api/places/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, city: profile.city, country: profile.country }),
+      });
+      const data = await res.json();
+      if (data.error) { setPlacesError(data.error); setPlacesResults([]); return; }
+      setPlacesResults(data.results || []);
+    } catch (err) {
+      setPlacesError(err.message);
+      setPlacesResults([]);
+    } finally {
+      setPlacesSearching(false);
+    }
+  };
+
+  const handlePlacesSelect = async (result) => {
+    setPlacesSaving(true);
+    setPlacesError("");
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase.from("profiles").update({
+      place_id: result.place_id,
+      place_name: result.name,
+      place_address: result.address,
+      place_rating: result.rating,
+      place_user_rating_count: result.user_rating_count,
+    }).eq("id", user.id);
+    setPlacesSaving(false);
+    if (error) { setPlacesError(error.message); return; }
+    setProfile((p) => ({
+      ...p,
+      place_id: result.place_id,
+      place_name: result.name,
+      place_address: result.address,
+      place_rating: result.rating,
+      place_user_rating_count: result.user_rating_count,
+    }));
+    setPlacesResults(null);
+    setPlacesQuery("");
+  };
+
+  const handlePlacesDisconnect = async () => {
+    setPlacesSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("profiles").update({
+      place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null,
+    }).eq("id", user.id);
+    setPlacesSaving(false);
+    setProfile((p) => ({ ...p, place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null }));
+  };
+
   const handleDeleteAccount = async () => {
     if (!confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -204,9 +293,74 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* GOOGLE PLACES AUTO-SYNC */}
+        <div className="section">
+          <div className="section-header">Google Reviews Auto-Sync {!canAutoSync && "(Growth/Pro)"}</div>
+          <div className="card">
+            {!canAutoSync ? (
+              <p className="places-locked">Automatic Google review sync is available on Growth and Pro plans. <a href="#plan-section" style={{color:"var(--gold)",textDecoration:"none"}}>Upgrade →</a></p>
+            ) : profile.place_id ? (
+              <>
+                <div className="places-connected">
+                  <div className="places-connected-icon">✓</div>
+                  <div className="places-connected-info">
+                    <div className="places-connected-name">{profile.place_name || profile.restaurant_name || "Connected"}</div>
+                    <div className="places-connected-meta">
+                      {profile.place_rating != null ? `${Number(profile.place_rating).toFixed(1)} ★` : "—"}
+                      {profile.place_user_rating_count != null && <span style={{color:"var(--text2)"}}> · {profile.place_user_rating_count.toLocaleString()} reviews</span>}
+                    </div>
+                    {profile.place_address && <div className="places-connected-addr" title={profile.place_address}>{profile.place_address}</div>}
+                  </div>
+                  <button className="btn-disconnect-places" onClick={handlePlacesDisconnect} disabled={placesSaving}>Disconnect</button>
+                </div>
+                <p style={{fontSize:12.5,color:"var(--text2)",margin:0,lineHeight:1.6}}>
+                  New Google reviews are pulled automatically every 6 hours. You'll receive AI reply suggestions by email the moment a new review lands.
+                </p>
+              </>
+            ) : (
+              <>
+                <p style={{fontSize:13.5,color:"var(--text2)",marginBottom:12,lineHeight:1.6}}>
+                  Search for your restaurant on Google to enable automatic review sync. We'll fetch new reviews every 6 hours and email AI reply suggestions to you.
+                </p>
+                <div className="places-search-row">
+                  <input
+                    className="places-search-input"
+                    placeholder={`e.g. ${profile.restaurant_name || "Maison Renaud"}`}
+                    value={placesQuery}
+                    onChange={(e) => setPlacesQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handlePlacesSearch(); }}
+                  />
+                  <button className="btn-places-search" onClick={handlePlacesSearch} disabled={placesSearching}>
+                    {placesSearching ? "Searching…" : "Search Google"}
+                  </button>
+                </div>
+                {placesResults && placesResults.length > 0 && (
+                  <div className="places-results">
+                    {placesResults.map((r) => (
+                      <div key={r.place_id} className="places-result" onClick={() => !placesSaving && handlePlacesSelect(r)}>
+                        <div className="places-result-name">{r.name}</div>
+                        <div className="places-result-meta">
+                          {r.rating != null ? `${r.rating.toFixed(1)} ★` : "No rating"}
+                          {r.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>}
+                          {r.type && <span style={{color:"var(--text2)"}}> · {r.type}</span>}
+                        </div>
+                        {r.address && <div className="places-result-addr">{r.address}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {placesResults && placesResults.length === 0 && !placesError && (
+                  <p style={{fontSize:13,color:"var(--text3)",marginTop:8}}>No matches found. Try refining the search.</p>
+                )}
+                {placesError && <div className="places-err">{placesError}</div>}
+              </>
+            )}
+          </div>
+        </div>
+
         {/* GOOGLE BUSINESS */}
         <div className="section">
-          <div className="section-header">Google Business Connection</div>
+          <div className="section-header">Google Business Connection (OAuth)</div>
           <div className="card">
             <div className="connect-row">
               <div className="connect-status">
