@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
-import { getPlan, usagePercent, isOverLimit, canUseFeature } from "@/lib/plans";
+import { getPlan, usagePercent, isOverLimit, canUseFeature, trialDaysLeft, isTrialExpired } from "@/lib/plans";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -64,6 +64,35 @@ const CSS = `
   .kw-label{font-size:10px;color:var(--text3)}
   .kw-label.pos{color:var(--pos-fg)}
   .kw-label.neg{color:var(--neg-fg)}
+
+  /* TRIAL BANNER */
+  .trial-banner{background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(201,168,76,.04));border:1px solid var(--gold-border);border-radius:var(--r);padding:12px 14px;margin-bottom:12px}
+  .trial-banner.expired{background:rgba(224,96,96,.08);border-color:rgba(224,96,96,.35)}
+  .trial-banner-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .trial-banner.expired .trial-banner-title{color:var(--neg-fg)}
+  .trial-banner-days{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text1);line-height:1.1}
+  .trial-banner-sub{font-size:11.5px;color:var(--text2);margin-top:4px;line-height:1.4}
+  .trial-banner-btn{margin-top:10px;width:100%;padding:7px;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer}
+
+  /* COMPETITOR TRACKING */
+  .comp-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .comp-info{flex:1;min-width:0}
+  .comp-name{font-size:12px;font-weight:700;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .comp-url{font-size:10.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .comp-del{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px;transition:all .2s}
+  .comp-del:hover{color:var(--neg-fg);background:rgba(224,96,96,.08)}
+  .comp-add-row{display:flex;gap:6px;margin-top:6px}
+  .comp-add-input{flex:1;padding:7px 9px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:11.5px;font-family:inherit;color:var(--text1);outline:none}
+  .comp-add-input:focus{border-color:var(--gold-border)}
+  .comp-add-input::placeholder{color:var(--text3)}
+  .comp-add-btn{padding:7px 12px;border-radius:8px;font-size:11.5px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer}
+  .comp-add-btn:disabled{opacity:.5;cursor:not-allowed}
+  .comp-limit{font-size:10.5px;color:var(--text3);text-align:right;margin-top:4px}
+
+  /* YOUR STYLE LEARNING HINT */
+  .style-learning{background:rgba(201,168,76,.06);border:1px dashed var(--gold-border);border-radius:var(--r);padding:14px;margin:12px 16px;text-align:center}
+  .style-learning-title{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .style-learning p{font-size:12.5px;color:var(--text2);line-height:1.55}
 
   /* MIDDLE COL */
   .mid-col{background:var(--bg);border-right:1px solid rgba(255,255,255,.06)}
@@ -180,6 +209,8 @@ const STYLES = [
   { key: "brief", label: "Brief & Direct", desc: "Short and impactful" },
 ];
 
+const STYLE_YOUR_STYLE = { key: "your_style", label: "Your Style", desc: "Learned from your past replies (Pro)" };
+
 function analyseKeywords(reviews) {
   return KEYWORD_CATS.map((cat) => {
     let posCount = 0, negCount = 0;
@@ -219,6 +250,10 @@ export default function DashboardPage() {
   const [savingReview, setSavingReview] = useState(false);
   const [modalError, setModalError] = useState("");
   const [generateError, setGenerateError] = useState("");
+  const [yourStyleStatus, setYourStyleStatus] = useState({});
+  const [competitorInput, setCompetitorInput] = useState({ url: "", name: "" });
+  const [savingCompetitor, setSavingCompetitor] = useState(false);
+  const [competitorError, setCompetitorError] = useState("");
   const supabase = createClient();
 
   const loadData = useCallback(async () => {
@@ -242,6 +277,12 @@ export default function DashboardPage() {
   const usedCount = profile?.used_count || 0;
   const pct = usagePercent(planKey, usedCount);
   const overLimit = isOverLimit(planKey, usedCount);
+  const daysLeft = trialDaysLeft(planKey, profile?.trial_ends_at);
+  const trialExpired = isTrialExpired(planKey, profile?.trial_ends_at);
+  const competitorUrls = profile?.competitor_urls || [];
+  const competitorLimit = plan.competitor_limit || 0;
+  const isPro = canUseFeature(planKey, "ai_style_learning");
+  const styleTabs = isPro ? [...STYLES, STYLE_YOUR_STYLE] : STYLES;
 
   const keywords = analyseKeywords(reviews);
 
@@ -278,6 +319,7 @@ export default function DashboardPage() {
       if (data.error) { setGenerateError(data.error); return; }
       if (data.replies) {
         setReplies((prev) => ({ ...prev, [selectedReview.id]: data.replies }));
+        setYourStyleStatus((prev) => ({ ...prev, [selectedReview.id]: data.your_style_status || null }));
         const { data: { user } } = await supabase.auth.getUser();
         await supabase.from("profiles").update({ used_count: usedCount + 1 }).eq("id", user.id);
         setProfile((p) => ({ ...p, used_count: usedCount + 1 }));
@@ -289,10 +331,37 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCopy = (text, idx) => {
+  const handleCopy = async (text, idx) => {
     navigator.clipboard.writeText(text);
     setCopiedIdx(idx);
     setTimeout(() => setCopiedIdx(null), 2000);
+    // Persist the copied reply so Pro Your Style can learn from it on future generations.
+    if (selectedReview && text) {
+      await supabase.from("reviews").update({ replied: true, reply_text: text }).eq("id", selectedReview.id);
+      setReviews((prev) => prev.map((r) => r.id === selectedReview.id ? { ...r, replied: true, reply_text: text } : r));
+    }
+  };
+
+  const handleAddCompetitor = async () => {
+    setCompetitorError("");
+    const url = competitorInput.url.trim();
+    if (!url) { setCompetitorError("Enter a Google Business URL"); return; }
+    if (competitorUrls.length >= competitorLimit) { setCompetitorError(`Max ${competitorLimit} competitors`); return; }
+    if (competitorUrls.includes(url)) { setCompetitorError("Already tracking this URL"); return; }
+    setSavingCompetitor(true);
+    const next = [...competitorUrls, url];
+    const { error } = await supabase.from("profiles").update({ competitor_urls: next }).eq("id", profile.id);
+    setSavingCompetitor(false);
+    if (error) { setCompetitorError(error.message); return; }
+    setProfile((p) => ({ ...p, competitor_urls: next }));
+    setCompetitorInput({ url: "", name: "" });
+  };
+
+  const handleRemoveCompetitor = async (urlToRemove) => {
+    const next = competitorUrls.filter((u) => u !== urlToRemove);
+    const { error } = await supabase.from("profiles").update({ competitor_urls: next }).eq("id", profile.id);
+    if (error) { setCompetitorError(error.message); return; }
+    setProfile((p) => ({ ...p, competitor_urls: next }));
   };
 
   const handleMarkReplied = async (reviewId) => {
@@ -365,6 +434,24 @@ export default function DashboardPage() {
       <div className="body">
         {/* LEFT COL */}
         <div className="col left-col">
+          {/* TRIAL COUNTDOWN — free_trial plan only */}
+          {planKey === "free_trial" && daysLeft !== null && (
+            <div className={`trial-banner${trialExpired ? " expired" : ""}`}>
+              <div className="trial-banner-title">{trialExpired ? "Trial Expired" : "Free Trial"}</div>
+              <div className="trial-banner-days">
+                {trialExpired ? "0 days" : `${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`}
+              </div>
+              <div className="trial-banner-sub">
+                {trialExpired
+                  ? "Upgrade to continue using AI replies."
+                  : `Your 14-day trial ends ${new Date(profile.trial_ends_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`}
+              </div>
+              <button className="trial-banner-btn" onClick={() => window.location.href = "/dashboard/settings"}>
+                {trialExpired ? "Upgrade Now →" : "View Plans →"}
+              </button>
+            </div>
+          )}
+
           {/* USAGE */}
           <div className="usage-card">
             <div className="usage-row">
@@ -400,6 +487,49 @@ export default function DashboardPage() {
               <span className="filter-count">{f.count}</span>
             </button>
           ))}
+
+          {/* COMPETITOR TRACKING — Pro only */}
+          {canUseFeature(planKey, "competitor_tracking") && (
+            <>
+              <div className="section-label">Competitor Tracking</div>
+              {competitorUrls.length === 0 && (
+                <p style={{fontSize:12,color:"var(--text3)",padding:"4px 4px 8px"}}>Track up to {competitorLimit} competitor Google Business profiles to monitor their review trends.</p>
+              )}
+              {competitorUrls.map((url) => {
+                let host = url;
+                try { host = new URL(url).hostname.replace("www.",""); } catch {}
+                return (
+                  <div key={url} className="comp-card">
+                    <div className="comp-info">
+                      <div className="comp-name">{host}</div>
+                      <div className="comp-url">{url}</div>
+                    </div>
+                    <button className="comp-del" onClick={() => handleRemoveCompetitor(url)} title="Remove">✕</button>
+                  </div>
+                );
+              })}
+              {competitorUrls.length < competitorLimit && (
+                <>
+                  <div className="comp-add-row">
+                    <input
+                      className="comp-add-input"
+                      placeholder="Google Business URL"
+                      value={competitorInput.url}
+                      onChange={(e) => setCompetitorInput({ ...competitorInput, url: e.target.value })}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleAddCompetitor(); }}
+                    />
+                    <button className="comp-add-btn" onClick={handleAddCompetitor} disabled={savingCompetitor || !competitorInput.url}>
+                      {savingCompetitor ? "…" : "+ Add"}
+                    </button>
+                  </div>
+                  <div className="comp-limit">{competitorUrls.length} / {competitorLimit} tracked</div>
+                </>
+              )}
+              {competitorError && (
+                <div style={{marginTop:6,padding:"6px 10px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:6,fontSize:11.5,color:"var(--neg-fg)"}}>{competitorError}</div>
+              )}
+            </>
+          )}
 
           {/* KEYWORD INTELLIGENCE */}
           <div className="section-label">Keyword Intelligence</div>
@@ -486,7 +616,7 @@ export default function DashboardPage() {
               <div className="editor-review-text">"{selectedReview.content}"</div>
 
               <div className="style-tabs">
-                {STYLES.map((s) => (
+                {styleTabs.map((s) => (
                   <button key={s.key} className={`style-tab${activeStyle === s.key ? " active" : ""}`} onClick={() => setActiveStyle(s.key)} title={s.desc}>{s.label}</button>
                 ))}
               </div>
@@ -514,8 +644,21 @@ export default function DashboardPage() {
 
               {currentReplies && (
                 <div className="reply-cards">
-                  {STYLES.map((s, idx) => (
-                    currentReplies[s.key] && (
+                  {styleTabs.map((s, idx) => {
+                    // Your Style: show a learning hint if not enough samples yet
+                    if (s.key === "your_style" && !currentReplies.your_style) {
+                      const status = yourStyleStatus[selectedReview.id];
+                      if (status === "learning") {
+                        return (
+                          <div key={s.key} className="style-learning" style={{margin:"0 0 0 0"}}>
+                            <div className="style-learning-title">Your Style — Learning</div>
+                            <p>Reply to a few more reviews using Copy. Once you have 3+ saved replies, the AI will start generating in your personal voice.</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }
+                    return currentReplies[s.key] && (
                       <div key={s.key} className="reply-card">
                         <div className="reply-style">{s.label}</div>
                         <div className="reply-text">{currentReplies[s.key]}</div>
@@ -530,8 +673,8 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                    )
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </>

@@ -170,10 +170,10 @@ const FEATURES = [
 ];
 
 const PRICING = [
-  { name: "Free Trial", price: null, period: "14 days free", desc: "Explore the full platform risk-free.", feats: ["5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
+  { name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
   { name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
-  { name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "Up to 5 locations", "Auto Google sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
-  { name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "Unlimited locations", "AI learns your style", "Competitor tracking (3)", "Reply effect tracking", "Priority 24/7 support", "API access"], popular: false },
+  { name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto email review detection", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
+  { name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "AI learns your style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:support@revuly.dev" }], popular: false },
 ];
 
 const TESTIMONIALS = [
@@ -290,7 +290,12 @@ export default function LandingPage() {
                 <div className="price-period">{plan.price ? "/month, billed monthly" : plan.period}</div>
                 <p className="price-desc">{plan.desc}</p>
                 <div className="price-div" />
-                <ul className="price-feats">{plan.feats.map((f) => <li key={f}><span className="chk">✓</span>{f}</li>)}</ul>
+                <ul className="price-feats">{plan.feats.map((f, idx) => {
+                  if (typeof f === "object" && f.href) {
+                    return <li key={idx}><span className="chk">✓</span><a href={f.href} style={{color:"var(--gold-lt)",textDecoration:"underline"}}>{f.label}</a></li>;
+                  }
+                  return <li key={typeof f === "string" ? f : idx}><span className="chk">✓</span>{f}</li>;
+                })}</ul>
                 <button className={`btn-price ${plan.popular?"btn-price-fill":"btn-price-outline"}`} onClick={() => window.location.href="/login"}>{plan.price?"Start Free Trial":"Get Started Free"}</button>
               </div>
             ))}
