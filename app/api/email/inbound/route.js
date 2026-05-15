@@ -242,25 +242,54 @@ export async function POST(req) {
 
     const stars = Math.min(5, Math.max(1, parseInt(parsed.stars) || 3));
     const sentiment = stars >= 4 ? "positive" : stars <= 2 ? "negative" : "neutral";
-    log("inserting review — stars:", stars, "sentiment:", sentiment);
+    const reviewerName = parsed.reviewer_name || "Anonymous";
+    const content = parsed.content || "";
+
+    // Dedup key — same review forwarded twice (or Resend webhook retry) hashes
+    // to the same value, and the unique partial index on google_review_id
+    // catches it at the DB level (Postgres error 23505).
+    const dedupHash = crypto
+      .createHash("md5")
+      .update(`${userId}:${reviewerName}:${stars}:${content.slice(0, 200)}`)
+      .digest("hex");
+    const dedupKey = `inbound:${dedupHash}`;
+
+    // Early-exit if we've already ingested this review — avoids wasted OpenAI calls.
+    const { data: existing } = await db
+      .from("reviews")
+      .select("id")
+      .eq("google_review_id", dedupKey)
+      .maybeSingle();
+    if (existing) {
+      log("duplicate inbound — already ingested:", existing.id);
+      return Response.json({ skipped: true, reason: "Duplicate review (dedup)", reviewId: existing.id });
+    }
+
+    log("inserting review — stars:", stars, "sentiment:", sentiment, "dedupKey:", dedupKey);
 
     const { data: review, error: reviewErr } = await db
       .from("reviews")
       .insert({
         user_id: userId,
-        reviewer_name: parsed.reviewer_name || "Anonymous",
+        reviewer_name: reviewerName,
         stars,
-        content: parsed.content || "",
+        content,
         source: "google",
         sentiment,
         is_crisis: false,
         replied: false,
         review_date: new Date().toISOString(),
+        google_review_id: dedupKey,
       })
       .select()
       .single();
 
     if (reviewErr) {
+      // 23505 = unique_violation — a concurrent run inserted between our SELECT and INSERT.
+      if (reviewErr.code === "23505") {
+        log("race-caught duplicate (23505), skipping");
+        return Response.json({ skipped: true, reason: "Duplicate review (unique constraint)" });
+      }
       err("review insert failed:", reviewErr.message);
       return Response.json({ error: reviewErr.message }, { status: 500 });
     }
