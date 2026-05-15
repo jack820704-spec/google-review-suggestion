@@ -66,7 +66,7 @@ export default function TermsPage() {
         <p>All prices are in USD. Subscriptions renew automatically on a monthly basis. You may cancel at any time from your account settings, effective at the end of the current billing period.</p>
 
         <h2>5. Refund Policy</h2>
-        <p>We offer a 7-day money-back guarantee for first-time subscribers. If you are not satisfied within 7 days of your first paid subscription, contact us at <a href="mailto:support@revuly.com">support@revuly.com</a> for a full refund. Subsequent subscription periods are non-refundable except where required by applicable law.</p>
+        <p>We offer a 7-day money-back guarantee for first-time subscribers. If you are not satisfied within 7 days of your first paid subscription, contact us at <a href="mailto:support@revuly.dev">support@revuly.dev</a> for a full refund. Subsequent subscription periods are non-refundable except where required by applicable law.</p>
 
         <h2>6. Acceptable Use</h2>
         <p>You agree not to:</p>
@@ -105,7 +105,7 @@ export default function TermsPage() {
         <p>We may update these Terms from time to time. We will notify you of material changes via email or in-app notification. Continued use of the Service after changes constitutes acceptance.</p>
 
         <h2>14. Contact</h2>
-        <p>For questions about these Terms, please contact us at <a href="mailto:legal@revuly.com">legal@revuly.com</a> or visit our <a href="/help">Help Centre</a>.</p>
+        <p>For questions about these Terms, please contact us at <a href="mailto:legal@revuly.dev">legal@revuly.dev</a> or visit our <a href="/help">Help Centre</a>.</p>
       </div>
     </>
   );

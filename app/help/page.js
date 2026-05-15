@@ -139,7 +139,7 @@ export default function HelpPage() {
             </ol>
             <h3>Common Issues</h3>
             <p><strong>I can't see my business after connecting.</strong> Make sure you're logged into the correct Google account. Your business must be fully verified — pending businesses won't appear.</p>
-            <p><strong>I get an authorisation error.</strong> Try disconnecting and reconnecting. If the issue persists, contact support@revuly.com.</p>
+            <p><strong>I get an authorisation error.</strong> Try disconnecting and reconnecting. If the issue persists, contact support@revuly.dev.</p>
             <p><strong>I have multiple locations.</strong> After connecting, each location can be added separately under Settings. Growth/Pro plans support up to 5 and unlimited locations respectively.</p>
           </div>
 
@@ -232,7 +232,7 @@ export default function HelpPage() {
             <h2>Contact Support</h2>
             <div className="contact-card">
               <h3>We're here to help</h3>
-              <div className="contact-email"><a href="mailto:support@revuly.com">support@revuly.com</a></div>
+              <div className="contact-email"><a href="mailto:support@revuly.dev">support@revuly.dev</a></div>
               <p className="contact-note">Our team typically responds within 24 hours on business days (Mon–Fri, 9am–6pm EST). Pro plan subscribers receive priority support with a 4-hour response time guarantee.</p>
               <p className="contact-note" style={{marginBottom:0}}>For urgent issues — system outages or billing errors — please include "URGENT" in your email subject line.</p>
             </div>
