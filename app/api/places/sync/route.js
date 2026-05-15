@@ -18,6 +18,7 @@
 import { createServiceClient } from "@/lib/supabase-server";
 import {
   fetchPlaceDetails,
+  fetchPlaceReviewsMultiSort,
   getOpenAI,
   getResend,
   ingestReview,
@@ -86,7 +87,10 @@ async function runSync(req) {
     }
 
     try {
-      const details = await fetchPlaceDetails(profile.place_id, placesKey);
+      // First sync pulls multi-sort (~15 reviews); ongoing cron uses the cheaper default fetch.
+      const details = profile.place_first_sync_done
+        ? await fetchPlaceDetails(profile.place_id, placesKey)
+        : await fetchPlaceReviewsMultiSort(profile.place_id, placesKey);
       const reviewsFromGoogle = details.reviews || [];
 
       // Refresh cached rating snapshot
@@ -106,7 +110,7 @@ async function runSync(req) {
       // ──────────────────────────────────────────────────────
       if (!profile.place_first_sync_done) {
         const digestItems = [];
-        for (const gr of reviewsFromGoogle.slice(0, 5)) {
+        for (const gr of reviewsFromGoogle) {
           try {
             const result = await ingestReview({ supa, openai, profile, googleReview: gr });
             if (result) {

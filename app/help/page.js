@@ -52,6 +52,7 @@ const CSS = `
 const NAV = [
   { id:"getting-started", label:"Getting Started" },
   { id:"connect-google", label:"Connect Google Business" },
+  { id:"csv-import", label:"CSV Import" },
   { id:"ai-reply", label:"Using AI Reply" },
   { id:"keyword-intel", label:"Keyword Intelligence" },
   { id:"notifications", label:"Email Notifications" },
@@ -143,10 +144,46 @@ export default function HelpPage() {
             <p><strong>I have multiple locations.</strong> After connecting, each location can be added separately under Settings. Growth/Pro plans support up to 5 and unlimited locations respectively.</p>
           </div>
 
+          {/* CSV IMPORT */}
+          <div className="section">
+            <div id="csv-import" className="section-anchor" />
+            <div className="section-badge">03</div>
+            <h2>Importing Historical Reviews via CSV</h2>
+            <p>Want to seed your dashboard with the reviews you already have on Google? Upload a CSV file. Revuly will deduplicate against any reviews already imported (by Google ID, by content fingerprint, or by previous CSV uploads), so it's always safe to re-run.</p>
+
+            <h3>CSV Format</h3>
+            <p>Save your file as <code>.csv</code> with UTF-8 encoding. Required columns are <strong>stars</strong> (or <strong>rating</strong>) and <strong>content</strong> (or <strong>comment</strong>/<strong>review</strong>). Reviewer name and date are optional but recommended. Column headers are case-insensitive and aliases are accepted:</p>
+            <ul>
+              <li><strong>reviewer_name</strong> · accepts: <code>reviewer</code>, <code>name</code>, <code>author</code></li>
+              <li><strong>stars</strong> · accepts: <code>rating</code>, <code>score</code></li>
+              <li><strong>content</strong> · accepts: <code>comment</code>, <code>review</code>, <code>text</code>, <code>body</code></li>
+              <li><strong>review_date</strong> · accepts: <code>date</code>, <code>published</code>, <code>posted</code></li>
+            </ul>
+
+            <h3>Where to Get the CSV</h3>
+            <p>Google doesn't export reviews as CSV directly, but you have a few options:</p>
+
+            <div className="step-card"><div className="step-n">A</div><div className="step-body"><h4>From your Google Business Profile (manual)</h4><p>Sign in to <a href="https://business.google.com" target="_blank">business.google.com</a>, open <strong>Reviews</strong>, and copy each review's reviewer name, rating, text, and date into a spreadsheet. Export the sheet as CSV. Tedious but free and accurate.</p></div></div>
+
+            <div className="step-card"><div className="step-n">B</div><div className="step-body"><h4>Google Takeout</h4><p>Visit <a href="https://takeout.google.com" target="_blank">takeout.google.com</a>, select <strong>Maps (your places)</strong>, and request the export. Google sends a ZIP containing your review history as JSON. Convert it to CSV using a small script or one of the many free online JSON-to-CSV converters.</p></div></div>
+
+            <div className="step-card"><div className="step-n">C</div><div className="step-body"><h4>Third-party scraper / aggregator</h4><p>Tools like Outscraper, Apify, or Phantombuster can export a Google Business location's public reviews into CSV directly. Make sure the tool gives you reviewer name, rating, text, and date columns — match the names listed above for a clean import.</p></div></div>
+
+            <h3>How to Upload</h3>
+            <ol>
+              <li>Go to the dashboard and click <strong>📄 Upload CSV</strong> next to <strong>+ Add Review</strong></li>
+              <li>Pick your <code>.csv</code> file</li>
+              <li>Click <strong>Upload</strong> — you'll see a summary like <em>"Imported 47 new · skipped 3 duplicates · 50 rows total"</em></li>
+              <li>The new reviews appear in your dashboard immediately. AI replies are <em>not</em> auto-generated for bulk imports (to avoid burning your monthly quota); click a review and use <strong>Generate AI Replies</strong> when you're ready to reply.</li>
+            </ol>
+
+            <div className="highlight-box"><p>✓ Tip: Upload limit is 1000 rows per request. For larger historical archives, split the CSV into multiple files.</p></div>
+          </div>
+
           {/* AI REPLY */}
           <div className="section">
             <div id="ai-reply" className="section-anchor" />
-            <div className="section-badge">03</div>
+            <div className="section-badge">04</div>
             <h2>Using AI Reply</h2>
             <p>Revuly uses Anthropic's Claude AI to generate contextually relevant, genuine-sounding replies that match your restaurant's voice.</p>
             <h3>Step-by-Step</h3>
@@ -171,7 +208,7 @@ export default function HelpPage() {
           {/* KEYWORD INTELLIGENCE */}
           <div className="section">
             <div id="keyword-intel" className="section-anchor" />
-            <div className="section-badge">04</div>
+            <div className="section-badge">05</div>
             <h2>Keyword Intelligence</h2>
             <p>Revuly automatically scans all your reviews and categorises mentions into key topics — giving you an at-a-glance understanding of what guests talk about most.</p>
             <h3>Default Categories</h3>
@@ -192,7 +229,7 @@ export default function HelpPage() {
           {/* NOTIFICATIONS */}
           <div className="section">
             <div id="notifications" className="section-anchor" />
-            <div className="section-badge">05</div>
+            <div className="section-badge">06</div>
             <h2>Email Notifications</h2>
             <p>Revuly sends beautifully formatted emails whenever you receive a new review, including the review content and pre-generated AI reply suggestions — so you can respond even before opening the dashboard.</p>
             <h3>Setting Up Notifications</h3>
@@ -213,7 +250,7 @@ export default function HelpPage() {
           {/* FAQ */}
           <div className="section">
             <div id="faq" className="section-anchor" />
-            <div className="section-badge">06</div>
+            <div className="section-badge">07</div>
             <h2>Frequently Asked Questions</h2>
             <div>
               {FAQS.map((faq, i) => (
@@ -228,7 +265,7 @@ export default function HelpPage() {
           {/* CONTACT */}
           <div className="section">
             <div id="contact" className="section-anchor" />
-            <div className="section-badge">07</div>
+            <div className="section-badge">08</div>
             <h2>Contact Support</h2>
             <div className="contact-card">
               <h3>We're here to help</h3>

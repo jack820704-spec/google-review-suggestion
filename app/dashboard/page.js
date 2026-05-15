@@ -94,6 +94,37 @@ const CSS = `
   .style-learning-title{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
   .style-learning p{font-size:12.5px;color:var(--text2);line-height:1.55}
 
+  /* TABS — All Reviews / Needs Reply */
+  .tabs{display:flex;gap:0;align-items:flex-end;height:34px}
+  .tab{padding:8px 4px;margin-right:18px;background:transparent;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;font-family:inherit;letter-spacing:.2px;transition:color .18s,border-color .18s;display:flex;align-items:center;gap:7px}
+  .tab:hover{color:var(--text1)}
+  .tab.active{color:var(--gold-lt);border-bottom-color:var(--gold)}
+  .tab-count{display:inline-block;padding:1px 8px;border-radius:999px;background:rgba(201,168,76,.14);font-size:10.5px;color:var(--gold);font-weight:700;letter-spacing:.3px}
+  .tab.active .tab-count{background:rgba(201,168,76,.22)}
+  .mid-actions{display:flex;align-items:center;gap:8px}
+  .btn-csv{padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:600;font-family:inherit;color:var(--gold);background:transparent;border:1px solid var(--gold-border);cursor:pointer;transition:all .2s}
+  .btn-csv:hover{background:rgba(201,168,76,.08);color:var(--gold-lt)}
+
+  /* DAYS UNANSWERED BADGE */
+  .days-unanswered{padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.3px;background:rgba(232,184,75,.12);color:var(--neu-fg);border:1px solid rgba(232,184,75,.25);margin-left:auto}
+  .days-unanswered.urgent{background:rgba(224,96,96,.12);color:var(--neg-fg);border-color:rgba(224,96,96,.25)}
+
+  /* LANGUAGE TOGGLE in topbar */
+  .lang-toggle{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--text2);cursor:pointer;font-size:11.5px;font-weight:700;font-family:inherit;letter-spacing:.5px;transition:all .18s}
+  .lang-toggle:hover{border-color:var(--gold-border);color:var(--gold-lt)}
+
+  /* CSV MODAL */
+  .csv-drop{padding:24px;border:1.5px dashed rgba(201,168,76,.3);border-radius:var(--r);background:rgba(201,168,76,.03);text-align:center;cursor:pointer;transition:all .2s}
+  .csv-drop:hover{border-color:var(--gold);background:rgba(201,168,76,.06)}
+  .csv-drop input{display:none}
+  .csv-drop-icon{font-size:28px;color:var(--gold);margin-bottom:10px}
+  .csv-drop-text{font-size:13.5px;color:var(--text2);margin-bottom:6px}
+  .csv-drop-filename{font-size:13px;color:var(--gold-lt);font-weight:600;margin-top:8px;word-break:break-all}
+  .csv-format-hint{font-size:11.5px;color:var(--text3);text-align:center;margin-top:10px;font-family:monospace}
+  .csv-help-link{display:block;font-size:12px;color:var(--gold);text-decoration:none;text-align:center;margin-top:6px}
+  .csv-help-link:hover{text-decoration:underline}
+  .csv-success{padding:10px 14px;background:rgba(93,186,122,.1);border:1px solid rgba(93,186,122,.3);border-radius:8px;font-size:13px;color:var(--pos-fg);margin-top:12px}
+
   /* MIDDLE COL */
   .mid-col{background:var(--bg);border-right:1px solid rgba(255,255,255,.06)}
   .mid-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:5}
@@ -203,13 +234,177 @@ const LANGS = [
   { key: "es", label: "Español" },
 ];
 
-const STYLES = [
+const STYLES_EN = [
   { key: "warm", label: "Warm & Personal", desc: "Like the owner personally read this tonight" },
   { key: "professional", label: "Professional & Gracious", desc: "Elegant, refined brand voice" },
   { key: "brief", label: "Brief & Direct", desc: "Short and impactful" },
 ];
+const STYLES_ZH = [
+  { key: "warm", label: "溫暖個人", desc: "彷彿老闆親自讀過這則評論" },
+  { key: "professional", label: "專業優雅", desc: "精緻、優雅的品牌語氣" },
+  { key: "brief", label: "簡短直接", desc: "簡短有力" },
+];
+const STYLE_YOUR_STYLE_EN = { key: "your_style", label: "Your Style", desc: "Learned from your past replies (Pro)" };
+const STYLE_YOUR_STYLE_ZH = { key: "your_style", label: "你的風格", desc: "從你過去的回覆學習而來（Pro）" };
 
-const STYLE_YOUR_STYLE = { key: "your_style", label: "Your Style", desc: "Learned from your past replies (Pro)" };
+// Backwards-compat alias for any remaining English references (e.g. server payload keys).
+const STYLES = STYLES_EN;
+
+// ─── Translations dictionary ────────────────────────────────────────────────
+const T = {
+  en: {
+    live: "Live",
+    ai_replies_used: "AI Replies Used",
+    avg_rating: "Avg Rating",
+    total_reviews: "Total Reviews",
+    reply_rate: "Reply Rate",
+    this_month: "This Month",
+    filters: "Filters",
+    f_all: "All Reviews",
+    f_positive: "Positive",
+    f_neutral: "Neutral",
+    f_negative: "Negative",
+    f_unanswered: "Unanswered",
+    f_crisis: "🚨 Crisis",
+    trial_free: "Free Trial",
+    trial_expired: "Trial Expired",
+    days_left: (n) => (n === 1 ? "1 day left" : `${n} days left`),
+    zero_days: "0 days",
+    trial_sub: (d) => `Your 14-day trial ends ${d}.`,
+    trial_expired_sub: "Upgrade to continue using AI replies.",
+    view_plans: "View Plans →",
+    upgrade_now: "Upgrade Now →",
+    competitor_tracking: "Competitor Tracking",
+    competitor_empty: (n) => `Track up to ${n} competitor Google Business profiles to monitor their review trends.`,
+    competitor_url_placeholder: "Google Business URL",
+    add_competitor: "+ Add",
+    tracked: (a, b) => `${a} / ${b} tracked`,
+    keyword_intel: "Keyword Intelligence",
+    kw_empty: "Add reviews to see keyword analysis",
+    mentions: (n) => `${n} mentions`,
+    tab_all: "All Reviews",
+    tab_needs_reply: "Needs Reply",
+    showing: (x, y) => `Showing ${x} of ${y} reviews`,
+    showing_filtered: (x, y) => `Showing ${x} of ${y}`,
+    add_review: "+ Add Review",
+    upload_csv: "Upload CSV",
+    no_reviews_title: "No reviews yet",
+    no_reviews_sub: 'Click "Add Review" to manually add a customer review and generate AI reply suggestions.',
+    no_unanswered_title: "All caught up",
+    no_unanswered_sub: "You've replied to every review. 🎉",
+    days_unanswered: (n) => (n === 0 ? "today" : n === 1 ? "1 day unanswered" : `${n} days unanswered`),
+    replied: "✓ Replied",
+    delete_btn: "Delete",
+    editor_empty_title: "Select a review to generate AI replies",
+    editor_empty_sub: "Click any review on the left to open the AI reply editor. Three different reply styles will be generated for you.",
+    lang_label: "Lang:",
+    over_limit: (n) => `You've used all ${n} AI replies this month.`,
+    upgrade_plan: "Upgrade Plan →",
+    btn_generate: "✦ Generate AI Replies",
+    btn_regenerate: "Regenerate All Replies",
+    btn_generating: "Generating…",
+    btn_copy: "Copy",
+    btn_copied: "Copied!",
+    btn_regen: "Regen",
+    ready_paste: "✓ Ready to paste into Google",
+    mark_replied: "Mark Replied",
+    ys_learning_title: "Your Style — Learning",
+    ys_learning_p: "Reply to a few more reviews using Copy. Once you have 3+ saved replies, the AI will start generating in your personal voice.",
+    modal_add_title: "Add Review",
+    modal_add_sub: "Manually add a customer review to generate AI reply suggestions.",
+    label_reviewer: "Reviewer Name",
+    label_stars: "Star Rating",
+    label_content: "Review Content",
+    cancel: "Cancel",
+    saving: "Saving…",
+    placeholder_name: "e.g. James T.",
+    placeholder_content: "Paste the review text here…",
+    csv_title: "Upload Review CSV",
+    csv_sub: "Bulk-import your past Google reviews. We'll deduplicate them against existing reviews.",
+    csv_select: "Choose CSV file",
+    csv_uploading: "Uploading…",
+    csv_upload: "Upload",
+    csv_format: "Expected columns: reviewer_name, stars, content, review_date",
+    csv_help: "How to export from Google Maps →",
+    csv_result: (i, d, t) => `Imported ${i} new · skipped ${d} duplicate${d === 1 ? "" : "s"} · ${t} rows total`,
+  },
+  zh: {
+    live: "即時",
+    ai_replies_used: "已用 AI 回覆",
+    avg_rating: "平均評分",
+    total_reviews: "評論總數",
+    reply_rate: "回覆率",
+    this_month: "本月",
+    filters: "篩選",
+    f_all: "全部評論",
+    f_positive: "正向",
+    f_neutral: "中性",
+    f_negative: "負向",
+    f_unanswered: "未回覆",
+    f_crisis: "🚨 危機",
+    trial_free: "免費試用",
+    trial_expired: "試用已過期",
+    days_left: (n) => (n === 1 ? "剩 1 天" : `剩 ${n} 天`),
+    zero_days: "0 天",
+    trial_sub: (d) => `14 天試用將於 ${d} 結束。`,
+    trial_expired_sub: "升級方案以繼續使用 AI 回覆。",
+    view_plans: "查看方案 →",
+    upgrade_now: "立即升級 →",
+    competitor_tracking: "競爭對手追蹤",
+    competitor_empty: (n) => `最多可追蹤 ${n} 個競爭對手 Google 商家，掌握評論趨勢。`,
+    competitor_url_placeholder: "Google 商家網址",
+    add_competitor: "+ 新增",
+    tracked: (a, b) => `${a} / ${b} 已追蹤`,
+    keyword_intel: "關鍵字情報",
+    kw_empty: "新增評論後會出現關鍵字分析",
+    mentions: (n) => `${n} 次提及`,
+    tab_all: "全部評論",
+    tab_needs_reply: "待回覆",
+    showing: (x, y) => `顯示 ${x} / 共 ${y} 則`,
+    showing_filtered: (x, y) => `顯示 ${x} / ${y}`,
+    add_review: "+ 新增評論",
+    upload_csv: "上傳 CSV",
+    no_reviews_title: "尚無評論",
+    no_reviews_sub: '點擊「新增評論」手動加入一則顧客評論，AI 會立刻產生回覆建議。',
+    no_unanswered_title: "全部回完了",
+    no_unanswered_sub: "你已回覆所有評論 🎉",
+    days_unanswered: (n) => (n === 0 ? "今天" : `${n} 天未回覆`),
+    replied: "✓ 已回覆",
+    delete_btn: "刪除",
+    editor_empty_title: "選擇一則評論以產生 AI 回覆",
+    editor_empty_sub: "在左側點擊任一評論開啟 AI 回覆編輯器，會自動產生三種不同風格的回覆。",
+    lang_label: "語言：",
+    over_limit: (n) => `本月 ${n} 則 AI 回覆已用完。`,
+    upgrade_plan: "升級方案 →",
+    btn_generate: "✦ 產生 AI 回覆",
+    btn_regenerate: "重新產生全部回覆",
+    btn_generating: "產生中…",
+    btn_copy: "複製",
+    btn_copied: "已複製！",
+    btn_regen: "重產",
+    ready_paste: "✓ 已複製，可直接貼到 Google",
+    mark_replied: "標記已回覆",
+    ys_learning_title: "你的風格 — 學習中",
+    ys_learning_p: "再多複製幾則回覆，累積 3 則以上後，AI 就能用你的個人語氣產出回覆。",
+    modal_add_title: "新增評論",
+    modal_add_sub: "手動加入一則顧客評論，AI 會產生回覆建議。",
+    label_reviewer: "評論者姓名",
+    label_stars: "星等",
+    label_content: "評論內容",
+    cancel: "取消",
+    saving: "儲存中…",
+    placeholder_name: "例如：James T.",
+    placeholder_content: "在此貼上評論文字…",
+    csv_title: "上傳評論 CSV",
+    csv_sub: "批次匯入過去的 Google 評論，系統會自動去重。",
+    csv_select: "選擇 CSV 檔",
+    csv_uploading: "上傳中…",
+    csv_upload: "上傳",
+    csv_format: "欄位：reviewer_name, stars, content, review_date",
+    csv_help: "如何從 Google Maps 匯出？→",
+    csv_result: (i, d, t) => `匯入 ${i} 則 · 跳過 ${d} 則重複 · 共 ${t} 列`,
+  },
+};
 
 function analyseKeywords(reviews) {
   return KEYWORD_CATS.map((cat) => {
@@ -254,6 +449,14 @@ export default function DashboardPage() {
   const [competitorInput, setCompetitorInput] = useState({ url: "", name: "" });
   const [savingCompetitor, setSavingCompetitor] = useState(false);
   const [competitorError, setCompetitorError] = useState("");
+  const [lang, setLang] = useState("en");
+  const [reviewTab, setReviewTab] = useState("all"); // "all" | "needs_reply"
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
+  const [csvResult, setCsvResult] = useState(null);
+  const [csvError, setCsvError] = useState("");
+  const t = T[lang];
   const supabase = createClient();
 
   const loadData = useCallback(async () => {
@@ -282,11 +485,16 @@ export default function DashboardPage() {
   const competitorUrls = profile?.competitor_urls || [];
   const competitorLimit = plan.competitor_limit || 0;
   const isPro = canUseFeature(planKey, "ai_style_learning");
-  const styleTabs = isPro ? [...STYLES, STYLE_YOUR_STYLE] : STYLES;
+  const stylesLocalized = lang === "zh" ? STYLES_ZH : STYLES_EN;
+  const yourStyleLocalized = lang === "zh" ? STYLE_YOUR_STYLE_ZH : STYLE_YOUR_STYLE_EN;
+  const styleTabs = isPro ? [...stylesLocalized, yourStyleLocalized] : stylesLocalized;
+  const unansweredCount = reviews.filter((r) => !r.replied).length;
+  const daysSince = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86400000));
 
   const keywords = analyseKeywords(reviews);
 
   const filteredReviews = reviews.filter((r) => {
+    if (reviewTab === "needs_reply" && r.replied) return false;
     if (kwFilter) {
       const cat = KEYWORD_CATS.find((c) => c.name === kwFilter);
       if (cat) {
@@ -364,6 +572,33 @@ export default function DashboardPage() {
     setProfile((p) => ({ ...p, competitor_urls: next }));
   };
 
+  const handleCsvUpload = async () => {
+    if (!csvFile) return;
+    setCsvUploading(true);
+    setCsvError("");
+    setCsvResult(null);
+    try {
+      const text = await csvFile.text();
+      const res = await fetch("/api/reviews/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csv: text }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setCsvError(data.error || "Upload failed");
+        return;
+      }
+      setCsvResult(data);
+      // Reload reviews so the new ones appear immediately
+      loadData();
+    } catch (err) {
+      setCsvError(err.message);
+    } finally {
+      setCsvUploading(false);
+    }
+  };
+
   const handleMarkReplied = async (reviewId) => {
     await supabase.from("reviews").update({ replied: true }).eq("id", reviewId);
     setReviews((prev) => prev.map((r) => r.id === reviewId ? { ...r, replied: true } : r));
@@ -425,6 +660,13 @@ export default function DashboardPage() {
         <div className="topbar-right">
           {profile?.restaurant_name && <span className="restaurant-name">{profile.restaurant_name}</span>}
           <span className="plan-badge">{plan.name}</span>
+          <button
+            className="lang-toggle"
+            onClick={() => setLang(lang === "en" ? "zh" : "en")}
+            title={lang === "en" ? "切換成中文" : "Switch to English"}
+          >
+            {lang === "en" ? "中文" : "EN"}
+          </button>
           <button className="icon-btn" onClick={() => window.location.href = "/dashboard/settings"} title="Settings">⚙</button>
           <button className="icon-btn" onClick={() => window.location.href = "/help"} title="Help">?</button>
           <button className="icon-btn" onClick={handleLogout} title="Logout">↩</button>
@@ -437,17 +679,17 @@ export default function DashboardPage() {
           {/* TRIAL COUNTDOWN — free_trial plan only */}
           {planKey === "free_trial" && daysLeft !== null && (
             <div className={`trial-banner${trialExpired ? " expired" : ""}`}>
-              <div className="trial-banner-title">{trialExpired ? "Trial Expired" : "Free Trial"}</div>
+              <div className="trial-banner-title">{trialExpired ? t.trial_expired : t.trial_free}</div>
               <div className="trial-banner-days">
-                {trialExpired ? "0 days" : `${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`}
+                {trialExpired ? t.zero_days : t.days_left(daysLeft)}
               </div>
               <div className="trial-banner-sub">
                 {trialExpired
-                  ? "Upgrade to continue using AI replies."
-                  : `Your 14-day trial ends ${new Date(profile.trial_ends_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}.`}
+                  ? t.trial_expired_sub
+                  : t.trial_sub(new Date(profile.trial_ends_at).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US", { month: "short", day: "numeric" }))}
               </div>
               <button className="trial-banner-btn" onClick={() => window.location.href = "/dashboard/settings"}>
-                {trialExpired ? "Upgrade Now →" : "View Plans →"}
+                {trialExpired ? t.upgrade_now : t.view_plans}
               </button>
             </div>
           )}
@@ -455,7 +697,7 @@ export default function DashboardPage() {
           {/* USAGE */}
           <div className="usage-card">
             <div className="usage-row">
-              <span className="usage-label">AI Replies Used</span>
+              <span className="usage-label">{t.ai_replies_used}</span>
               <span className="usage-val">{usedCount} / {plan.reply_limit === Infinity ? "∞" : plan.reply_limit}</span>
             </div>
             <div className="usage-bar">
@@ -465,21 +707,21 @@ export default function DashboardPage() {
 
           {/* STATS */}
           <div className="stat-grid">
-            <div className="stat-card"><div className="stat-n">{avgRating}★</div><div className="stat-l">Avg Rating</div></div>
-            <div className="stat-card"><div className="stat-n">{reviews.length}</div><div className="stat-l">Total Reviews</div></div>
-            <div className="stat-card"><div className="stat-n">{replyRate}%</div><div className="stat-l">Reply Rate</div></div>
-            <div className="stat-card"><div className="stat-n">{reviews.filter((r) => { const d = new Date(r.review_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length}</div><div className="stat-l">This Month</div></div>
+            <div className="stat-card"><div className="stat-n">{avgRating}★</div><div className="stat-l">{t.avg_rating}</div></div>
+            <div className="stat-card"><div className="stat-n">{reviews.length}</div><div className="stat-l">{t.total_reviews}</div></div>
+            <div className="stat-card"><div className="stat-n">{replyRate}%</div><div className="stat-l">{t.reply_rate}</div></div>
+            <div className="stat-card"><div className="stat-n">{reviews.filter((r) => { const d = new Date(r.review_date); const now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length}</div><div className="stat-l">{t.this_month}</div></div>
           </div>
 
           {/* FILTERS */}
-          <div className="section-label">Filters</div>
+          <div className="section-label">{t.filters}</div>
           {[
-            { key: "all", label: "All Reviews", dot: "#555", count: reviews.length },
-            { key: "positive", label: "Positive", dot: "var(--pos-fg)", count: reviews.filter((r) => r.stars >= 4).length },
-            { key: "neutral", label: "Neutral", dot: "var(--neu-fg)", count: reviews.filter((r) => r.stars === 3).length },
-            { key: "negative", label: "Negative", dot: "var(--neg-fg)", count: reviews.filter((r) => r.stars <= 2).length },
-            { key: "unanswered", label: "Unanswered", dot: "var(--gold)", count: reviews.filter((r) => !r.replied).length },
-            { key: "crisis", label: "🚨 Crisis", dot: "var(--neg-fg)", count: reviews.filter((r) => r.is_crisis).length },
+            { key: "all", label: t.f_all, dot: "#555", count: reviews.length },
+            { key: "positive", label: t.f_positive, dot: "var(--pos-fg)", count: reviews.filter((r) => r.stars >= 4).length },
+            { key: "neutral", label: t.f_neutral, dot: "var(--neu-fg)", count: reviews.filter((r) => r.stars === 3).length },
+            { key: "negative", label: t.f_negative, dot: "var(--neg-fg)", count: reviews.filter((r) => r.stars <= 2).length },
+            { key: "unanswered", label: t.f_unanswered, dot: "var(--gold)", count: reviews.filter((r) => !r.replied).length },
+            { key: "crisis", label: t.f_crisis, dot: "var(--neg-fg)", count: reviews.filter((r) => r.is_crisis).length },
           ].map((f) => (
             <button key={f.key} className={`filter-btn${filter === f.key ? " active" : ""}`} onClick={() => { setFilter(f.key); setKwFilter(null); }}>
               <span className="filter-dot" style={{ background: f.dot }} />
@@ -491,9 +733,9 @@ export default function DashboardPage() {
           {/* COMPETITOR TRACKING — Pro only */}
           {canUseFeature(planKey, "competitor_tracking") && (
             <>
-              <div className="section-label">Competitor Tracking</div>
+              <div className="section-label">{t.competitor_tracking}</div>
               {competitorUrls.length === 0 && (
-                <p style={{fontSize:12,color:"var(--text3)",padding:"4px 4px 8px"}}>Track up to {competitorLimit} competitor Google Business profiles to monitor their review trends.</p>
+                <p style={{fontSize:12,color:"var(--text3)",padding:"4px 4px 8px"}}>{t.competitor_empty(competitorLimit)}</p>
               )}
               {competitorUrls.map((url) => {
                 let host = url;
@@ -513,16 +755,16 @@ export default function DashboardPage() {
                   <div className="comp-add-row">
                     <input
                       className="comp-add-input"
-                      placeholder="Google Business URL"
+                      placeholder={t.competitor_url_placeholder}
                       value={competitorInput.url}
                       onChange={(e) => setCompetitorInput({ ...competitorInput, url: e.target.value })}
                       onKeyDown={(e) => { if (e.key === "Enter") handleAddCompetitor(); }}
                     />
                     <button className="comp-add-btn" onClick={handleAddCompetitor} disabled={savingCompetitor || !competitorInput.url}>
-                      {savingCompetitor ? "…" : "+ Add"}
+                      {savingCompetitor ? "…" : t.add_competitor}
                     </button>
                   </div>
-                  <div className="comp-limit">{competitorUrls.length} / {competitorLimit} tracked</div>
+                  <div className="comp-limit">{t.tracked(competitorUrls.length, competitorLimit)}</div>
                 </>
               )}
               {competitorError && (
@@ -532,16 +774,16 @@ export default function DashboardPage() {
           )}
 
           {/* KEYWORD INTELLIGENCE */}
-          <div className="section-label">Keyword Intelligence</div>
+          <div className="section-label">{t.keyword_intel}</div>
           <div className="keyword-section">
-            {keywords.length === 0 && <p style={{fontSize:12,color:"var(--text3)",padding:"8px 4px"}}>Add reviews to see keyword analysis</p>}
+            {keywords.length === 0 && <p style={{fontSize:12,color:"var(--text3)",padding:"8px 4px"}}>{t.kw_empty}</p>}
             {keywords.map((kw) => {
               const total = kw.posCount + kw.negCount || 1;
               const posPct = Math.round((kw.posCount / total) * 100);
               const negPct = 100 - posPct;
               return (
                 <div key={kw.name} className={`kw-card${kwFilter === kw.name ? " active" : ""}`} onClick={() => setKwFilter(kwFilter === kw.name ? null : kw.name)}>
-                  <div className="kw-header"><span className="kw-name">{kw.name}</span><span className="kw-count">{kw.total} mentions</span></div>
+                  <div className="kw-header"><span className="kw-name">{kw.name}</span><span className="kw-count">{t.mentions(kw.total)}</span></div>
                   <div className="kw-bar-wrap">
                     <div className="kw-bar-pos" style={{ width: `${posPct}%`, background: "var(--pos-fg)" }} />
                     <div className="kw-bar-neg" style={{ width: `${negPct}%`, background: "var(--neg-fg)" }} />
@@ -558,9 +800,26 @@ export default function DashboardPage() {
 
         {/* MIDDLE COL */}
         <div className="col mid-col">
-          <div className="mid-header">
-            <div><div className="mid-title">Reviews</div><div className="mid-count">{filteredReviews.length} showing</div></div>
-            <button className="btn-add" onClick={() => setShowAddModal(true)}>+ Add Review</button>
+          <div className="mid-header" style={{flexDirection:"column",alignItems:"stretch",gap:8,paddingTop:10,paddingBottom:0}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",gap:12,flexWrap:"wrap"}}>
+              <div className="tabs">
+                <button className={`tab${reviewTab === "all" ? " active" : ""}`} onClick={() => setReviewTab("all")}>
+                  {t.tab_all}<span className="tab-count">{reviews.length}</span>
+                </button>
+                <button className={`tab${reviewTab === "needs_reply" ? " active" : ""}`} onClick={() => setReviewTab("needs_reply")}>
+                  {t.tab_needs_reply}<span className="tab-count">{unansweredCount}</span>
+                </button>
+              </div>
+              <div className="mid-actions">
+                <button className="btn-csv" onClick={() => { setShowCsvModal(true); setCsvResult(null); setCsvError(""); setCsvFile(null); }}>📄 {t.upload_csv}</button>
+                <button className="btn-add" onClick={() => setShowAddModal(true)}>{t.add_review}</button>
+              </div>
+            </div>
+            <div className="mid-count" style={{paddingBottom:8}}>
+              {reviewTab === "all"
+                ? t.showing(filteredReviews.length, reviews.length)
+                : t.showing_filtered(filteredReviews.length, unansweredCount)}
+            </div>
           </div>
 
           {loading && [1,2,3].map((i) => (
@@ -573,27 +832,33 @@ export default function DashboardPage() {
 
           {!loading && filteredReviews.length === 0 && (
             <div className="empty-reviews">
-              <h4>No reviews yet</h4>
-              <p>Click "Add Review" to manually add a customer review and generate AI reply suggestions.</p>
+              <h4>{reviewTab === "needs_reply" ? t.no_unanswered_title : t.no_reviews_title}</h4>
+              <p>{reviewTab === "needs_reply" ? t.no_unanswered_sub : t.no_reviews_sub}</p>
             </div>
           )}
 
-          {filteredReviews.map((review) => (
-            <div key={review.id} className={`review-card${selectedReview?.id === review.id ? " selected" : ""}${review.is_crisis ? " crisis" : ""}`} onClick={() => setSelectedReview(review)}>
-              <div className="review-meta">
-                <span className="review-name">{review.reviewer_name}</span>
-                <span className="stars">{starsDisplay(review.stars)}</span>
-                <span className="review-date">{new Date(review.review_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                <span className={`sentiment-tag sent-${review.sentiment}`}>{review.sentiment}</span>
-                {review.is_crisis && <span className="crisis-tag">🚨 Crisis</span>}
+          {filteredReviews.map((review) => {
+            const days = daysSince(review.review_date);
+            return (
+              <div key={review.id} className={`review-card${selectedReview?.id === review.id ? " selected" : ""}${review.is_crisis ? " crisis" : ""}`} onClick={() => setSelectedReview(review)}>
+                <div className="review-meta">
+                  <span className="review-name">{review.reviewer_name}</span>
+                  <span className="stars">{starsDisplay(review.stars)}</span>
+                  <span className="review-date">{new Date(review.review_date).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                  <span className={`sentiment-tag sent-${review.sentiment}`}>{review.sentiment}</span>
+                  {review.is_crisis && <span className="crisis-tag">🚨 Crisis</span>}
+                  {reviewTab === "needs_reply" && (
+                    <span className={`days-unanswered${days >= 3 ? " urgent" : ""}`}>{t.days_unanswered(days)}</span>
+                  )}
+                </div>
+                <div className="review-text">{review.content}</div>
+                <div className="review-actions">
+                  {review.replied && <span className="replied-tag">{t.replied}</span>}
+                  <button className="btn-del" onClick={(e) => { e.stopPropagation(); handleDelete(review.id); }}>{t.delete_btn}</button>
+                </div>
               </div>
-              <div className="review-text">{review.content}</div>
-              <div className="review-actions">
-                {review.replied && <span className="replied-tag">✓ Replied</span>}
-                <button className="btn-del" onClick={(e) => { e.stopPropagation(); handleDelete(review.id); }}>Delete</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* RIGHT COL */}
@@ -601,8 +866,8 @@ export default function DashboardPage() {
           {!selectedReview ? (
             <div className="editor-empty">
               <div className="editor-empty-icon">✦</div>
-              <h4>Select a review to generate AI replies</h4>
-              <p>Click any review on the left to open the AI reply editor. Three different reply styles will be generated for you.</p>
+              <h4>{t.editor_empty_title}</h4>
+              <p>{t.editor_empty_sub}</p>
             </div>
           ) : (
             <>
@@ -622,7 +887,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="lang-row">
-                <span className="lang-label">Lang:</span>
+                <span className="lang-label">{t.lang_label}</span>
                 {LANGS.map((l) => (
                   <button key={l.key} className={`lang-btn${activeLang === l.key ? " active" : ""}`} onClick={() => setActiveLang(l.key)}>{l.label}</button>
                 ))}
@@ -630,14 +895,14 @@ export default function DashboardPage() {
 
               {overLimit && (
                 <div className="upgrade-banner">
-                  <p>You've used all {plan.reply_limit} AI replies this month.</p>
-                  <button className="btn-upgrade" onClick={() => window.location.href = "/dashboard/settings"}>Upgrade Plan →</button>
+                  <p>{t.over_limit(plan.reply_limit)}</p>
+                  <button className="btn-upgrade" onClick={() => window.location.href = "/dashboard/settings"}>{t.upgrade_plan}</button>
                 </div>
               )}
 
               <div className="generate-area">
                 <button className="btn-generate" onClick={handleGenerate} disabled={generating || overLimit}>
-                  {generating ? "Generating…" : currentReplies ? "Regenerate All Replies" : "✦ Generate AI Replies"}
+                  {generating ? t.btn_generating : currentReplies ? t.btn_regenerate : t.btn_generate}
                 </button>
                 {generateError && <div style={{marginTop:10,padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:12.5,color:"var(--neg-fg)"}}>{generateError}</div>}
               </div>
@@ -651,8 +916,8 @@ export default function DashboardPage() {
                       if (status === "learning") {
                         return (
                           <div key={s.key} className="style-learning" style={{margin:"0 0 0 0"}}>
-                            <div className="style-learning-title">Your Style — Learning</div>
-                            <p>Reply to a few more reviews using Copy. Once you have 3+ saved replies, the AI will start generating in your personal voice.</p>
+                            <div className="style-learning-title">{t.ys_learning_title}</div>
+                            <p>{t.ys_learning_p}</p>
                           </div>
                         );
                       }
@@ -664,12 +929,12 @@ export default function DashboardPage() {
                         <div className="reply-text">{currentReplies[s.key]}</div>
                         <div className="reply-actions">
                           <button className="btn-copy" onClick={() => handleCopy(currentReplies[s.key], idx)}>
-                            {copiedIdx === idx ? "Copied!" : "Copy"}
+                            {copiedIdx === idx ? t.btn_copied : t.btn_copy}
                           </button>
-                          <button className="btn-regen" onClick={() => handleGenerate()}>Regen</button>
-                          {copiedIdx === idx && <span className="copied-hint">✓ Ready to paste into Google</span>}
+                          <button className="btn-regen" onClick={() => handleGenerate()}>{t.btn_regen}</button>
+                          {copiedIdx === idx && <span className="copied-hint">{t.ready_paste}</span>}
                           {!selectedReview.replied && (
-                            <button className="btn-regen" style={{marginLeft:"auto"}} onClick={() => handleMarkReplied(selectedReview.id)}>Mark Replied</button>
+                            <button className="btn-regen" style={{marginLeft:"auto"}} onClick={() => handleMarkReplied(selectedReview.id)}>{t.mark_replied}</button>
                           )}
                         </div>
                       </div>
@@ -686,15 +951,15 @@ export default function DashboardPage() {
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Add Review</h3>
-            <p className="modal-sub">Manually add a customer review to generate AI reply suggestions.</p>
+            <h3>{t.modal_add_title}</h3>
+            <p className="modal-sub">{t.modal_add_sub}</p>
             {modalError && <div style={{padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:13,color:"var(--neg-fg)",marginBottom:14}}>{modalError}</div>}
             <div className="modal-group">
-              <label className="modal-label">Reviewer Name</label>
-              <input className="modal-input" placeholder="e.g. James T." value={newReview.reviewer_name} onChange={(e) => setNewReview({ ...newReview, reviewer_name: e.target.value })} />
+              <label className="modal-label">{t.label_reviewer}</label>
+              <input className="modal-input" placeholder={t.placeholder_name} value={newReview.reviewer_name} onChange={(e) => setNewReview({ ...newReview, reviewer_name: e.target.value })} />
             </div>
             <div className="modal-group">
-              <label className="modal-label">Star Rating</label>
+              <label className="modal-label">{t.label_stars}</label>
               <div className="star-select">
                 {[1,2,3,4,5].map((n) => (
                   <button key={n} className={`star-btn${newReview.stars >= n ? " active" : ""}`} onClick={() => setNewReview({ ...newReview, stars: n })}>★</button>
@@ -702,12 +967,46 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="modal-group">
-              <label className="modal-label">Review Content</label>
-              <textarea className="modal-input modal-textarea" placeholder="Paste the review text here…" value={newReview.content} onChange={(e) => setNewReview({ ...newReview, content: e.target.value })} />
+              <label className="modal-label">{t.label_content}</label>
+              <textarea className="modal-input modal-textarea" placeholder={t.placeholder_content} value={newReview.content} onChange={(e) => setNewReview({ ...newReview, content: e.target.value })} />
             </div>
             <div className="modal-actions">
-              <button className="modal-cancel" onClick={() => setShowAddModal(false)}>Cancel</button>
-              <button className="modal-save" onClick={handleAddReview} disabled={savingReview || !newReview.content}>{savingReview ? "Saving…" : "Add Review"}</button>
+              <button className="modal-cancel" onClick={() => setShowAddModal(false)}>{t.cancel}</button>
+              <button className="modal-save" onClick={handleAddReview} disabled={savingReview || !newReview.content}>{savingReview ? t.saving : t.modal_add_title}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV UPLOAD MODAL */}
+      {showCsvModal && (
+        <div className="modal-overlay" onClick={() => setShowCsvModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t.csv_title}</h3>
+            <p className="modal-sub">{t.csv_sub}</p>
+            <label className="csv-drop">
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => { setCsvFile(e.target.files?.[0] || null); setCsvResult(null); setCsvError(""); }}
+              />
+              <div className="csv-drop-icon">📄</div>
+              <div className="csv-drop-text">{t.csv_select}</div>
+              {csvFile && <div className="csv-drop-filename">{csvFile.name}</div>}
+            </label>
+            <div className="csv-format-hint">{t.csv_format}</div>
+            <a className="csv-help-link" href="/help#csv-import" target="_blank" rel="noreferrer">{t.csv_help}</a>
+            {csvError && (
+              <div style={{padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:13,color:"var(--neg-fg)",marginTop:12}}>{csvError}</div>
+            )}
+            {csvResult && (
+              <div className="csv-success">{t.csv_result(csvResult.inserted, csvResult.skipped_duplicates, csvResult.total)}</div>
+            )}
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => setShowCsvModal(false)}>{t.cancel}</button>
+              <button className="modal-save" onClick={handleCsvUpload} disabled={!csvFile || csvUploading}>
+                {csvUploading ? t.csv_uploading : t.csv_upload}
+              </button>
             </div>
           </div>
         </div>

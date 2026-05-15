@@ -12,7 +12,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createServiceClient } from "@/lib/supabase-server";
-import { fetchPlaceDetails, getOpenAI, ingestReview } from "@/lib/places-sync";
+import { fetchPlaceReviewsMultiSort, getOpenAI, ingestReview } from "@/lib/places-sync";
 import { sendDigestEmail } from "@/app/api/email/digest/route";
 
 export async function POST(req) {
@@ -57,9 +57,10 @@ export async function POST(req) {
       return Response.json({ ok: true, alreadySynced: true, new_reviews: 0 });
     }
 
-    // ── Pull up to 5 reviews ──
-    const details = await fetchPlaceDetails(place_id, placesKey);
-    const reviews = (details.reviews || []).slice(0, 5);
+    // ── Pull as many historical reviews as Google will return,
+    //     across NEWEST / MOST_RELEVANT sort orders, deduped (up to ~15) ──
+    const details = await fetchPlaceReviewsMultiSort(place_id, placesKey);
+    const reviews = details.reviews || [];
 
     // Refresh cached rating
     if (typeof details.rating === "number" || typeof details.userRatingCount === "number") {

@@ -90,6 +90,30 @@ export default function OnboardingPage() {
   const [info, setInfo] = useState({ restaurant_name: "", restaurant_type: "Fine Dining", city: "", country: "", rating_goal: "4.8", rating_goal_months: "6" });
   const [googleConnected, setGoogleConnected] = useState(false);
   const [notif, setNotif] = useState({ email_notifications: true, notification_frequency: "immediately", crisis_alerts: true, weekly_report: false });
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
+  const [csvResult, setCsvResult] = useState(null);
+  const [csvError, setCsvError] = useState("");
+
+  const handleCsvUpload = async () => {
+    if (!csvFile) return;
+    setCsvUploading(true); setCsvError(""); setCsvResult(null);
+    try {
+      const text = await csvFile.text();
+      const res = await fetch("/api/reviews/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csv: text }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setCsvError(data.error || "Upload failed"); return; }
+      setCsvResult(data);
+    } catch (e) {
+      setCsvError(e.message);
+    } finally {
+      setCsvUploading(false);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -214,6 +238,45 @@ export default function OnboardingPage() {
                   </select>
                 </div>
               </div>
+            </div>
+            {/* OPTIONAL — Import past Google reviews via CSV */}
+            <div style={{marginTop:24,padding:"18px 20px",background:"rgba(201,168,76,.04)",border:"1px dashed var(--gold-border)",borderRadius:"var(--r)"}}>
+              <div style={{fontSize:13,fontWeight:700,color:"var(--gold-lt)",marginBottom:6}}>📄 Import past reviews (optional)</div>
+              <p style={{fontSize:12.5,color:"var(--text2)",lineHeight:1.6,marginBottom:12}}>
+                Have a CSV of your historical Google reviews? Upload it here to seed your dashboard. We'll dedupe and import them in bulk. You can also do this later from the dashboard.
+              </p>
+              <label style={{display:"inline-block",padding:"8px 14px",borderRadius:8,border:"1px solid var(--gold-border)",color:"var(--gold)",cursor:"pointer",fontSize:12.5,fontWeight:600,background:"transparent"}}>
+                {csvFile ? `📎 ${csvFile.name}` : "Choose CSV file"}
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  style={{display:"none"}}
+                  onChange={(e) => { setCsvFile(e.target.files?.[0] || null); setCsvResult(null); setCsvError(""); }}
+                />
+              </label>
+              {csvFile && !csvResult && (
+                <button
+                  className="btn-next"
+                  style={{display:"block",marginTop:10,padding:"8px 14px",fontSize:13}}
+                  onClick={handleCsvUpload}
+                  disabled={csvUploading}
+                >
+                  {csvUploading ? "Uploading…" : "Upload CSV"}
+                </button>
+              )}
+              {csvResult && (
+                <div style={{marginTop:10,padding:"8px 12px",background:"rgba(93,186,122,.08)",border:"1px solid rgba(93,186,122,.25)",borderRadius:8,fontSize:12.5,color:"var(--pos)"}}>
+                  ✓ Imported {csvResult.inserted} new · skipped {csvResult.skipped_duplicates} duplicate{csvResult.skipped_duplicates === 1 ? "" : "s"}
+                </div>
+              )}
+              {csvError && (
+                <div style={{marginTop:10,padding:"8px 12px",background:"rgba(224,96,96,.1)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:12.5,color:"var(--neg)"}}>
+                  {csvError}
+                </div>
+              )}
+              <a href="/help#csv-import" target="_blank" style={{display:"inline-block",marginTop:8,fontSize:11.5,color:"var(--gold)",textDecoration:"none"}}>
+                How to export from Google Maps →
+              </a>
             </div>
             <div className="actions"><button className="btn-next" onClick={handleInfoNext}>Continue →</button></div>
           </div>
