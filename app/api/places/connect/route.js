@@ -59,8 +59,20 @@ export async function POST(req) {
 
     // ── Pull as many historical reviews as Google will return,
     //     across NEWEST / MOST_RELEVANT sort orders, deduped (up to ~15) ──
+    console.log(`[places/connect] user=${user.id} email=${profile.email} → place_id=${place_id} name="${place_name || "?"}"`);
     const details = await fetchPlaceReviewsMultiSort(place_id, placesKey);
     const reviews = details.reviews || [];
+    const fetchedName = details.displayName?.text || details.displayName || null;
+    console.log(
+      `[places/connect]   Places returned displayName="${fetchedName || "?"}" reviews=${reviews.length} ` +
+      `rating=${details.rating ?? "?"} count=${details.userRatingCount ?? "?"}`
+    );
+    if (place_name && fetchedName && place_name !== fetchedName) {
+      console.warn(
+        `[places/connect]   ⚠ name mismatch — search picked "${place_name}" but Place Details now says "${fetchedName}". ` +
+        `Proceeding with place_id=${place_id} as the source of truth.`
+      );
+    }
 
     // Refresh cached rating
     if (typeof details.rating === "number" || typeof details.userRatingCount === "number") {

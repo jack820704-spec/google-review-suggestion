@@ -101,12 +101,22 @@ const CSS = `
   .btn-disconnect-places:hover{border-color:rgba(224,96,96,.35);color:var(--neg)}
   .places-err{padding:8px 12px;background:rgba(224,96,96,.1);border:1px solid rgba(224,96,96,.25);border-radius:8px;font-size:12.5px;color:var(--neg);margin-top:8px}
   .places-locked{font-size:12.5px;color:var(--text3);font-style:italic}
+  .places-verify-warning{padding:10px 14px;background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.28);border-radius:8px;font-size:12.5px;color:#e8b84b;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+  .places-verify-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+  .places-maps-link{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--gold);text-decoration:none;font-weight:600}
+  .places-maps-link:hover{text-decoration:underline}
+  .places-connected-maps{font-size:11.5px;color:var(--gold);text-decoration:none;font-weight:600;margin-top:6px;display:inline-block}
+  .places-connected-maps:hover{text-decoration:underline}
+  .places-connected-verify{padding:10px 14px;background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.22);border-radius:8px;font-size:12px;color:var(--text2);margin-top:10px;line-height:1.55}
 `;
 
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];
 const FREQ_OPTIONS = [{ value:"immediately",label:"Immediately" },{ value:"daily",label:"Daily Digest" },{ value:"weekly",label:"Weekly Only" }];
 
 const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "revuly.dev";
+
+// Stable Google Maps URL for any place_id — Google redirects this to the canonical listing.
+const mapsUrlFor = (placeId) => `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId || "")}`;
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
@@ -333,11 +343,24 @@ export default function SettingsPage() {
                       {profile.place_user_rating_count != null && <span style={{color:"var(--text2)"}}> · {profile.place_user_rating_count.toLocaleString()} reviews</span>}
                     </div>
                     {profile.place_address && <div className="places-connected-addr" title={profile.place_address}>{profile.place_address}</div>}
+                    <a
+                      className="places-connected-maps"
+                      href={mapsUrlFor(profile.place_id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      🗺 View on Google Maps →
+                    </a>
                   </div>
                   <button className="btn-disconnect-places" onClick={handlePlacesDisconnect} disabled={placesSaving}>Disconnect</button>
                 </div>
-                <p style={{fontSize:12.5,color:"var(--text2)",margin:0,lineHeight:1.6}}>
-                  New Google reviews are pulled automatically every 6 hours. You'll receive AI reply suggestions by email the moment a new review lands.
+                <div className="places-connected-verify">
+                  <strong style={{color:"var(--text1)"}}>⚠ Please verify this is your correct business.</strong>{" "}
+                  Open the Google Maps link above and confirm the name, address, and rating match your venue.
+                  Wrong business connected? Click <strong>Disconnect</strong> and search again.
+                </div>
+                <p style={{fontSize:12.5,color:"var(--text2)",margin:"12px 0 0",lineHeight:1.6}}>
+                  New Google reviews are pulled automatically every day. You'll receive AI reply suggestions by email the moment a new review lands.
                 </p>
               </>
             ) : (
@@ -358,19 +381,40 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 {placesResults && placesResults.length > 0 && (
-                  <div className="places-results">
-                    {placesResults.map((r) => (
-                      <div key={r.place_id} className="places-result" onClick={() => !placesSaving && handlePlacesSelect(r)}>
-                        <div className="places-result-name">{r.name}</div>
-                        <div className="places-result-meta">
-                          {r.rating != null ? `${r.rating.toFixed(1)} ★` : "No rating"}
-                          {r.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>}
-                          {r.type && <span style={{color:"var(--text2)"}}> · {r.type}</span>}
-                        </div>
-                        {r.address && <div className="places-result-addr">{r.address}</div>}
-                      </div>
-                    ))}
-                  </div>
+                  <>
+                    <div className="places-verify-warning">
+                      <span className="places-verify-icon">⚠</span>
+                      <span>
+                        <strong>Please verify this is your correct business before connecting.</strong>{" "}
+                        Click the <em>View on Google Maps</em> link on each result and confirm the name, address, and photos match your venue.
+                      </span>
+                    </div>
+                    <div className="places-results">
+                      {placesResults.map((r) => {
+                        const mapsHref = r.maps_uri || mapsUrlFor(r.place_id);
+                        return (
+                          <div key={r.place_id} className="places-result" onClick={() => !placesSaving && handlePlacesSelect(r)}>
+                            <div className="places-result-name">{r.name}</div>
+                            <div className="places-result-meta">
+                              {r.rating != null ? `${r.rating.toFixed(1)} ★` : "No rating"}
+                              {r.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>}
+                              {r.type && <span style={{color:"var(--text2)"}}> · {r.type}</span>}
+                            </div>
+                            {r.address && <div className="places-result-addr">{r.address}</div>}
+                            <a
+                              className="places-maps-link"
+                              href={mapsHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              🗺 View on Google Maps →
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
                 {placesResults && placesResults.length === 0 && !placesError && (
                   <p style={{fontSize:13,color:"var(--text3)",marginTop:8}}>No matches found. Try refining the search.</p>

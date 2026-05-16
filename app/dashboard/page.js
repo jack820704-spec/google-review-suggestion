@@ -463,10 +463,16 @@ export default function DashboardPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.location.href = "/login"; return; }
 
-    const [{ data: prof }, { data: revs }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", user.id).single(),
-      supabase.from("reviews").select("*").eq("user_id", user.id).order("review_date", { ascending: false }),
-    ]);
+    const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+
+    // Filter reviews so reconnecting a different Google business never mixes data.
+    // Match either the current place_id, or NULL (manual / CSV / inbound entries with no
+    // clear place provenance — those stay visible across business changes).
+    let reviewsQuery = supabase.from("reviews").select("*").eq("user_id", user.id);
+    if (prof?.place_id) {
+      reviewsQuery = reviewsQuery.or(`place_id.eq.${prof.place_id},place_id.is.null`);
+    }
+    const { data: revs } = await reviewsQuery.order("review_date", { ascending: false });
 
     setProfile(prof);
     setReviews(revs || []);

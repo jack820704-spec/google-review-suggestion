@@ -88,10 +88,24 @@ async function runSync(req) {
 
     try {
       // First sync pulls multi-sort (~15 reviews); ongoing cron uses the cheaper default fetch.
+      log(`user=${profile.id} email=${profile.email} plan=${plan} → fetching place_id=${profile.place_id} (cached name: "${profile.place_name || "?"}")`);
+
       const details = profile.place_first_sync_done
         ? await fetchPlaceDetails(profile.place_id, placesKey)
         : await fetchPlaceReviewsMultiSort(profile.place_id, placesKey);
       const reviewsFromGoogle = details.reviews || [];
+
+      const fetchedName = details.displayName?.text || details.displayName || null;
+      log(
+        `  Places returned displayName="${fetchedName || "?"}" reviews=${reviewsFromGoogle.length} ` +
+        `rating=${details.rating ?? "?"} count=${details.userRatingCount ?? "?"}`
+      );
+      if (profile.place_name && fetchedName && profile.place_name !== fetchedName) {
+        log(
+          `  ⚠ name drift: cached "${profile.place_name}" vs current "${fetchedName}". ` +
+          `Will continue using place_id=${profile.place_id} (the source of truth).`
+        );
+      }
 
       // Refresh cached rating snapshot
       if (typeof details.rating === "number" || typeof details.userRatingCount === "number") {
