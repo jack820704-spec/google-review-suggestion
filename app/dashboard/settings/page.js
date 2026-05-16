@@ -71,12 +71,6 @@ const CSS = `
   .danger-zone p{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6}
   .btn-danger{padding:10px 20px;border-radius:var(--r);font-size:13.5px;font-weight:700;font-family:inherit;color:var(--neg);background:transparent;border:1px solid rgba(224,96,96,.3);cursor:pointer;transition:all .2s}
   .btn-danger:hover{background:rgba(224,96,96,.1)}
-  .inbound-email-box{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:10px 14px;margin-bottom:14px}
-  .inbound-email-addr{flex:1;font-family:monospace;font-size:13px;color:var(--gold-lt);word-break:break-all}
-  .btn-copy{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;border:1px solid var(--gold-border);background:transparent;color:var(--gold);transition:all .2s;white-space:nowrap}
-  .btn-copy:hover{background:rgba(201,168,76,.1)}
-  .inbound-steps{margin:0;padding:0 0 0 18px;font-size:13px;color:var(--text2);line-height:2}
-  .inbound-steps li{margin:0}
 
   /* PLACES SEARCH */
   .places-search-row{display:flex;gap:10px;margin-bottom:12px}
@@ -132,9 +126,6 @@ const CSS = `
     /* Plan & usage row */
     .plan-row{flex-direction:column;align-items:flex-start;gap:8px}
     .btn-upgrade{width:100%}
-    /* Email inbound box: better wrap */
-    .inbound-email-box{flex-direction:column;align-items:stretch;gap:8px;padding:12px}
-    .btn-copy{width:100%}
     /* Keyword chips wrap nicely (already do, just tighter) */
     .kw-add-row{flex-direction:column;gap:6px}
     .kw-input{width:100%}
@@ -152,18 +143,14 @@ const CSS = `
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];
 const FREQ_OPTIONS = [{ value:"immediately",label:"Immediately" },{ value:"daily",label:"Daily Digest" },{ value:"weekly",label:"Weekly Only" }];
 
-const INBOUND_DOMAIN = process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN || "revuly.dev";
-
 // Stable Google Maps URL for any place_id — Google redirects this to the canonical listing.
 const mapsUrlFor = (placeId) => `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId || "")}`;
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
-  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
-  const [copied, setCopied] = useState(false);
   const [newKw, setNewKw] = useState("");
   const [placesQuery, setPlacesQuery] = useState("");
   const [placesResults, setPlacesResults] = useState(null); // null = not searched, [] = no matches
@@ -175,14 +162,8 @@ export default function SettingsPage() {
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { window.location.href = "/login"; return; }
-      setUserId(user.id);
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      const derived = `user-${user.id}@${INBOUND_DOMAIN}`;
-      // Persist derived inbound_email if it's missing or stale
-      if (data && data.inbound_email !== derived) {
-        await supabase.from("profiles").update({ inbound_email: derived }).eq("id", user.id);
-      }
-      setProfile({ ...(data || {}), inbound_email: derived });
+      setProfile(data || {});
       setLoading(false);
     });
   }, []);
@@ -220,13 +201,6 @@ export default function SettingsPage() {
       setSuccess("Settings saved successfully.");
       setTimeout(() => setSuccess(""), 3000);
     }
-  };
-
-  const inboundEmail = userId ? `user-${userId}@${INBOUND_DOMAIN}` : "";
-  const copyInbound = () => {
-    navigator.clipboard.writeText(inboundEmail);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const addKw = () => {
@@ -478,30 +452,6 @@ export default function SettingsPage() {
                 {profile.google_connected ? "Reconnect" : "Connect Google Business"}
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* INBOUND EMAIL FORWARDING */}
-        <div className="section">
-          <div className="section-header">Auto-Import via Email Forwarding</div>
-          <div className="card">
-            <p style={{fontSize:13.5,color:"var(--text2)",marginBottom:14,lineHeight:1.6}}>
-              Forward your Google review notification emails to your unique Revuly address below.
-              Each new review is parsed automatically, three AI reply suggestions are generated, and
-              we email them straight to you.
-            </p>
-            <div className="inbound-email-box">
-              <span className="inbound-email-addr">{inboundEmail}</span>
-              <button className="btn-copy" onClick={copyInbound}>{copied ? "Copied ✓" : "Copy"}</button>
-            </div>
-            <p style={{fontSize:12,fontWeight:700,letterSpacing:".3px",color:"var(--text3)",textTransform:"uppercase",marginBottom:8}}>Gmail Setup (recommended)</p>
-            <ol className="inbound-steps">
-              <li>Open <strong style={{color:"var(--text1)"}}>Gmail → ⚙️ Settings → See all settings → Forwarding and POP/IMAP</strong></li>
-              <li>Click <strong style={{color:"var(--text1)"}}>Add a forwarding address</strong> and paste the address above, then confirm via the verification email we forward back to you</li>
-              <li>Go to the <strong style={{color:"var(--text1)"}}>Filters and Blocked Addresses</strong> tab and click <strong style={{color:"var(--text1)"}}>Create a new filter</strong></li>
-              <li>Set <em style={{color:"var(--text2)"}}>From: noreply-business-profile@google.com</em> and <em style={{color:"var(--text2)"}}>Subject contains: review</em>, then click <strong style={{color:"var(--text1)"}}>Create filter</strong></li>
-              <li>Choose <strong style={{color:"var(--text1)"}}>Forward it to:</strong> and select your Revuly address — done. New Google reviews now flow into Revuly automatically.</li>
-            </ol>
           </div>
         </div>
 
