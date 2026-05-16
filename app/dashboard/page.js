@@ -109,9 +109,10 @@ const CSS = `
   .days-unanswered{padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.3px;background:rgba(232,184,75,.12);color:var(--neu-fg);border:1px solid rgba(232,184,75,.25);margin-left:auto}
   .days-unanswered.urgent{background:rgba(224,96,96,.12);color:var(--neg-fg);border-color:rgba(224,96,96,.25)}
 
-  /* LANGUAGE TOGGLE in topbar */
-  .lang-toggle{padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--text2);cursor:pointer;font-size:11.5px;font-weight:700;font-family:inherit;letter-spacing:.5px;transition:all .18s}
-  .lang-toggle:hover{border-color:var(--gold-border);color:var(--gold-lt)}
+  /* LANGUAGE TOGGLE in topbar — bright, always-visible chip */
+  .lang-toggle{padding:5px 12px;border-radius:8px;border:1px solid var(--gold-border);background:rgba(201,168,76,.1);color:var(--gold-lt);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;letter-spacing:.5px;transition:all .18s;display:inline-flex;align-items:center;gap:5px;min-height:28px}
+  .lang-toggle::before{content:"🌐";font-size:11px}
+  .lang-toggle:hover{background:rgba(201,168,76,.22);color:var(--gold-lt);border-color:var(--gold)}
 
   /* CSV MODAL */
   .csv-drop{padding:24px;border:1.5px dashed rgba(201,168,76,.3);border-radius:var(--r);background:rgba(201,168,76,.03);text-align:center;cursor:pointer;transition:all .2s}
@@ -415,7 +416,7 @@ const T = {
     delete_btn: "Delete",
     editor_empty_title: "Select a review to generate AI replies",
     editor_empty_sub: "Click any review on the left to open the AI reply editor. Three different reply styles will be generated for you.",
-    lang_label: "Lang:",
+    lang_label: "Reply in:",
     over_limit: (n) => `You've used all ${n} AI replies this month.`,
     upgrade_plan: "Upgrade Plan →",
     btn_generate: "✦ Generate AI Replies",
@@ -423,7 +424,7 @@ const T = {
     btn_generating: "Generating…",
     btn_copy: "Copy",
     btn_copied: "Copied!",
-    btn_regen: "Regen",
+    btn_regen: "Regenerate",
     ready_paste: "✓ Ready to paste into Google",
     mark_replied: "Mark Replied",
     ys_learning_title: "Your Style — Learning",
@@ -452,6 +453,20 @@ const T = {
     mr_skip: "Skip — just mark replied",
     mr_learned_just_now: "✓ Your style has been learned",
     mr_progress: (have, need) => `Pro style learning: ${have} / ${need} replies analyzed`,
+    // Plan badge / topbar tooltips
+    plan_free_trial: "Free Trial",
+    plan_starter: "Starter",
+    plan_growth: "Growth",
+    plan_pro: "Pro",
+    tt_settings: "Settings",
+    tt_help: "Help",
+    tt_signout: "Sign Out",
+    // Sentiment + crisis labels rendered inside review cards
+    sent_positive: "positive",
+    sent_neutral: "neutral",
+    sent_negative: "negative",
+    crisis_label: "🚨 Crisis",
+    days_ago: (n) => (n === 0 ? "today" : n === 1 ? "1 day ago" : `${n} days ago`),
   },
   zh: {
     live: "即時",
@@ -498,7 +513,7 @@ const T = {
     delete_btn: "刪除",
     editor_empty_title: "選擇一則評論以產生 AI 回覆",
     editor_empty_sub: "在左側點擊任一評論開啟 AI 回覆編輯器，會自動產生三種不同風格的回覆。",
-    lang_label: "語言：",
+    lang_label: "回覆語言：",
     over_limit: (n) => `本月 ${n} 則 AI 回覆已用完。`,
     upgrade_plan: "升級方案 →",
     btn_generate: "✦ 產生 AI 回覆",
@@ -506,7 +521,7 @@ const T = {
     btn_generating: "產生中…",
     btn_copy: "複製",
     btn_copied: "已複製！",
-    btn_regen: "重產",
+    btn_regen: "重新生成",
     ready_paste: "✓ 已複製，可直接貼到 Google",
     mark_replied: "標記已回覆",
     ys_learning_title: "你的風格 — 學習中",
@@ -535,8 +550,25 @@ const T = {
     mr_skip: "略過，只標已回覆",
     mr_learned_just_now: "✓ 風格學習完成",
     mr_progress: (have, need) => `Pro 風格學習：${have} / ${need} 則回覆已分析`,
+    // Plan badge / topbar tooltips
+    plan_free_trial: "免費試用",
+    plan_starter: "入門版",
+    plan_growth: "成長版",
+    plan_pro: "專業版",
+    tt_settings: "設定",
+    tt_help: "說明",
+    tt_signout: "登出",
+    // Sentiment + crisis labels rendered inside review cards
+    sent_positive: "好評",
+    sent_neutral: "普通",
+    sent_negative: "差評",
+    crisis_label: "🚨 危機",
+    days_ago: (n) => (n === 0 ? "今天" : `${n} 天前`),
   },
 };
+
+// Resolve a plan's badge label by plan key, in the current language.
+const PLAN_LABEL_KEY = { free_trial: "plan_free_trial", starter: "plan_starter", growth: "plan_growth", pro: "plan_pro" };
 
 function analyseKeywords(reviews) {
   return KEYWORD_CATS.map((cat) => {
@@ -880,21 +912,22 @@ export default function DashboardPage() {
       <div className="topbar">
         <div className="topbar-left">
           <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
-          <div className="live-badge"><span className="live-dot" />Live</div>
+          <div className="live-badge"><span className="live-dot" />{t.live}</div>
         </div>
         <div className="topbar-right">
           {profile?.restaurant_name && <span className="restaurant-name">{profile.restaurant_name}</span>}
-          <span className="plan-badge">{plan.name}</span>
+          <span className="plan-badge">{t[PLAN_LABEL_KEY[planKey]] || plan.name}</span>
           <button
             className="lang-toggle"
             onClick={() => setLang(lang === "en" ? "zh" : "en")}
             title={lang === "en" ? "切換成中文" : "Switch to English"}
+            aria-label={lang === "en" ? "Switch to Chinese" : "Switch to English"}
           >
             {lang === "en" ? "中文" : "EN"}
           </button>
-          <button className="icon-btn" onClick={() => window.location.href = "/dashboard/settings"} title="Settings">⚙</button>
-          <button className="icon-btn" onClick={() => window.location.href = "/help"} title="Help">?</button>
-          <button className="icon-btn" onClick={handleLogout} title="Logout">↩</button>
+          <button className="icon-btn" onClick={() => window.location.href = "/dashboard/settings"} title={t.tt_settings}>⚙</button>
+          <button className="icon-btn" onClick={() => window.location.href = "/help"} title={t.tt_help}>?</button>
+          <button className="icon-btn" onClick={handleLogout} title={t.tt_signout}>↩</button>
         </div>
       </div>
 
@@ -1087,8 +1120,8 @@ export default function DashboardPage() {
                   <span className="review-name">{review.reviewer_name}</span>
                   <span className="stars">{starsDisplay(review.stars)}</span>
                   <span className="review-date">{new Date(review.review_date).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                  <span className={`sentiment-tag sent-${review.sentiment}`}>{review.sentiment}</span>
-                  {review.is_crisis && <span className="crisis-tag">🚨 Crisis</span>}
+                  <span className={`sentiment-tag sent-${review.sentiment}`}>{t[`sent_${review.sentiment}`] || review.sentiment}</span>
+                  {review.is_crisis && <span className="crisis-tag">{t.crisis_label}</span>}
                   {reviewTab === "needs_reply" && (
                     <span className={`days-unanswered${days >= 3 ? " urgent" : ""}`}>{t.days_unanswered(days)}</span>
                   )}
@@ -1131,7 +1164,7 @@ export default function DashboardPage() {
                 <div className="editor-review-name">{selectedReview.reviewer_name}</div>
                 <div className="editor-review-meta">
                   <span className="stars" style={{fontSize:13}}>{starsDisplay(selectedReview.stars)}</span>
-                  <span className={`sentiment-tag sent-${selectedReview.sentiment}`}>{selectedReview.sentiment}</span>
+                  <span className={`sentiment-tag sent-${selectedReview.sentiment}`}>{t[`sent_${selectedReview.sentiment}`] || selectedReview.sentiment}</span>
                 </div>
               </div>
               <div className="editor-review-text">"{selectedReview.content}"</div>
