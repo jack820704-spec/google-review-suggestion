@@ -71,6 +71,29 @@ const CSS = `
   .btn-back{padding:13px 20px;border-radius:var(--r);font-size:15px;font-weight:600;font-family:inherit;color:var(--text2);background:transparent;border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .2s}
   .btn-back:hover{border-color:var(--gold-border);color:var(--text1)}
   .error-msg{padding:10px 14px;background:rgba(224,96,96,.1);border:1px solid rgba(224,96,96,.3);border-radius:8px;font-size:13.5px;color:var(--neg);margin-bottom:16px}
+
+  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  @media (max-width: 768px) {
+    .page{padding:24px 4vw 60px}
+    .logo{font-size:18px;margin-bottom:28px}
+    .progress-wrap{margin-bottom:28px}
+    .progress-labels{flex-wrap:nowrap;gap:6px}
+    .prog-label{font-size:10.5px;letter-spacing:.2px;flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card{padding:24px 20px;border-radius:14px}
+    .card-title{font-size:22px}
+    .card-sub{font-size:13.5px;margin-bottom:24px;line-height:1.55}
+    /* Stack side-by-side form rows */
+    .form-row{grid-template-columns:1fr;gap:0}
+    .goal-row{grid-template-columns:1fr;gap:8px}
+    .goal-sep{display:none}
+    .actions{flex-direction:column-reverse;gap:10px}
+    .btn-back,.btn-next{width:100%}
+    .google-card{padding:20px}
+    .freq-options{gap:6px}
+    .freq-opt{padding:6px 12px;font-size:12px}
+    .toggle-info h4{font-size:13.5px}
+    .toggle-info p{font-size:12px}
+  }
 `;
 
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];

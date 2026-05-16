@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 import { getPlan, usagePercent, isOverLimit, canUseFeature, trialDaysLeft, isTrialExpired } from "@/lib/plans";
 
@@ -125,6 +125,14 @@ const CSS = `
   .csv-help-link:hover{text-decoration:underline}
   .csv-success{padding:10px 14px;background:rgba(93,186,122,.1);border:1px solid rgba(93,186,122,.3);border-radius:8px;font-size:13px;color:var(--pos-fg);margin-top:12px}
 
+  /* Mobile-only widgets are hidden on desktop */
+  .mobile-only{display:none}
+  .filter-row{display:contents}
+  .mobile-drawer-handle{display:none}
+  .mobile-drawer-close{display:none}
+  .mobile-drawer-backdrop{display:none}
+  .mobile-kw-toggle{display:none}
+
   /* MIDDLE COL */
   .mid-col{background:var(--bg);border-right:1px solid rgba(255,255,255,.06)}
   .mid-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:5}
@@ -213,6 +221,116 @@ const CSS = `
   .empty-reviews{padding:60px 20px;text-align:center;color:var(--text3)}
   .empty-reviews h4{font-size:15px;color:var(--text2);margin-bottom:8px}
   .empty-reviews p{font-size:13px;line-height:1.6}
+
+  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  @media (max-width: 768px) {
+    body{overflow:auto;height:auto;min-height:100vh}
+
+    /* Topbar — compact, hide non-essential elements */
+    .topbar{padding:0 12px;gap:6px;height:54px;flex-wrap:nowrap}
+    .topbar-left{gap:8px;min-width:0;flex-shrink:1}
+    .live-badge{display:none}
+    .restaurant-name{display:none}
+    .plan-badge{font-size:10px;padding:2px 7px}
+    .lang-toggle{padding:3px 8px;font-size:11px}
+    .topbar-right{gap:6px}
+    .icon-btn{width:30px;height:30px;font-size:14px}
+    .logo{font-size:15px}
+    .logo-icon{width:22px;height:22px;font-size:11px}
+
+    /* Body: stack everything */
+    .body{display:flex;flex-direction:column;height:auto;min-height:calc(100vh - 54px)}
+    .col{height:auto;overflow:visible;width:100%}
+
+    /* Left col: now a horizontal-friendly summary above the review list */
+    .left-col{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);padding:12px}
+    .usage-card{padding:11px 12px;margin-bottom:10px}
+
+    /* Stats: keep 2×2 grid (compact on mobile) */
+    .stat-grid{gap:8px;margin-bottom:10px}
+    .stat-card{padding:10px}
+    .stat-n{font-size:18px}
+    .stat-l{font-size:10.5px}
+
+    /* Filters: horizontal scroll row */
+    .section-label{margin:10px 0 6px}
+    .filter-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;margin-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .filter-row::-webkit-scrollbar{display:none}
+    .filter-row .filter-btn{flex-shrink:0;width:auto;padding:6px 12px;font-size:12.5px;background:var(--surface);border:1px solid rgba(255,255,255,.08)}
+    .filter-row .filter-btn.active{background:rgba(201,168,76,.12);border-color:var(--gold-border);color:var(--gold-lt)}
+    .filter-row .filter-count{margin-left:5px}
+
+    /* Trial banner more compact */
+    .trial-banner{padding:10px 12px;margin-bottom:10px}
+    .trial-banner-days{font-size:18px}
+    .trial-banner-sub{font-size:11px}
+
+    /* Competitor section: collapse to keep above-the-fold short */
+    .comp-card{padding:8px 10px}
+    .comp-name{font-size:11.5px}
+    .comp-url{font-size:10px}
+
+    /* Keyword Intelligence: collapsible */
+    .mobile-kw-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 10px;background:transparent;border:1px solid rgba(255,255,255,.06);border-radius:8px;color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;margin-top:4px}
+    .mobile-kw-toggle:hover{border-color:var(--gold-border)}
+    .mobile-kw-toggle .chev{transition:transform .25s;color:var(--gold)}
+    .mobile-kw-toggle.open .chev{transform:rotate(180deg)}
+    .keyword-section.collapsed{display:none}
+
+    /* Middle col */
+    .mid-col{border-right:none}
+    .mid-header{padding:10px 12px}
+    .tabs{height:auto}
+    .tab{padding:6px 4px;margin-right:14px;font-size:12.5px}
+    .btn-csv{padding:5px 10px;font-size:11.5px}
+    .btn-add{padding:5px 11px;font-size:12px}
+    .review-card{padding:12px}
+    .review-meta{gap:6px}
+    .review-name{font-size:13px}
+    .review-text{font-size:13px;-webkit-line-clamp:3}
+    .review-date{font-size:11px}
+
+    /* Right col → fixed bottom drawer */
+    .right-col{
+      position:fixed;
+      left:0;right:0;bottom:0;top:auto;
+      width:100%;
+      max-height:90vh;height:90vh;
+      transform:translateY(100%);
+      transition:transform .32s cubic-bezier(.4,0,.2,1);
+      z-index:101;
+      border-radius:18px 18px 0 0;
+      box-shadow:0 -10px 40px rgba(0,0,0,.55);
+      border-top:1px solid rgba(201,168,76,.15);
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    .right-col.mobile-open{transform:translateY(0)}
+
+    .mobile-drawer-handle{display:flex;justify-content:center;align-items:center;padding:10px 0 6px;position:sticky;top:0;background:var(--bg2);z-index:5;cursor:grab;touch-action:none}
+    .mobile-drawer-handle::after{content:'';width:44px;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}
+
+    .mobile-drawer-close{display:flex;position:absolute;top:8px;right:10px;width:32px;height:32px;border:none;background:rgba(255,255,255,.06);color:var(--text2);border-radius:50%;align-items:center;justify-content:center;font-size:16px;cursor:pointer;z-index:6}
+    .mobile-drawer-close:hover{background:rgba(255,255,255,.1);color:var(--text1)}
+
+    .mobile-drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100}
+    .mobile-drawer-backdrop.open{display:block;animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    .editor-header{padding-top:10px}
+    .style-tabs{padding:10px 12px;flex-wrap:wrap;gap:6px}
+    .style-tab{flex:1 1 auto;min-width:0;padding:8px 6px;font-size:11.5px}
+    .lang-row{padding:10px 12px;gap:8px}
+    .generate-area{padding:14px 12px}
+    .reply-cards{padding:10px 12px}
+    .reply-card{padding:12px}
+    .reply-text{font-size:13px}
+
+    /* Modal stays usable on small screens */
+    .modal{padding:22px 18px;max-height:90vh;overflow-y:auto}
+    .modal h3{font-size:18px}
+    .modal-actions{position:sticky;bottom:0;background:var(--surface);padding-top:8px}
+  }
 `;
 
 const KEYWORD_CATS = [
@@ -456,6 +574,11 @@ export default function DashboardPage() {
   const [csvUploading, setCsvUploading] = useState(false);
   const [csvResult, setCsvResult] = useState(null);
   const [csvError, setCsvError] = useState("");
+  const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
+  const [keywordExpanded, setKeywordExpanded] = useState(false);
+  const drawerTouchStartY = useRef(null);
+  const drawerTouchDelta = useRef(0);
+  const drawerRef = useRef(null);
   const t = T[lang];
   const supabase = createClient();
 
@@ -480,6 +603,43 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Auto-open the bottom drawer on mobile when a review is selected;
+  // desktop just shows the editor in the right column as usual.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (selectedReview && window.innerWidth <= 768) setMobileEditorOpen(true);
+  }, [selectedReview]);
+
+  const closeMobileDrawer = () => {
+    setMobileEditorOpen(false);
+    // Reset translate on the drawer node so the next open isn't dragged-down.
+    if (drawerRef.current) drawerRef.current.style.transform = "";
+  };
+
+  const onDrawerTouchStart = (e) => {
+    drawerTouchStartY.current = e.touches[0].clientY;
+    drawerTouchDelta.current = 0;
+  };
+  const onDrawerTouchMove = (e) => {
+    if (drawerTouchStartY.current == null) return;
+    const delta = e.touches[0].clientY - drawerTouchStartY.current;
+    if (delta < 0) return; // only react to downward drags
+    drawerTouchDelta.current = delta;
+    if (drawerRef.current) {
+      drawerRef.current.style.transform = `translateY(${delta}px)`;
+      drawerRef.current.style.transition = "none";
+    }
+  };
+  const onDrawerTouchEnd = () => {
+    if (drawerRef.current) {
+      drawerRef.current.style.transition = "";
+      drawerRef.current.style.transform = "";
+    }
+    if (drawerTouchDelta.current > 80) closeMobileDrawer();
+    drawerTouchStartY.current = null;
+    drawerTouchDelta.current = 0;
+  };
 
   const plan = getPlan(profile?.plan || "free_trial");
   const planKey = profile?.plan || "free_trial";
@@ -679,6 +839,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Backdrop behind the mobile drawer */}
+      <div
+        className={`mobile-drawer-backdrop${mobileEditorOpen ? " open" : ""}`}
+        onClick={closeMobileDrawer}
+      />
+
       <div className="body">
         {/* LEFT COL */}
         <div className="col left-col">
@@ -721,20 +887,22 @@ export default function DashboardPage() {
 
           {/* FILTERS */}
           <div className="section-label">{t.filters}</div>
-          {[
-            { key: "all", label: t.f_all, dot: "#555", count: reviews.length },
-            { key: "positive", label: t.f_positive, dot: "var(--pos-fg)", count: reviews.filter((r) => r.stars >= 4).length },
-            { key: "neutral", label: t.f_neutral, dot: "var(--neu-fg)", count: reviews.filter((r) => r.stars === 3).length },
-            { key: "negative", label: t.f_negative, dot: "var(--neg-fg)", count: reviews.filter((r) => r.stars <= 2).length },
-            { key: "unanswered", label: t.f_unanswered, dot: "var(--gold)", count: reviews.filter((r) => !r.replied).length },
-            { key: "crisis", label: t.f_crisis, dot: "var(--neg-fg)", count: reviews.filter((r) => r.is_crisis).length },
-          ].map((f) => (
-            <button key={f.key} className={`filter-btn${filter === f.key ? " active" : ""}`} onClick={() => { setFilter(f.key); setKwFilter(null); }}>
-              <span className="filter-dot" style={{ background: f.dot }} />
-              {f.label}
-              <span className="filter-count">{f.count}</span>
-            </button>
-          ))}
+          <div className="filter-row">
+            {[
+              { key: "all", label: t.f_all, dot: "#555", count: reviews.length },
+              { key: "positive", label: t.f_positive, dot: "var(--pos-fg)", count: reviews.filter((r) => r.stars >= 4).length },
+              { key: "neutral", label: t.f_neutral, dot: "var(--neu-fg)", count: reviews.filter((r) => r.stars === 3).length },
+              { key: "negative", label: t.f_negative, dot: "var(--neg-fg)", count: reviews.filter((r) => r.stars <= 2).length },
+              { key: "unanswered", label: t.f_unanswered, dot: "var(--gold)", count: reviews.filter((r) => !r.replied).length },
+              { key: "crisis", label: t.f_crisis, dot: "var(--neg-fg)", count: reviews.filter((r) => r.is_crisis).length },
+            ].map((f) => (
+              <button key={f.key} className={`filter-btn${filter === f.key ? " active" : ""}`} onClick={() => { setFilter(f.key); setKwFilter(null); }}>
+                <span className="filter-dot" style={{ background: f.dot }} />
+                {f.label}
+                <span className="filter-count">{f.count}</span>
+              </button>
+            ))}
+          </div>
 
           {/* COMPETITOR TRACKING — Pro only */}
           {canUseFeature(planKey, "competitor_tracking") && (
@@ -781,7 +949,16 @@ export default function DashboardPage() {
 
           {/* KEYWORD INTELLIGENCE */}
           <div className="section-label">{t.keyword_intel}</div>
-          <div className="keyword-section">
+          {/* Mobile: collapsible toggle (desktop hides via CSS) */}
+          <button
+            className={`mobile-kw-toggle${keywordExpanded ? " open" : ""}`}
+            onClick={() => setKeywordExpanded((v) => !v)}
+            aria-expanded={keywordExpanded}
+          >
+            <span>{keywords.length} {lang === "zh" ? "個關鍵字類別" : "categories"}</span>
+            <span className="chev">▼</span>
+          </button>
+          <div className={`keyword-section${keywordExpanded ? "" : " collapsed"}`}>
             {keywords.length === 0 && <p style={{fontSize:12,color:"var(--text3)",padding:"8px 4px"}}>{t.kw_empty}</p>}
             {keywords.map((kw) => {
               const total = kw.posCount + kw.negCount || 1;
@@ -867,8 +1044,22 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* RIGHT COL */}
-        <div className="col right-col">
+        {/* RIGHT COL — acts as a fixed bottom drawer on mobile */}
+        <div
+          className={`col right-col${mobileEditorOpen ? " mobile-open" : ""}`}
+          ref={drawerRef}
+        >
+          <div
+            className="mobile-drawer-handle"
+            onTouchStart={onDrawerTouchStart}
+            onTouchMove={onDrawerTouchMove}
+            onTouchEnd={onDrawerTouchEnd}
+          />
+          <button
+            className="mobile-drawer-close"
+            onClick={closeMobileDrawer}
+            aria-label="Close"
+          >✕</button>
           {!selectedReview ? (
             <div className="editor-empty">
               <div className="editor-empty-icon">✦</div>

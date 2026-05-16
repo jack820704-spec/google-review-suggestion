@@ -108,6 +108,45 @@ const CSS = `
   .places-connected-maps{font-size:11.5px;color:var(--gold);text-decoration:none;font-weight:600;margin-top:6px;display:inline-block}
   .places-connected-maps:hover{text-decoration:underline}
   .places-connected-verify{padding:10px 14px;background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.22);border-radius:8px;font-size:12px;color:var(--text2);margin-top:10px;line-height:1.55}
+
+  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  @media (max-width: 768px) {
+    .topbar{padding:0 12px;height:54px}
+    .logo{font-size:16px}
+    .wrap{padding:24px 4vw 60px;max-width:none}
+    .page-title{font-size:22px}
+    .page-sub{font-size:13px;margin-bottom:26px;line-height:1.55}
+    .section{margin-bottom:24px}
+    .section-header{font-size:10.5px;letter-spacing:1.2px;margin-bottom:10px}
+    .card{padding:16px}
+    /* Stack side-by-side form fields */
+    .form-row{grid-template-columns:1fr;gap:0}
+    .goal-row{grid-template-columns:1fr;gap:8px}
+    .goal-sep{display:none}
+    /* Connected card: stack info above the disconnect button */
+    .places-connected{flex-direction:column;align-items:stretch;gap:10px}
+    .btn-disconnect-places{width:100%;padding:8px}
+    /* Connect button row wraps */
+    .connect-row{flex-direction:column;align-items:stretch;gap:10px}
+    .btn-connect{width:100%;text-align:center}
+    /* Plan & usage row */
+    .plan-row{flex-direction:column;align-items:flex-start;gap:8px}
+    .btn-upgrade{width:100%}
+    /* Email inbound box: better wrap */
+    .inbound-email-box{flex-direction:column;align-items:stretch;gap:8px;padding:12px}
+    .btn-copy{width:100%}
+    /* Keyword chips wrap nicely (already do, just tighter) */
+    .kw-add-row{flex-direction:column;gap:6px}
+    .kw-input{width:100%}
+    .btn-add-kw{width:100%}
+    /* Frequency option pills wrap */
+    .freq-options{gap:6px}
+    .freq-opt{padding:6px 11px;font-size:12px}
+    /* Places search results: stack action */
+    .places-search-row{flex-direction:column;gap:8px}
+    .btn-places-search{width:100%}
+    .places-result{padding:12px}
+  }
 `;
 
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];

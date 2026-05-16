@@ -64,6 +64,16 @@ const CSS = `
   .form-footer{margin-top:28px;text-align:center;font-size:12px;color:var(--text3)}
   .form-footer a{color:var(--text3);text-decoration:none}
   .form-footer a:hover{color:var(--gold)}
+
+  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  @media (max-width: 800px) {
+    .form-panel{padding:32px 6vw}
+    .form-title{font-size:24px}
+    .form-sub{font-size:13.5px;margin-bottom:26px}
+    .form-input{padding:11px 13px;font-size:14px}
+    .btn-submit{padding:12px;font-size:14.5px}
+    .btn-google{padding:11px;font-size:13.5px}
+  }
 `;
 
 const BRAND_FEATS = [

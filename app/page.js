@@ -158,6 +158,67 @@ const CSS = `
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
   .reveal.visible{opacity:1;transform:translateY(0)}
   .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+  /* Hamburger button (mobile only) */
+  .nav-burger{display:none;width:38px;height:38px;border:1px solid var(--gold-border);background:transparent;border-radius:9px;color:var(--gold-lt);cursor:pointer;font-size:18px;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0}
+  .nav-burger:hover{background:rgba(201,168,76,.07)}
+
+  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  @media (max-width: 768px) {
+    .nav{padding:0 4vw;height:60px;gap:8px}
+    .nav-burger{display:flex}
+    .nav-links{position:absolute;top:60px;left:0;right:0;background:rgba(10,10,11,.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(201,168,76,.18);flex-direction:column;align-items:flex-start;gap:0;padding:0;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
+    .nav-links.open{max-height:340px;padding:14px 6vw}
+    .nav-links li{width:100%;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+    .nav-links li:last-child{border-bottom:none}
+    .nav-links a{display:block;font-size:15px;color:var(--text1);font-weight:500}
+    .nav-ctas{gap:6px}
+    .nav-ctas .btn-ghost{padding:6px 12px;font-size:12px}
+    .nav-ctas .btn-gold{padding:6px 14px;font-size:12px}
+
+    .hero{padding:100px 5vw 60px;min-height:auto}
+    .hero h1{font-size:38px;letter-spacing:-.3px;line-height:1.15}
+    .hero-sub{font-size:15px;margin-bottom:28px}
+    .hero-ctas{gap:10px}
+    .btn-primary{padding:12px 22px;font-size:14px;width:100%}
+    .btn-secondary{padding:12px 22px;font-size:14px;width:100%}
+    .hero-stats{gap:24px;margin-top:40px;padding-top:32px}
+    .stat-n{font-size:24px}
+    .stat-l{font-size:12px}
+
+    .section-wrap{padding:64px 5vw}
+    .section-title{font-size:26px}
+    .section-sub{font-size:14.5px;line-height:1.6}
+    .section-header{margin-bottom:36px}
+
+    .feat-grid{grid-template-columns:1fr;gap:14px}
+    .feat-card{padding:22px}
+    .how-grid{grid-template-columns:1fr;gap:16px}
+
+    /* Pricing — single column, Most Popular pinned to top */
+    .price-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto;gap:14px}
+    .price-card.popular{order:-1;border-color:var(--gold)}
+    .price-card{padding:24px}
+    .price-amt{font-size:38px}
+    .popular-badge{top:14px;right:14px}
+
+    .testi-grid{grid-template-columns:1fr;gap:14px}
+    .testi-card{padding:24px}
+
+    .faq-wrap{padding:0}
+    .faq-q{font-size:14px;padding:18px 0}
+
+    .cta-banner{margin:0 5vw 60px;padding:44px 6vw;border-radius:16px}
+    .cta-banner h2{font-size:24px}
+    .cta-banner p{font-size:14.5px;margin-bottom:24px}
+    .cta-btns{flex-direction:column;gap:10px}
+    .cta-btns .btn-primary,.cta-btns .btn-secondary{width:100%}
+
+    .footer{padding:48px 5vw 28px}
+    .footer-top{grid-template-columns:1fr;gap:28px;margin-bottom:36px}
+    .footer-bottom{flex-direction:column;align-items:flex-start;gap:8px;text-align:left}
+    .foot-links{flex-wrap:wrap}
+  }
 `;
 
 const FEATURES = [
@@ -193,6 +254,7 @@ const FAQS = [
 export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const revealRefs = useRef([]);
 
   useEffect(() => {
@@ -219,14 +281,27 @@ export default function LandingPage() {
 
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
         <a className="logo" href="#"><span className="logo-icon">✦</span>Revuly</a>
-        <ul className="nav-links">
+        <ul className={`nav-links${mobileMenuOpen ? " open" : ""}`}>
           {["Features", "Pricing", "Testimonials", "FAQ"].map((l) => (
-            <li key={l}><a href={`#${l.toLowerCase()}`} onClick={(e) => { e.preventDefault(); go(l.toLowerCase()); }}>{l}</a></li>
+            <li key={l}>
+              <a
+                href={`#${l.toLowerCase()}`}
+                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); go(l.toLowerCase()); }}
+              >{l}</a>
+            </li>
           ))}
         </ul>
         <div className="nav-ctas">
           <button className="btn-ghost" onClick={() => window.location.href = "/login"}>Login</button>
           <button className="btn-gold" onClick={() => window.location.href = "/login"}>Start Free Trial</button>
+          <button
+            className="nav-burger"
+            onClick={() => setMobileMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </nav>
 
