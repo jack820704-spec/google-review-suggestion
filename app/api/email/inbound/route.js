@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase-server";
 import OpenAI from "openai";
 import crypto from "crypto";
+import { buildSystemPrompt, buildUserPrompt, STYLES, STYLE_NOTES } from "@/lib/reply-prompts";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -135,26 +136,20 @@ Look for cues such as "New review", "left a review", a star rating, or sender no
   }
 }
 
-async function generateReplies(reviewContent, profile) {
-  const ctx = `${profile.restaurant_name || "our restaurant"}, a ${profile.restaurant_type || "restaurant"} in ${profile.city || ""}${profile.country ? ", " + profile.country : ""}`;
-  const system = `You are the owner of ${ctx}. Write a reply as if you personally read this review tonight after closing. Sound genuine and specific. 60-100 words.`;
-  const styles = {
-    warm: "Warm & Personal style — casual, genuine, like the owner speaking directly to the guest.",
-    professional: "Professional & Gracious style — polished, elegant, refined.",
-    brief: "Brief & Direct style — only 2-3 sentences.",
-  };
-  log("generating replies for review len:", (reviewContent || "").length);
+async function generateReplies(review, profile) {
+  const system = buildSystemPrompt(profile, "en");
+  log("generating replies for review len:", (review?.content || "").length);
   const entries = await Promise.all(
-    Object.entries(styles).map(async ([key, styleNote]) => {
+    STYLES.map(async (styleKey) => {
       const r = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        max_tokens: 250,
+        max_tokens: 300,
         messages: [
           { role: "system", content: system },
-          { role: "user", content: `Review: "${reviewContent}"\n\n${styleNote}` },
+          { role: "user", content: buildUserPrompt(review, STYLE_NOTES[styleKey]) },
         ],
       });
-      return [key, r.choices[0].message.content.trim()];
+      return [styleKey, r.choices[0].message.content.trim()];
     })
   );
   log("generated replies:", entries.map(([k, v]) => `${k} (${v.length} chars)`));
@@ -295,7 +290,7 @@ export async function POST(req) {
     }
     log("review inserted:", review.id);
 
-    const replies = await generateReplies(review.content, profile);
+    const replies = await generateReplies(review, profile);
 
     const { error: suggErr } = await db.from("reply_suggestions").insert({
       review_id: review.id,
