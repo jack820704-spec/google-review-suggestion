@@ -126,6 +126,85 @@ const CSS = `
   .csv-help-link:hover{text-decoration:underline}
   .csv-success{padding:10px 14px;background:rgba(93,186,122,.1);border:1px solid rgba(93,186,122,.3);border-radius:8px;font-size:13px;color:var(--pos-fg);margin-top:12px}
 
+  /* ════════════ Competitors tab ════════════ */
+  .competitors-pane{padding:18px 16px;display:flex;flex-direction:column;gap:22px}
+  .comp-upgrade{padding:30px 24px;background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));border:1px solid var(--gold-border);border-radius:14px;text-align:center}
+  .comp-upgrade-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-lt);margin-bottom:8px}
+  .comp-upgrade-sub{font-size:13.5px;color:var(--text2);line-height:1.6;max-width:480px;margin:0 auto 18px}
+  .comp-upgrade-btn{padding:11px 26px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;box-shadow:0 3px 14px rgba(201,168,76,.32)}
+  .comp-upgrade-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(201,168,76,.45)}
+
+  .comp-section{display:flex;flex-direction:column;gap:10px}
+  .comp-section-title{font-size:11.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding-left:2px}
+
+  /* Search */
+  .comp-search-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px}
+  .comp-search-row{display:flex;gap:8px}
+  .comp-search-input{flex:1;padding:10px 12px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:8px;font-size:13.5px;font-family:inherit;color:var(--text1);outline:none;transition:border-color .2s}
+  .comp-search-input:focus{border-color:var(--gold-border)}
+  .comp-search-btn{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;white-space:nowrap}
+  .comp-search-btn:disabled{opacity:.6;cursor:not-allowed}
+  .comp-search-results{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .comp-result{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:11px 13px;display:flex;align-items:flex-start;gap:10px;transition:all .18s}
+  .comp-result:hover{border-color:var(--gold-border);background:rgba(201,168,76,.04)}
+  .comp-result-info{flex:1;min-width:0}
+  .comp-result-name{font-size:13.5px;font-weight:700;color:var(--text1);margin-bottom:3px}
+  .comp-result-meta{font-size:12px;color:var(--gold);margin-bottom:3px}
+  .comp-result-addr{font-size:11.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .comp-track-btn{padding:6px 14px;border-radius:8px;font-size:12.5px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;flex-shrink:0;white-space:nowrap}
+  .comp-track-btn:disabled{opacity:.6;cursor:not-allowed}
+  .comp-err{padding:8px 12px;background:rgba(224,96,96,.1);border:1px solid rgba(224,96,96,.25);border-radius:8px;font-size:12.5px;color:var(--neg-fg);margin-top:10px}
+
+  /* Rating comparison strip */
+  .rating-compare{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .rating-compare::-webkit-scrollbar{display:none}
+  .rating-card{flex:1 0 160px;min-width:160px;background:var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:13px;display:flex;flex-direction:column;gap:4px;position:relative}
+  .rating-card.you{border-color:var(--gold-border);background:linear-gradient(135deg,rgba(201,168,76,.08),var(--surface))}
+  .rating-card.leader::after{content:"🏆";position:absolute;top:8px;right:10px;font-size:14px}
+  .rating-card-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3)}
+  .rating-card-name{font-size:13.5px;font-weight:700;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rating-card-stars{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold)}
+  .rating-card-count{font-size:11.5px;color:var(--text2)}
+
+  /* Per-competitor block */
+  .comp-block{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:14px}
+  .comp-block-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .comp-block-info{flex:1;min-width:0}
+  .comp-block-name{font-size:15px;font-weight:700;color:var(--text1);margin-bottom:4px}
+  .comp-block-meta{font-size:12.5px;color:var(--gold);margin-bottom:4px}
+  .comp-block-addr{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
+  .comp-block-maps{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--gold);text-decoration:none}
+  .comp-block-maps:hover{text-decoration:underline}
+  .comp-block-actions{display:flex;gap:6px}
+  .btn-comp-remove{padding:5px 11px;border-radius:7px;font-size:11.5px;font-weight:600;font-family:inherit;background:transparent;border:1px solid rgba(224,96,96,.25);color:var(--neg-fg);cursor:pointer;transition:all .18s}
+  .btn-comp-remove:hover{background:rgba(224,96,96,.08)}
+
+  /* Keyword comparison block — 2 columns side by side */
+  .kw-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:768px){.kw-compare{grid-template-columns:1fr}}
+  .kw-side{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px}
+  .kw-side-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+  .kw-side-label.you{color:var(--gold)}
+  .kw-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;font-size:12px}
+  .kw-row-name{color:var(--text2);font-weight:500}
+  .kw-row-stats{font-size:11px;display:flex;gap:6px}
+  .kw-row-pos{color:var(--pos-fg);font-weight:700}
+  .kw-row-neg{color:var(--neg-fg);font-weight:700}
+  .kw-empty-side{font-size:11.5px;color:var(--text3);font-style:italic;padding:6px 0}
+
+  /* Latest competitor reviews */
+  .comp-reviews-list{display:flex;flex-direction:column;gap:8px}
+  .comp-review-item{background:var(--bg2);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px}
+  .comp-review-head{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+  .comp-review-name{font-size:12.5px;font-weight:700;color:var(--text1)}
+  .comp-review-stars{font-size:11px;color:var(--gold);letter-spacing:1px}
+  .comp-review-date{font-size:11px;color:var(--text3)}
+  .comp-review-text{font-size:12.5px;color:var(--text2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+  .comp-empty{padding:36px 20px;text-align:center;background:var(--surface);border:1px dashed rgba(255,255,255,.1);border-radius:var(--r)}
+  .comp-empty h4{font-size:14.5px;color:var(--text1);font-weight:700;margin-bottom:6px}
+  .comp-empty p{font-size:12.5px;color:var(--text2);line-height:1.55;max-width:340px;margin:0 auto}
+
   /* Mobile-only widgets are hidden on desktop */
   .mobile-only{display:none}
   .filter-row{display:contents}
@@ -467,6 +546,34 @@ const T = {
     sent_negative: "negative",
     crisis_label: "🚨 Crisis",
     days_ago: (n) => (n === 0 ? "today" : n === 1 ? "1 day ago" : `${n} days ago`),
+    // Competitors tab
+    tab_competitors: "Competitors",
+    comp_upgrade_title: "Competitor tracking is a Pro feature",
+    comp_upgrade_sub: "Track up to 3 rival restaurants. Compare ratings, reviews, and the keywords guests mention about you vs them.",
+    comp_upgrade_btn: "Upgrade to Pro →",
+    comp_add_section: "Add a competitor",
+    comp_search_placeholder: "Restaurant name or business",
+    comp_search_btn: "Search Google",
+    comp_searching: "Searching…",
+    comp_no_results: "No matches found. Try a different name.",
+    comp_max_reached: (n) => `Max ${n} competitors reached. Remove one to add another.`,
+    comp_added: "Tracking",
+    comp_track_btn: "Track →",
+    comp_tracking: "Tracking…",
+    comp_remove: "Remove",
+    comp_rating_compare_title: "Rating Comparison",
+    comp_keyword_compare_title: "Keyword Comparison",
+    comp_latest_reviews_title: "Latest reviews",
+    comp_no_reviews: "No reviews synced yet — daily cron is on it.",
+    comp_your_store: "Your store",
+    comp_loading: "Loading competitors…",
+    comp_review_count_short: (n) => `${n} ${n === 1 ? "review" : "reviews"}`,
+    comp_view_maps: "View on Google Maps →",
+    comp_synced_at: (date) => `Last synced ${date}`,
+    comp_empty_title: "No competitors yet",
+    comp_empty_sub: "Search and add up to 3 competitor Google businesses to start tracking their reviews and keyword trends.",
+    kw_pos: "positive mentions",
+    kw_neg: "negative mentions",
   },
   zh: {
     live: "即時",
@@ -564,6 +671,34 @@ const T = {
     sent_negative: "差評",
     crisis_label: "🚨 危機",
     days_ago: (n) => (n === 0 ? "今天" : `${n} 天前`),
+    // Competitors tab
+    tab_competitors: "競爭對手",
+    comp_upgrade_title: "競爭對手追蹤為 Pro 方案功能",
+    comp_upgrade_sub: "最多追蹤 3 家對手餐廳，比較評分、評論內容，以及顧客提到你與對手時最常用的關鍵字。",
+    comp_upgrade_btn: "升級至 Pro →",
+    comp_add_section: "新增競爭對手",
+    comp_search_placeholder: "餐廳名稱或商家",
+    comp_search_btn: "搜尋 Google",
+    comp_searching: "搜尋中…",
+    comp_no_results: "找不到符合的商家，請換個名稱試試。",
+    comp_max_reached: (n) => `已達 ${n} 家上限，請先移除其中一家再新增。`,
+    comp_added: "已追蹤",
+    comp_track_btn: "追蹤 →",
+    comp_tracking: "新增中…",
+    comp_remove: "移除",
+    comp_rating_compare_title: "評分比較",
+    comp_keyword_compare_title: "關鍵字比較",
+    comp_latest_reviews_title: "最新評論",
+    comp_no_reviews: "尚未同步到評論——每日 cron 會自動補上。",
+    comp_your_store: "你的店",
+    comp_loading: "競爭對手載入中…",
+    comp_review_count_short: (n) => `${n} 則評論`,
+    comp_view_maps: "在 Google Maps 查看 →",
+    comp_synced_at: (date) => `最後同步：${date}`,
+    comp_empty_title: "尚未新增競爭對手",
+    comp_empty_sub: "搜尋並新增最多 3 家競爭對手的 Google 商家，開始追蹤他們的評論和關鍵字趨勢。",
+    kw_pos: "次正向提及",
+    kw_neg: "次負向提及",
   },
 };
 
@@ -626,6 +761,14 @@ export default function DashboardPage() {
   const [markRepliedText, setMarkRepliedText] = useState("");
   const [markRepliedSaving, setMarkRepliedSaving] = useState(false);
   const [styleLearnedToast, setStyleLearnedToast] = useState(false);
+  // Competitors tab state
+  const [competitors, setCompetitors] = useState([]);
+  const [competitorReviews, setCompetitorReviews] = useState([]);
+  const [compSearchQuery, setCompSearchQuery] = useState("");
+  const [compSearchResults, setCompSearchResults] = useState(null);
+  const [compSearching, setCompSearching] = useState(false);
+  const [compAdding, setCompAdding] = useState(false);
+  const [compError, setCompError] = useState("");
   const drawerTouchStartY = useRef(null);
   const drawerTouchDelta = useRef(0);
   const drawerRef = useRef(null);
@@ -649,6 +792,17 @@ export default function DashboardPage() {
 
     setProfile(prof);
     setReviews(revs || []);
+
+    // Pro plan: load competitors + their reviews in parallel
+    if (prof?.plan === "pro") {
+      const [{ data: comps }, { data: compRevs }] = await Promise.all([
+        supabase.from("competitors").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        supabase.from("competitor_reviews").select("*").eq("user_id", user.id).order("review_date", { ascending: false }),
+      ]);
+      setCompetitors(comps || []);
+      setCompetitorReviews(compRevs || []);
+    }
+
     setLoading(false);
   }, []);
 
@@ -786,6 +940,77 @@ export default function DashboardPage() {
     const { error } = await supabase.from("profiles").update({ competitor_urls: next }).eq("id", profile.id);
     if (error) { setCompetitorError(error.message); return; }
     setProfile((p) => ({ ...p, competitor_urls: next }));
+  };
+
+  // ────────── Competitors tab handlers ──────────
+  const handleCompSearch = async () => {
+    setCompError("");
+    setCompSearchResults(null);
+    const q = compSearchQuery.trim();
+    if (!q) { setCompError("Enter a restaurant name"); return; }
+    setCompSearching(true);
+    try {
+      const res = await fetch("/api/places/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: q, city: profile?.city, country: profile?.country }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setCompError(data.error || "Search failed"); setCompSearchResults([]); return; }
+      setCompSearchResults(data.results || []);
+    } catch (e) {
+      setCompError(e.message);
+      setCompSearchResults([]);
+    } finally {
+      setCompSearching(false);
+    }
+  };
+
+  const handleCompAdd = async (result) => {
+    setCompAdding(true);
+    setCompError("");
+    try {
+      const res = await fetch("/api/competitors/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setCompError(data.error || "Failed to add"); return; }
+      // Refresh list + reviews
+      const { data: { user } } = await supabase.auth.getUser();
+      const [{ data: comps }, { data: compRevs }] = await Promise.all([
+        supabase.from("competitors").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
+        supabase.from("competitor_reviews").select("*").eq("user_id", user.id).order("review_date", { ascending: false }),
+      ]);
+      setCompetitors(comps || []);
+      setCompetitorReviews(compRevs || []);
+      setCompSearchResults(null);
+      setCompSearchQuery("");
+    } catch (e) {
+      setCompError(e.message);
+    } finally {
+      setCompAdding(false);
+    }
+  };
+
+  const handleCompRemove = async (compId) => {
+    if (!confirm("Remove this competitor and its cached reviews?")) return;
+    setCompError("");
+    try {
+      await fetch("/api/competitors/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: compId }),
+      });
+      const removed = competitors.find((c) => c.id === compId);
+      setCompetitors((prev) => prev.filter((c) => c.id !== compId));
+      if (removed) {
+        setCompetitorReviews((prev) => prev.filter((r) => r.competitor_place_id !== removed.place_id));
+      }
+    } catch (e) {
+      setCompError(e.message);
+    }
   };
 
   const handleCsvUpload = async () => {
@@ -996,46 +1221,20 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* COMPETITOR TRACKING — Pro only */}
-          {canUseFeature(planKey, "competitor_tracking") && (
+          {/* COMPETITOR TRACKING moved into its own mid-col tab (Pro) — left col
+              now just shows a small shortcut for Pro users with competitors */}
+          {isPro && competitors.length > 0 && (
             <>
               <div className="section-label">{t.competitor_tracking}</div>
-              {competitorUrls.length === 0 && (
-                <p style={{fontSize:12,color:"var(--text3)",padding:"4px 4px 8px"}}>{t.competitor_empty(competitorLimit)}</p>
-              )}
-              {competitorUrls.map((url) => {
-                let host = url;
-                try { host = new URL(url).hostname.replace("www.",""); } catch {}
-                return (
-                  <div key={url} className="comp-card">
-                    <div className="comp-info">
-                      <div className="comp-name">{host}</div>
-                      <div className="comp-url">{url}</div>
-                    </div>
-                    <button className="comp-del" onClick={() => handleRemoveCompetitor(url)} title="Remove">✕</button>
-                  </div>
-                );
-              })}
-              {competitorUrls.length < competitorLimit && (
-                <>
-                  <div className="comp-add-row">
-                    <input
-                      className="comp-add-input"
-                      placeholder={t.competitor_url_placeholder}
-                      value={competitorInput.url}
-                      onChange={(e) => setCompetitorInput({ ...competitorInput, url: e.target.value })}
-                      onKeyDown={(e) => { if (e.key === "Enter") handleAddCompetitor(); }}
-                    />
-                    <button className="comp-add-btn" onClick={handleAddCompetitor} disabled={savingCompetitor || !competitorInput.url}>
-                      {savingCompetitor ? "…" : t.add_competitor}
-                    </button>
-                  </div>
-                  <div className="comp-limit">{t.tracked(competitorUrls.length, competitorLimit)}</div>
-                </>
-              )}
-              {competitorError && (
-                <div style={{marginTop:6,padding:"6px 10px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:6,fontSize:11.5,color:"var(--neg-fg)"}}>{competitorError}</div>
-              )}
+              <button
+                className="filter-btn"
+                style={{background:"rgba(201,168,76,.08)",border:"1px solid var(--gold-border)",color:"var(--gold-lt)",marginBottom:6}}
+                onClick={() => setReviewTab("competitors")}
+              >
+                <span className="filter-dot" style={{background:"var(--gold)"}} />
+                {t.tab_competitors}
+                <span className="filter-count">{competitors.length}</span>
+              </button>
             </>
           )}
 
@@ -1084,20 +1283,27 @@ export default function DashboardPage() {
                 <button className={`tab${reviewTab === "needs_reply" ? " active" : ""}`} onClick={() => setReviewTab("needs_reply")}>
                   {t.tab_needs_reply}<span className="tab-count">{unansweredCount}</span>
                 </button>
+                <button className={`tab${reviewTab === "competitors" ? " active" : ""}`} onClick={() => setReviewTab("competitors")}>
+                  {t.tab_competitors}{isPro && <span className="tab-count">{competitors.length}</span>}
+                </button>
               </div>
-              <div className="mid-actions">
-                <button className="btn-csv" onClick={() => { setShowCsvModal(true); setCsvResult(null); setCsvError(""); setCsvFile(null); }}>📄 {t.upload_csv}</button>
-                <button className="btn-add" onClick={() => setShowAddModal(true)}>{t.add_review}</button>
+              {reviewTab !== "competitors" && (
+                <div className="mid-actions">
+                  <button className="btn-csv" onClick={() => { setShowCsvModal(true); setCsvResult(null); setCsvError(""); setCsvFile(null); }}>📄 {t.upload_csv}</button>
+                  <button className="btn-add" onClick={() => setShowAddModal(true)}>{t.add_review}</button>
+                </div>
+              )}
+            </div>
+            {reviewTab !== "competitors" && (
+              <div className="mid-count" style={{paddingBottom:8}}>
+                {reviewTab === "all"
+                  ? t.showing(filteredReviews.length, reviews.length)
+                  : t.showing_filtered(filteredReviews.length, unansweredCount)}
               </div>
-            </div>
-            <div className="mid-count" style={{paddingBottom:8}}>
-              {reviewTab === "all"
-                ? t.showing(filteredReviews.length, reviews.length)
-                : t.showing_filtered(filteredReviews.length, unansweredCount)}
-            </div>
+            )}
           </div>
 
-          {loading && [1,2,3].map((i) => (
+          {reviewTab !== "competitors" && loading && [1,2,3].map((i) => (
             <div key={i} style={{padding:"14px 16px",borderBottom:"1px solid rgba(255,255,255,.05)"}}>
               <div className="shimmer" style={{height:14,width:"60%",marginBottom:8}} />
               <div className="shimmer" style={{height:12,width:"40%",marginBottom:10}} />
@@ -1105,14 +1311,14 @@ export default function DashboardPage() {
             </div>
           ))}
 
-          {!loading && filteredReviews.length === 0 && (
+          {reviewTab !== "competitors" && !loading && filteredReviews.length === 0 && (
             <div className="empty-reviews">
               <h4>{reviewTab === "needs_reply" ? t.no_unanswered_title : t.no_reviews_title}</h4>
               <p>{reviewTab === "needs_reply" ? t.no_unanswered_sub : t.no_reviews_sub}</p>
             </div>
           )}
 
-          {filteredReviews.map((review) => {
+          {reviewTab !== "competitors" && filteredReviews.map((review) => {
             const days = daysSince(review.review_date);
             return (
               <div key={review.id} className={`review-card${selectedReview?.id === review.id ? " selected" : ""}${review.is_crisis ? " crisis" : ""}`} onClick={() => setSelectedReview(review)}>
@@ -1134,6 +1340,219 @@ export default function DashboardPage() {
               </div>
             );
           })}
+
+          {/* ════════════ Competitors tab content ════════════ */}
+          {reviewTab === "competitors" && (
+            <div className="competitors-pane">
+              {!isPro ? (
+                <div className="comp-upgrade">
+                  <div style={{fontSize:36,marginBottom:8}}>🏆</div>
+                  <div className="comp-upgrade-title">{t.comp_upgrade_title}</div>
+                  <div className="comp-upgrade-sub">{t.comp_upgrade_sub}</div>
+                  <button className="comp-upgrade-btn" onClick={() => window.location.href = "/dashboard/settings#plan-section"}>
+                    {t.comp_upgrade_btn}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Rating comparison strip */}
+                  {(competitors.length > 0 || reviews.length > 0) && (
+                    <div className="comp-section">
+                      <div className="comp-section-title">{t.comp_rating_compare_title}</div>
+                      {(() => {
+                        const youRating = avgRating === "—" ? 0 : Number(avgRating);
+                        const youCount = reviews.length;
+                        const entries = [
+                          { id: "you", name: t.comp_your_store, rating: youRating, count: youCount, isYou: true },
+                          ...competitors.map((c) => ({
+                            id: c.id,
+                            name: c.name || "Competitor",
+                            rating: typeof c.rating === "number" ? c.rating : 0,
+                            count: c.user_rating_count || 0,
+                            isYou: false,
+                          })),
+                        ];
+                        const leaderRating = Math.max(...entries.map((e) => e.rating));
+                        return (
+                          <div className="rating-compare">
+                            {entries.map((e) => (
+                              <div
+                                key={e.id}
+                                className={`rating-card${e.isYou ? " you" : ""}${e.rating === leaderRating && leaderRating > 0 ? " leader" : ""}`}
+                              >
+                                <div className="rating-card-label">{e.isYou ? t.comp_your_store : "Competitor"}</div>
+                                <div className="rating-card-name" title={e.name}>{e.name}</div>
+                                <div className="rating-card-stars">{e.rating > 0 ? `${e.rating.toFixed(1)} ★` : "—"}</div>
+                                <div className="rating-card-count">{t.comp_review_count_short(e.count)}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Add competitor */}
+                  {competitors.length < 3 && (
+                    <div className="comp-section">
+                      <div className="comp-section-title">{t.comp_add_section}</div>
+                      <div className="comp-search-card">
+                        <div className="comp-search-row">
+                          <input
+                            className="comp-search-input"
+                            placeholder={t.comp_search_placeholder}
+                            value={compSearchQuery}
+                            onChange={(e) => setCompSearchQuery(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") handleCompSearch(); }}
+                          />
+                          <button className="comp-search-btn" onClick={handleCompSearch} disabled={compSearching}>
+                            {compSearching ? t.comp_searching : t.comp_search_btn}
+                          </button>
+                        </div>
+
+                        {compSearchResults && compSearchResults.length > 0 && (
+                          <div className="comp-search-results">
+                            {compSearchResults.map((r) => {
+                              const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
+                              const isOwn = profile?.place_id === r.place_id;
+                              return (
+                                <div key={r.place_id} className="comp-result">
+                                  <div className="comp-result-info">
+                                    <div className="comp-result-name">{r.name}</div>
+                                    <div className="comp-result-meta">
+                                      {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
+                                      {r.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>}
+                                    </div>
+                                    {r.address && <div className="comp-result-addr">{r.address}</div>}
+                                  </div>
+                                  <button
+                                    className="comp-track-btn"
+                                    onClick={() => handleCompAdd(r)}
+                                    disabled={compAdding || alreadyTracked || isOwn}
+                                    title={isOwn ? "That's your business" : alreadyTracked ? "Already tracking" : ""}
+                                  >
+                                    {compAdding ? t.comp_tracking : alreadyTracked ? t.comp_added : isOwn ? "—" : t.comp_track_btn}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {compSearchResults && compSearchResults.length === 0 && !compError && (
+                          <p style={{fontSize:12.5,color:"var(--text3)",marginTop:10}}>{t.comp_no_results}</p>
+                        )}
+                        {compError && <div className="comp-err">{compError}</div>}
+                      </div>
+                    </div>
+                  )}
+                  {competitors.length >= 3 && (
+                    <p style={{fontSize:12,color:"var(--text3)",fontStyle:"italic"}}>{t.comp_max_reached(3)}</p>
+                  )}
+
+                  {/* Per-competitor blocks */}
+                  {competitors.length === 0 && (
+                    <div className="comp-empty">
+                      <h4>{t.comp_empty_title}</h4>
+                      <p>{t.comp_empty_sub}</p>
+                    </div>
+                  )}
+
+                  {competitors.map((c) => {
+                    const reviewsForComp = competitorReviews.filter((r) => r.competitor_place_id === c.place_id);
+                    const top5 = reviewsForComp.slice(0, 5);
+
+                    // Keyword analysis: your store + competitor side-by-side
+                    const yourKw = analyseKeywords(reviews).slice(0, 5);
+                    const compKwAll = analyseKeywords(reviewsForComp.map((r) => ({ content: r.review_content })));
+                    const compKw = compKwAll.slice(0, 5);
+
+                    return (
+                      <div key={c.id} className="comp-block">
+                        <div className="comp-block-header">
+                          <div className="comp-block-info">
+                            <div className="comp-block-name">{c.name || "Competitor"}</div>
+                            <div className="comp-block-meta">
+                              {typeof c.rating === "number" ? `${c.rating.toFixed(1)} ★` : "—"}
+                              {c.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {c.user_rating_count.toLocaleString()} reviews</span>}
+                            </div>
+                            {c.address && <div className="comp-block-addr" title={c.address}>{c.address}</div>}
+                            <a
+                              className="comp-block-maps"
+                              href={c.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(c.place_id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >{t.comp_view_maps}</a>
+                            {c.last_synced_at && (
+                              <div style={{fontSize:10.5,color:"var(--text3)",marginTop:4}}>
+                                {t.comp_synced_at(new Date(c.last_synced_at).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US"))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="comp-block-actions">
+                            <button className="btn-comp-remove" onClick={() => handleCompRemove(c.id)}>{t.comp_remove}</button>
+                          </div>
+                        </div>
+
+                        {/* Keyword comparison */}
+                        <div>
+                          <div className="comp-section-title" style={{marginBottom:8}}>{t.comp_keyword_compare_title}</div>
+                          <div className="kw-compare">
+                            <div className="kw-side">
+                              <div className="kw-side-label you">{t.comp_your_store}</div>
+                              {yourKw.length === 0 && <div className="kw-empty-side">—</div>}
+                              {yourKw.map((kw) => (
+                                <div key={kw.name} className="kw-row">
+                                  <span className="kw-row-name">{kw.name}</span>
+                                  <span className="kw-row-stats">
+                                    <span className="kw-row-pos">+{kw.posCount}</span>
+                                    <span className="kw-row-neg">−{kw.negCount}</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="kw-side">
+                              <div className="kw-side-label">{c.name || "Competitor"}</div>
+                              {compKw.length === 0 && <div className="kw-empty-side">—</div>}
+                              {compKw.map((kw) => (
+                                <div key={kw.name} className="kw-row">
+                                  <span className="kw-row-name">{kw.name}</span>
+                                  <span className="kw-row-stats">
+                                    <span className="kw-row-pos">+{kw.posCount}</span>
+                                    <span className="kw-row-neg">−{kw.negCount}</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Latest reviews */}
+                        <div>
+                          <div className="comp-section-title" style={{marginBottom:8}}>{t.comp_latest_reviews_title}</div>
+                          {top5.length === 0 ? (
+                            <p style={{fontSize:12.5,color:"var(--text3)",fontStyle:"italic"}}>{t.comp_no_reviews}</p>
+                          ) : (
+                            <div className="comp-reviews-list">
+                              {top5.map((r) => (
+                                <div key={r.id} className="comp-review-item">
+                                  <div className="comp-review-head">
+                                    <span className="comp-review-name">{r.reviewer_name || "Anonymous"}</span>
+                                    <span className="comp-review-stars">{starsDisplay(r.stars || 3)}</span>
+                                    <span className="comp-review-date">{new Date(r.review_date || r.created_at).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                                  </div>
+                                  <div className="comp-review-text">{r.review_content}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* RIGHT COL — acts as a fixed bottom drawer on mobile */}
