@@ -103,6 +103,25 @@ const CSS = `
   .places-connected-maps:hover{text-decoration:underline}
   .places-connected-verify{padding:10px 14px;background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.22);border-radius:8px;font-size:12px;color:var(--text2);margin-top:10px;line-height:1.55}
 
+  /* AI STYLE LEARNING (Pro) */
+  .style-progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .style-progress-label{font-size:13px;color:var(--text2);font-weight:600}
+  .style-progress-count{font-size:13px;color:var(--gold);font-weight:700}
+  .style-progress-bar{height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:14px}
+  .style-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-lt));border-radius:999px;transition:width .4s}
+  .style-learned-banner{padding:10px 14px;background:rgba(93,186,122,.08);border:1px solid rgba(93,186,122,.28);border-radius:8px;font-size:13px;color:var(--pos);margin-bottom:14px}
+  .style-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  @media (max-width:768px){.style-summary{grid-template-columns:1fr}}
+  .style-card{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px 12px}
+  .style-card-label{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+  .style-card-value{font-size:13px;color:var(--text1);line-height:1.5;font-weight:500}
+  .style-card-value.muted{color:var(--text2);font-weight:400}
+  .style-phrases{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .style-phrase-tag{padding:3px 9px;border-radius:999px;background:rgba(201,168,76,.1);border:1px solid var(--gold-border);font-size:11.5px;color:var(--gold)}
+  .btn-reset-style{padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:600;font-family:inherit;background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text2);cursor:pointer;transition:all .2s}
+  .btn-reset-style:hover{border-color:rgba(224,96,96,.35);color:var(--neg)}
+  .style-pre-summary{font-size:12.5px;color:var(--text2);line-height:1.6;margin:0 0 10px;font-style:italic}
+
   /* ════════════ MOBILE (≤ 768px) ════════════ */
   @media (max-width: 768px) {
     .topbar{padding:0 12px;height:54px}
@@ -152,6 +171,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [newKw, setNewKw] = useState("");
+  const [styleStatus, setStyleStatus] = useState(null); // { samples_have, needs, ai_style_learned, analysis }
+  const [styleResetting, setStyleResetting] = useState(false);
   const [placesQuery, setPlacesQuery] = useState("");
   const [placesResults, setPlacesResults] = useState(null); // null = not searched, [] = no matches
   const [placesSearching, setPlacesSearching] = useState(false);
@@ -165,8 +186,28 @@ export default function SettingsPage() {
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       setProfile(data || {});
       setLoading(false);
+      // For Pro users, pull current AI style learning status.
+      if (data?.plan === "pro") {
+        try {
+          const res = await fetch("/api/ai/learn-style");
+          const status = await res.json();
+          if (status.ok) setStyleStatus(status);
+        } catch {}
+      }
     });
   }, []);
+
+  const handleResetStyle = async () => {
+    if (!confirm("Reset your AI Style Learning? Your past replies stay on file, but the AI will need to re-learn your voice the next time you Mark Replied.")) return;
+    setStyleResetting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("profiles")
+      .update({ ai_style_data: {}, ai_style_learned: false })
+      .eq("id", user.id);
+    setStyleResetting(false);
+    setProfile((p) => ({ ...p, ai_style_data: {}, ai_style_learned: false }));
+    setStyleStatus((s) => s ? { ...s, ai_style_learned: false, analysis: null } : s);
+  };
 
   const update = (key, val) => setProfile((p) => ({ ...p, [key]: val }));
   const planKey = profile?.plan || "free_trial";
@@ -477,6 +518,104 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
+
+        {/* AI STYLE LEARNING — Pro only */}
+        {planKey === "pro" && (
+          <div className="section">
+            <div className="section-header">AI Style Learning (Pro)</div>
+            <div className="card">
+              {(() => {
+                const have = styleStatus?.samples_have ?? 0;
+                const needs = styleStatus?.needs ?? 5;
+                const learned = !!profile.ai_style_learned;
+                const analysis = profile.ai_style_data && profile.ai_style_data.tone
+                  ? profile.ai_style_data
+                  : styleStatus?.analysis;
+                const pct = Math.min(100, Math.round((have / needs) * 100));
+
+                return (
+                  <>
+                    <p style={{fontSize:13,color:"var(--text2)",marginBottom:14,lineHeight:1.6}}>
+                      As you use <strong style={{color:"var(--text1)"}}>Mark Replied</strong> on the dashboard and paste your actual posted reply, Revuly learns the voice you use with guests — your tone, openers, closers, and signature phrases. Once 5 replies are on file, the AI's <strong style={{color:"var(--gold-lt)"}}>Your Style</strong> tab generates new replies in that exact voice.
+                    </p>
+
+                    <div className="style-progress-row">
+                      <span className="style-progress-label">Replies analyzed</span>
+                      <span className="style-progress-count">{have} / {needs}</span>
+                    </div>
+                    <div className="style-progress-bar">
+                      <div className="style-progress-fill" style={{width:`${pct}%`}} />
+                    </div>
+
+                    {learned && (
+                      <div className="style-learned-banner">
+                        ✓ Your style has been learned ({analysis?._samples ?? have} {analysis?._samples === 1 ? "reply" : "replies"} analysed{analysis?._learned_at ? ` · ${new Date(analysis._learned_at).toLocaleDateString()}` : ""}).
+                      </div>
+                    )}
+
+                    {analysis && analysis.tone && (
+                      <>
+                        {analysis.summary && (
+                          <p className="style-pre-summary">"{analysis.summary}"</p>
+                        )}
+                        <div className="style-summary">
+                          <div className="style-card">
+                            <div className="style-card-label">Tone</div>
+                            <div className="style-card-value">{analysis.tone}</div>
+                          </div>
+                          <div className="style-card">
+                            <div className="style-card-label">Avg length</div>
+                            <div className="style-card-value">{analysis.avg_length_words ?? "?"} words</div>
+                          </div>
+                          <div className="style-card">
+                            <div className="style-card-label">Opener</div>
+                            <div className="style-card-value muted">{analysis.common_opener || "—"}</div>
+                          </div>
+                          <div className="style-card">
+                            <div className="style-card-label">Closer</div>
+                            <div className="style-card-value muted">{analysis.common_closer || "—"}</div>
+                          </div>
+                          <div className="style-card">
+                            <div className="style-card-label">Addresses by name</div>
+                            <div className="style-card-value">{analysis.addresses_by_name ? "Yes" : "No"}</div>
+                          </div>
+                          <div className="style-card">
+                            <div className="style-card-label">Language</div>
+                            <div className="style-card-value">{analysis.language || "—"}</div>
+                          </div>
+                        </div>
+                        {Array.isArray(analysis.signature_phrases) && analysis.signature_phrases.length > 0 && (
+                          <>
+                            <div className="style-card-label" style={{marginBottom:6}}>Signature phrases</div>
+                            <div className="style-phrases">
+                              {analysis.signature_phrases.map((p, i) => (
+                                <span key={i} className="style-phrase-tag">{p}</span>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    {learned && (
+                      <div style={{marginTop:16,display:"flex",justifyContent:"flex-end"}}>
+                        <button className="btn-reset-style" onClick={handleResetStyle} disabled={styleResetting}>
+                          {styleResetting ? "Resetting…" : "Reset Style"}
+                        </button>
+                      </div>
+                    )}
+
+                    {!learned && have < needs && (
+                      <p style={{fontSize:12,color:"var(--text3)",marginTop:8}}>
+                        {needs - have} more {needs - have === 1 ? "reply" : "replies"} needed before the AI can start mirroring your voice.
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
 
         {/* NOTIFICATIONS */}
         <div className="section">

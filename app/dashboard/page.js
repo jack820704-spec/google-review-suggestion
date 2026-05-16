@@ -445,6 +445,13 @@ const T = {
     csv_format: "Expected columns: reviewer_name, stars, content, review_date",
     csv_help: "How to export from Google Maps →",
     csv_result: (i, d, t) => `Imported ${i} new · skipped ${d} duplicate${d === 1 ? "" : "s"} · ${t} rows total`,
+    mr_title: "Mark as Replied",
+    mr_sub: "Paste the exact reply you posted on Google. We use this to learn your personal voice and improve future AI suggestions (Pro plan).",
+    mr_placeholder: "The exact text you posted on Google…",
+    mr_save: "Save Reply",
+    mr_skip: "Skip — just mark replied",
+    mr_learned_just_now: "✓ Your style has been learned",
+    mr_progress: (have, need) => `Pro style learning: ${have} / ${need} replies analyzed`,
   },
   zh: {
     live: "即時",
@@ -521,6 +528,13 @@ const T = {
     csv_format: "欄位：reviewer_name, stars, content, review_date",
     csv_help: "如何從 Google Maps 匯出？→",
     csv_result: (i, d, t) => `匯入 ${i} 則 · 跳過 ${d} 則重複 · 共 ${t} 列`,
+    mr_title: "標記為已回覆",
+    mr_sub: "貼上你在 Google 實際發出的回覆內容。系統會用這些資料學習你的個人語氣，提升「你的風格」的 AI 建議準確度（Pro 方案）。",
+    mr_placeholder: "你在 Google 發出的實際文字…",
+    mr_save: "儲存回覆",
+    mr_skip: "略過，只標已回覆",
+    mr_learned_just_now: "✓ 風格學習完成",
+    mr_progress: (have, need) => `Pro 風格學習：${have} / ${need} 則回覆已分析`,
   },
 };
 
@@ -576,6 +590,10 @@ export default function DashboardPage() {
   const [csvError, setCsvError] = useState("");
   const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
   const [keywordExpanded, setKeywordExpanded] = useState(false);
+  const [showMarkRepliedModal, setShowMarkRepliedModal] = useState(false);
+  const [markRepliedText, setMarkRepliedText] = useState("");
+  const [markRepliedSaving, setMarkRepliedSaving] = useState(false);
+  const [styleLearnedToast, setStyleLearnedToast] = useState(false);
   const drawerTouchStartY = useRef(null);
   const drawerTouchDelta = useRef(0);
   const drawerRef = useRef(null);
@@ -765,9 +783,50 @@ export default function DashboardPage() {
     }
   };
 
-  const handleMarkReplied = async (reviewId) => {
-    await supabase.from("reviews").update({ replied: true }).eq("id", reviewId);
-    setReviews((prev) => prev.map((r) => r.id === reviewId ? { ...r, replied: true } : r));
+  // Opens the Mark Replied modal preloaded with the currently focused AI suggestion
+  // as a starting point (the user can paste their actual edited reply over it).
+  const openMarkRepliedModal = () => {
+    const current = selectedReview ? replies[selectedReview.id]?.[activeStyle] : "";
+    setMarkRepliedText(current || "");
+    setShowMarkRepliedModal(true);
+  };
+
+  // Save the actual reply text + mark replied. Auto-fires AI style training
+  // once the user has accumulated 5+ actual replies and isn't yet learned.
+  const saveActualReply = async (skipText = false) => {
+    if (!selectedReview) return;
+    setMarkRepliedSaving(true);
+    const payload = { replied: true };
+    if (!skipText && markRepliedText.trim()) {
+      payload.actual_reply_text = markRepliedText.trim();
+    }
+    const { error } = await supabase.from("reviews").update(payload).eq("id", selectedReview.id);
+    if (!error) {
+      setReviews((prev) => prev.map((r) => r.id === selectedReview.id ? { ...r, ...payload } : r));
+    }
+    setShowMarkRepliedModal(false);
+    setMarkRepliedSaving(false);
+    setMarkRepliedText("");
+
+    // Trigger style learning if Pro + we just saved an actual reply text
+    if (!skipText && payload.actual_reply_text && profile?.plan === "pro") {
+      try {
+        const res = await fetch("/api/ai/learn-style", { method: "POST" });
+        const data = await res.json();
+        if (data.ok && data.ready) {
+          // Refresh profile so Settings + dashboard reflect the new learned state.
+          const { data: { user } } = await supabase.auth.getUser();
+          const { data: fresh } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+          if (fresh) setProfile(fresh);
+          if (!profile?.ai_style_learned) {
+            setStyleLearnedToast(true);
+            setTimeout(() => setStyleLearnedToast(false), 5000);
+          }
+        }
+      } catch (e) {
+        console.warn("[dashboard] learn-style call failed:", e.message);
+      }
+    }
   };
 
   const handleDelete = async (reviewId) => {
@@ -1131,7 +1190,7 @@ export default function DashboardPage() {
                           <button className="btn-regen" onClick={() => handleGenerate()}>{t.btn_regen}</button>
                           {copiedIdx === idx && <span className="copied-hint">{t.ready_paste}</span>}
                           {!selectedReview.replied && (
-                            <button className="btn-regen" style={{marginLeft:"auto"}} onClick={() => handleMarkReplied(selectedReview.id)}>{t.mark_replied}</button>
+                            <button className="btn-regen" style={{marginLeft:"auto"}} onClick={openMarkRepliedModal}>{t.mark_replied}</button>
                           )}
                         </div>
                       </div>
@@ -1172,6 +1231,46 @@ export default function DashboardPage() {
               <button className="modal-save" onClick={handleAddReview} disabled={savingReview || !newReview.content}>{savingReview ? t.saving : t.modal_add_title}</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* MARK REPLIED MODAL — collects the actual posted text */}
+      {showMarkRepliedModal && (
+        <div className="modal-overlay" onClick={() => setShowMarkRepliedModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t.mr_title}</h3>
+            <p className="modal-sub">{t.mr_sub}</p>
+            <div className="modal-group">
+              <label className="modal-label">{t.label_content}</label>
+              <textarea
+                className="modal-input modal-textarea"
+                placeholder={t.mr_placeholder}
+                value={markRepliedText}
+                onChange={(e) => setMarkRepliedText(e.target.value)}
+                style={{minHeight:140}}
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => saveActualReply(true)} disabled={markRepliedSaving}>
+                {t.mr_skip}
+              </button>
+              <button className="modal-save" onClick={() => saveActualReply(false)} disabled={markRepliedSaving || !markRepliedText.trim()}>
+                {markRepliedSaving ? t.saving : t.mr_save}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STYLE LEARNED TOAST */}
+      {styleLearnedToast && (
+        <div style={{
+          position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",
+          padding:"12px 22px",background:"linear-gradient(135deg,#e8c96a,#c9a84c)",color:"#000",
+          fontWeight:700,fontSize:13.5,borderRadius:999,boxShadow:"0 6px 20px rgba(201,168,76,.5)",
+          zIndex:200,animation:"fadeIn .3s ease"
+        }}>
+          {t.mr_learned_just_now}
         </div>
       )}
 
