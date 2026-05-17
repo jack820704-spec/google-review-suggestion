@@ -841,7 +841,20 @@ export default function DashboardPage() {
   const [competitorInput, setCompetitorInput] = useState({ url: "", name: "" });
   const [savingCompetitor, setSavingCompetitor] = useState(false);
   const [competitorError, setCompetitorError] = useState("");
-  const [lang, setLang] = useState("en");
+  const [lang, setLangRaw] = useState("en");
+  // Hydrate language from localStorage on mount so Settings/Help see the
+  // same preference, and persist on every toggle.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = window.localStorage.getItem("revuly-lang");
+      if (saved === "zh" || saved === "en") setLangRaw(saved);
+    } catch {}
+  }, []);
+  const setLang = (next) => {
+    setLangRaw(next);
+    try { window.localStorage.setItem("revuly-lang", next); } catch {}
+  };
   const [reviewTab, setReviewTab] = useState("all"); // "all" | "needs_reply"
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvFile, setCsvFile] = useState(null);

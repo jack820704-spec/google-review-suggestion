@@ -122,6 +122,30 @@ const CSS = `
   .btn-reset-style:hover{border-color:rgba(224,96,96,.35);color:var(--neg)}
   .style-pre-summary{font-size:12.5px;color:var(--text2);line-height:1.6;margin:0 0 10px;font-style:italic}
 
+  /* AI REPLY PREFERENCES */
+  .pref-help{font-size:12.5px;color:var(--text2);line-height:1.55;margin:-4px 0 14px}
+  .pref-block{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .pref-block:first-of-type{padding-top:4px}
+  .pref-block:last-of-type{border-bottom:none}
+  .pref-label{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;display:block}
+  .pref-sub{font-size:11.5px;color:var(--text3);margin-top:4px;line-height:1.5}
+  .pref-slider-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+  .pref-slider{flex:1;-webkit-appearance:none;height:4px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(201,168,76,.4),rgba(255,255,255,.1));border-radius:999px;outline:none;cursor:pointer}
+  .pref-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;box-shadow:0 2px 6px rgba(201,168,76,.4)}
+  .pref-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;box-shadow:0 2px 6px rgba(201,168,76,.4)}
+  .pref-slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;font-weight:600;letter-spacing:.3px}
+  .pref-slider-ends{min-width:64px;font-size:11.5px;color:var(--text2);font-weight:600}
+  .pref-textarea{width:100%;min-height:64px;padding:10px 13px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);font-size:13.5px;font-family:inherit;color:var(--text1);outline:none;transition:border-color .2s;resize:vertical;line-height:1.5}
+  .pref-textarea:focus{border-color:var(--gold-border)}
+  .pref-textarea::placeholder{color:var(--text3)}
+  .pref-counter{font-size:11px;color:var(--text3);text-align:right;margin-top:4px}
+  .pref-counter.over{color:var(--neg)}
+  .pref-pro-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(201,168,76,.16);border:1px solid var(--gold-border);color:var(--gold-lt);vertical-align:1px}
+  .pref-length-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .pref-length-opt{padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--text2);transition:all .2s}
+  .pref-length-opt.active{background:rgba(201,168,76,.12);border-color:var(--gold-border);color:var(--gold-lt)}
+  .pref-locked-note{font-size:12px;color:var(--text3);font-style:italic;margin-top:6px}
+
   /* ════════════ MOBILE (≤ 768px) ════════════ */
   @media (max-width: 768px) {
     .topbar{padding:0 12px;height:54px}
@@ -162,8 +186,116 @@ const CSS = `
 const RESTAURANT_TYPES = ["Fine Dining","Casual Dining","Fast Casual","Café","Bar","Bistro","Steakhouse","Seafood","Italian","French","Japanese","Other"];
 const FREQ_OPTIONS = [{ value:"immediately",label:"Immediately" },{ value:"daily",label:"Daily Digest" },{ value:"weekly",label:"Weekly Only" }];
 
+// Restaurant style options for AI Reply Preferences. The value strings are
+// the canonical English keys that match the prompt builder's lookup table.
+const REST_STYLE_OPTIONS = [
+  { value: "Fine Dining",            en: "Fine Dining",            zh: "Fine Dining（優雅正式）" },
+  { value: "Casual Dining",          en: "Casual Dining",          zh: "Casual Dining（輕鬆親切）" },
+  { value: "Fast Casual",            en: "Fast Casual",            zh: "Fast Casual（簡短直接）" },
+  { value: "Izakaya / Asian Fusion", en: "Izakaya / Asian Fusion", zh: "Izakaya / Asian Fusion（活潑有個性）" },
+  { value: "Café & Brunch",          en: "Café & Brunch",          zh: "Café & Brunch（溫暖文青）" },
+];
+
+const LENGTH_PREFS = [
+  { value: "short",  en: "Short (30–50 words)",   zh: "短（30–50 字）" },
+  { value: "medium", en: "Medium (50–80 words)",  zh: "中（50–80 字）" },
+  { value: "long",   en: "Long (80–120 words)",   zh: "長（80–120 字）" },
+];
+
+const BRAND_VOICE_MAX = 100;
+
+const T = {
+  en: {
+    pref_section: "AI Reply Preferences",
+    pref_help: "Customize how Revuly's AI writes replies for your restaurant. These settings shape every generated reply, including auto-synced reviews emailed to you.",
+    pref_restaurant_style: "Restaurant Style",
+    pref_restaurant_style_help: "Sets the overall voice the AI uses for your venue.",
+    pref_tone_formality: "Tone — Formality",
+    pref_tone_warmth: "Tone — Warmth",
+    pref_tone_detail: "Tone — Detail",
+    pref_formal: "Formal",
+    pref_casual: "Casual",
+    pref_reserved: "Reserved",
+    pref_warm: "Warm",
+    pref_brief: "Brief",
+    pref_detailed: "Detailed",
+    pref_owner_name: "Owner Name (optional)",
+    pref_owner_name_ph: "e.g. James",
+    pref_owner_name_help: "If set, replies will be signed “— James, Owner”. Leave blank to skip the signature.",
+    pref_brand_voice: "Brand Voice (optional, max 100 chars)",
+    pref_brand_voice_ph: "e.g. Family-run izakaya known for fresh seafood and warm hospitality.",
+    pref_brand_voice_help: "The AI weaves this into the voice — don't quote it back at guests, just let it shape the tone.",
+    pref_banned: "Banned Words / Phrases",
+    pref_banned_ph: "apologize, inconvenience, strive",
+    pref_banned_help: "Comma-separated. The AI will rephrase to avoid these.",
+    pref_required: "Signature Phrases (use at least one)",
+    pref_required_ph: "Come back soon!, Our door is always open",
+    pref_required_help: "Comma-separated. The AI will naturally weave in at least one when fitting.",
+    pref_length: "Reply Length Preference",
+    pref_length_help: "Overrides the default 50–80 word target.",
+    pref_pro_only: "Pro only",
+    pref_pro_locked: "Upgrade to Pro to use banned/required word lists and length targeting.",
+  },
+  zh: {
+    pref_section: "AI 回覆偏好設定",
+    pref_help: "客製化 Revuly AI 為你的餐廳撰寫回覆的方式。這些設定會套用到每一則生成的回覆，包含自動同步並寄到你信箱的版本。",
+    pref_restaurant_style: "餐廳風格",
+    pref_restaurant_style_help: "決定 AI 為你的店家使用的整體語氣。",
+    pref_tone_formality: "語氣 — 正式度",
+    pref_tone_warmth: "語氣 — 溫度",
+    pref_tone_detail: "語氣 — 詳細度",
+    pref_formal: "正式",
+    pref_casual: "輕鬆",
+    pref_reserved: "保守",
+    pref_warm: "熱情",
+    pref_brief: "簡短",
+    pref_detailed: "詳細",
+    pref_owner_name: "老闆名字（可選）",
+    pref_owner_name_ph: "例如：James",
+    pref_owner_name_help: "若填寫，回覆會以「— James, Owner」署名。留空則不署名。",
+    pref_brand_voice: "品牌特色（可選，最多 100 字）",
+    pref_brand_voice_ph: "例如：家族經營的居酒屋，主打新鮮海鮮與熱情款待。",
+    pref_brand_voice_help: "AI 會把它融入語氣裡，不會直接引用給顧客，只是用來塑造整體調性。",
+    pref_banned: "禁用詞彙",
+    pref_banned_ph: "apologize, inconvenience, strive",
+    pref_banned_help: "用逗號分隔。AI 會改寫以避開這些字詞。",
+    pref_required: "招牌語（至少使用其一）",
+    pref_required_ph: "Come back soon!, Our door is always open",
+    pref_required_help: "用逗號分隔。AI 會在合適的時機自然帶入其中之一。",
+    pref_length: "回覆長度偏好",
+    pref_length_help: "覆寫預設的 50–80 字長度。",
+    pref_pro_only: "僅限 Pro 方案",
+    pref_pro_locked: "升級至 Pro 才能使用禁用/必用詞彙清單與長度控制。",
+  },
+};
+
+// Settings page has no language toggle of its own — read the choice the
+// user set on the dashboard so the two surfaces stay in sync.
+function detectLang() {
+  if (typeof window === "undefined") return "en";
+  try {
+    return window.localStorage.getItem("revuly-lang") === "zh" ? "zh" : "en";
+  } catch { return "en"; }
+}
+
 // Stable Google Maps URL for any place_id — Google redirects this to the canonical listing.
 const mapsUrlFor = (placeId) => `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId || "")}`;
+
+// Default AI preferences for a profile that has never opened this section.
+const DEFAULT_AI_PREFS = {
+  restaurant_style: "",
+  tone_formality: 50,
+  tone_warmth: 50,
+  tone_detail: 50,
+  owner_name: "",
+  brand_voice: "",
+  banned_words: [],
+  required_words: [],
+  length_preference: "medium",
+};
+
+// Normalize comma-separated text input back to an array (trimmed, no empties).
+const csvToArray = (s) => String(s || "").split(",").map((x) => x.trim()).filter(Boolean);
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
@@ -178,7 +310,12 @@ export default function SettingsPage() {
   const [placesSearching, setPlacesSearching] = useState(false);
   const [placesSaving, setPlacesSaving] = useState(false);
   const [placesError, setPlacesError] = useState("");
+  const [lang, setLang] = useState("en");
   const supabase = createClient();
+  const t = T[lang];
+
+  // Mirror the dashboard's language choice (stored in localStorage on toggle).
+  useEffect(() => { setLang(detectLang()); }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -215,6 +352,16 @@ export default function SettingsPage() {
   const pct = usagePercent(planKey, profile?.used_count || 0);
   const canCustomKw = canUseFeature(planKey, "custom_keywords");
 
+  // Merge any unset preference keys into the existing object so saving
+  // never wipes a field the user hasn't touched.
+  const currentPrefs = () => ({ ...DEFAULT_AI_PREFS, ...(profile?.ai_preferences || {}) });
+  const updatePref = (key, val) => {
+    setProfile((p) => ({
+      ...p,
+      ai_preferences: { ...DEFAULT_AI_PREFS, ...(p?.ai_preferences || {}), [key]: val },
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true); setSuccess("");
     const { data: { user } } = await supabase.auth.getUser();
@@ -228,6 +375,7 @@ export default function SettingsPage() {
       crisis_alerts: profile.crisis_alerts,
       weekly_report: profile.weekly_report,
       custom_keywords: profile.custom_keywords || [],
+      ai_preferences: currentPrefs(),
     }).eq("id", user.id);
     if (!error) {
       await supabase.from("profiles").update({
@@ -493,6 +641,162 @@ export default function SettingsPage() {
                 {profile.google_connected ? "Reconnect" : "Connect Google Business"}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* AI REPLY PREFERENCES — all plans (Pro gets extras) */}
+        <div className="section">
+          <div className="section-header">{t.pref_section}</div>
+          <div className="card">
+            <p className="pref-help">{t.pref_help}</p>
+
+            {(() => {
+              const prefs = currentPrefs();
+              const isPro = planKey === "pro";
+              const bvLen = (prefs.brand_voice || "").length;
+              return (
+                <>
+                  {/* Restaurant style */}
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_restaurant_style}</label>
+                    <select
+                      className="form-select"
+                      value={prefs.restaurant_style || ""}
+                      onChange={(e) => updatePref("restaurant_style", e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {REST_STYLE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt[lang]}</option>
+                      ))}
+                    </select>
+                    <div className="pref-sub">{t.pref_restaurant_style_help}</div>
+                  </div>
+
+                  {/* Tone sliders */}
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_tone_formality}</label>
+                    <div className="pref-slider-row">
+                      <span className="pref-slider-ends" style={{textAlign:"right"}}>{t.pref_formal}</span>
+                      <input
+                        type="range" min="0" max="100" className="pref-slider"
+                        value={prefs.tone_formality}
+                        onChange={(e) => updatePref("tone_formality", parseInt(e.target.value, 10))}
+                      />
+                      <span className="pref-slider-ends">{t.pref_casual}</span>
+                    </div>
+                  </div>
+
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_tone_warmth}</label>
+                    <div className="pref-slider-row">
+                      <span className="pref-slider-ends" style={{textAlign:"right"}}>{t.pref_reserved}</span>
+                      <input
+                        type="range" min="0" max="100" className="pref-slider"
+                        value={prefs.tone_warmth}
+                        onChange={(e) => updatePref("tone_warmth", parseInt(e.target.value, 10))}
+                      />
+                      <span className="pref-slider-ends">{t.pref_warm}</span>
+                    </div>
+                  </div>
+
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_tone_detail}</label>
+                    <div className="pref-slider-row">
+                      <span className="pref-slider-ends" style={{textAlign:"right"}}>{t.pref_brief}</span>
+                      <input
+                        type="range" min="0" max="100" className="pref-slider"
+                        value={prefs.tone_detail}
+                        onChange={(e) => updatePref("tone_detail", parseInt(e.target.value, 10))}
+                      />
+                      <span className="pref-slider-ends">{t.pref_detailed}</span>
+                    </div>
+                  </div>
+
+                  {/* Owner name */}
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_owner_name}</label>
+                    <input
+                      className="form-input"
+                      placeholder={t.pref_owner_name_ph}
+                      value={prefs.owner_name || ""}
+                      onChange={(e) => updatePref("owner_name", e.target.value)}
+                    />
+                    <div className="pref-sub">{t.pref_owner_name_help}</div>
+                  </div>
+
+                  {/* Brand voice */}
+                  <div className="pref-block">
+                    <label className="pref-label">{t.pref_brand_voice}</label>
+                    <textarea
+                      className="pref-textarea"
+                      placeholder={t.pref_brand_voice_ph}
+                      value={prefs.brand_voice || ""}
+                      onChange={(e) => updatePref("brand_voice", e.target.value.slice(0, BRAND_VOICE_MAX))}
+                      maxLength={BRAND_VOICE_MAX}
+                    />
+                    <div className={`pref-counter${bvLen > BRAND_VOICE_MAX ? " over" : ""}`}>{bvLen} / {BRAND_VOICE_MAX}</div>
+                    <div className="pref-sub">{t.pref_brand_voice_help}</div>
+                  </div>
+
+                  {/* Banned words (Pro) */}
+                  <div className="pref-block">
+                    <label className="pref-label">
+                      {t.pref_banned}
+                      <span className="pref-pro-badge">{t.pref_pro_only}</span>
+                    </label>
+                    <input
+                      className="form-input"
+                      placeholder={t.pref_banned_ph}
+                      value={(prefs.banned_words || []).join(", ")}
+                      onChange={(e) => updatePref("banned_words", csvToArray(e.target.value))}
+                      disabled={!isPro}
+                    />
+                    {isPro ? (
+                      <div className="pref-sub">{t.pref_banned_help}</div>
+                    ) : (
+                      <div className="pref-locked-note">{t.pref_pro_locked}</div>
+                    )}
+                  </div>
+
+                  {/* Required words (Pro) */}
+                  <div className="pref-block">
+                    <label className="pref-label">
+                      {t.pref_required}
+                      <span className="pref-pro-badge">{t.pref_pro_only}</span>
+                    </label>
+                    <input
+                      className="form-input"
+                      placeholder={t.pref_required_ph}
+                      value={(prefs.required_words || []).join(", ")}
+                      onChange={(e) => updatePref("required_words", csvToArray(e.target.value))}
+                      disabled={!isPro}
+                    />
+                    {isPro && <div className="pref-sub">{t.pref_required_help}</div>}
+                  </div>
+
+                  {/* Length preference (Pro) */}
+                  <div className="pref-block">
+                    <label className="pref-label">
+                      {t.pref_length}
+                      <span className="pref-pro-badge">{t.pref_pro_only}</span>
+                    </label>
+                    <div className="pref-length-row">
+                      {LENGTH_PREFS.map((opt) => (
+                        <button
+                          key={opt.value}
+                          className={`pref-length-opt${prefs.length_preference === opt.value ? " active" : ""}`}
+                          onClick={() => isPro && updatePref("length_preference", opt.value)}
+                          disabled={!isPro}
+                        >
+                          {opt[lang]}
+                        </button>
+                      ))}
+                    </div>
+                    {isPro && <div className="pref-sub">{t.pref_length_help}</div>}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 
