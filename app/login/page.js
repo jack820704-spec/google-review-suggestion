@@ -11,21 +11,39 @@ const CSS = `
   @media(max-width:800px){.layout{grid-template-columns:1fr}}
 
   /* LEFT BRAND PANEL */
-  .brand-panel{background:linear-gradient(160deg,#111116,#0a0a0b);border-right:1px solid rgba(201,168,76,.12);padding:48px 52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+  .brand-panel{background:linear-gradient(160deg,#111116,#0a0a0b);border-right:1px solid rgba(201,168,76,.12);padding:36px 44px 28px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:100vh}
   @media(max-width:800px){.brand-panel{display:none}}
   .brand-panel::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.1),transparent 70%);pointer-events:none}
-  .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-lt);display:flex;align-items:center;gap:9px;text-decoration:none}
+  .brand-panel::after{content:'';position:absolute;bottom:-120px;left:-80px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.05),transparent 70%);pointer-events:none}
+  .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold-lt);display:flex;align-items:center;gap:9px;text-decoration:none;position:relative;z-index:1}
   .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-  .brand-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0}
-  .brand-body h2{font-family:'Playfair Display',serif;font-size:clamp(28px,3vw,38px);font-weight:900;line-height:1.2;margin-bottom:16px}
+
+  .brand-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 0;position:relative;z-index:1}
+  .brand-body h2{font-family:'Playfair Display',serif;font-size:clamp(26px,2.8vw,34px);font-weight:900;line-height:1.2;margin-bottom:14px}
   .brand-accent{background:linear-gradient(135deg,var(--gold-lt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  .brand-body p{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:40px}
-  .brand-feats{display:flex;flex-direction:column;gap:16px}
-  .brand-feat{display:flex;align-items:flex-start;gap:14px}
-  .feat-dot{width:36px;height:36px;border-radius:9px;background:rgba(201,168,76,.1);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-  .feat-info h4{font-size:14px;font-weight:600;margin-bottom:3px}
-  .feat-info p{font-size:13px;color:var(--text2);line-height:1.5;margin:0}
-  .brand-footer{font-size:12.5px;color:var(--text3)}
+  .brand-body p.brand-lead{font-size:14.5px;color:var(--text2);line-height:1.7;margin-bottom:26px}
+
+  /* Six-feature checklist — tighter row so the testimonial + CTA fit below */
+  .brand-feats{display:flex;flex-direction:column;gap:11px;margin-bottom:24px}
+  .brand-feat{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--text2);line-height:1.5}
+  .feat-icon{width:28px;height:28px;border-radius:7px;background:rgba(201,168,76,.1);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--gold-lt);flex-shrink:0}
+  .brand-feat strong{color:var(--text1);font-weight:600}
+
+  /* Testimonial card */
+  .brand-testi{background:rgba(255,255,255,.025);border:1px solid rgba(201,168,76,.18);border-radius:12px;padding:18px 20px;margin-bottom:18px;position:relative}
+  .brand-testi::before{content:"\\201C";position:absolute;top:-6px;left:14px;font-family:'Playfair Display',serif;font-size:48px;color:var(--gold-dim);line-height:1;opacity:.55}
+  .testi-stars{color:var(--gold);letter-spacing:2px;font-size:12px;margin-bottom:8px}
+  .testi-quote{font-size:13.5px;color:var(--text1);font-style:italic;line-height:1.6;margin-bottom:10px}
+  .testi-author{display:flex;align-items:center;gap:10px}
+  .testi-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--gold-dim),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#000;flex-shrink:0}
+  .testi-meta-name{font-size:12.5px;color:var(--text1);font-weight:700;line-height:1.2}
+  .testi-meta-role{font-size:11.5px;color:var(--text3);margin-top:1px}
+
+  /* "See full product tour" CTA */
+  .brand-tour-btn{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:10px 18px;border-radius:9px;border:1px solid var(--gold-border);background:rgba(201,168,76,.06);color:var(--gold-lt);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:.2px}
+  .brand-tour-btn:hover{background:rgba(201,168,76,.12);border-color:var(--gold);transform:translateY(-1px)}
+
+  .brand-footer{font-size:12px;color:var(--text3);position:relative;z-index:1}
 
   /* RIGHT FORM PANEL */
   .form-panel{display:flex;align-items:center;justify-content:center;padding:48px 6vw;background:var(--bg)}
@@ -64,24 +82,54 @@ const CSS = `
   .form-footer{margin-top:28px;text-align:center;font-size:12px;color:var(--text3)}
   .form-footer a{color:var(--text3);text-decoration:none}
   .form-footer a:hover{color:var(--gold)}
+  /* Persistent "Back to home" link above the form title */
+  .back-to-home{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);text-decoration:none;font-weight:600;margin-bottom:22px;transition:color .2s}
+  .back-to-home:hover{color:var(--gold-lt)}
+  /* Mobile-only "Learn more about Revuly" CTA at the bottom of the form panel */
+  .mobile-tour-cta{display:none;margin-top:24px;padding:14px 18px;background:rgba(201,168,76,.06);border:1px solid var(--gold-border);border-radius:10px;text-align:center;text-decoration:none;color:var(--gold-lt);font-size:13.5px;font-weight:700;transition:all .2s}
+  .mobile-tour-cta:hover{background:rgba(201,168,76,.12)}
 
-  /* ════════════ MOBILE (≤ 768px) ════════════ */
+  /* ════════════ MOBILE (≤ 800px) ════════════ */
   @media (max-width: 800px) {
-    .form-panel{padding:32px 6vw}
+    .form-panel{padding:28px 6vw 36px}
     .form-title{font-size:24px}
-    .form-sub{font-size:13.5px;margin-bottom:26px}
+    .form-sub{font-size:13.5px;margin-bottom:22px}
     .form-input{padding:11px 13px;font-size:14px}
     .btn-submit{padding:12px;font-size:14.5px}
     .btn-google{padding:11px;font-size:13.5px}
+    .back-to-home{margin-bottom:18px}
+    .mobile-tour-cta{display:block}
+  }
+  /* iPhone SE-class — keep form inputs comfortable at 320–375px */
+  @media (max-width: 380px) {
+    .form-panel{padding:24px 5vw 32px}
+    .form-title{font-size:22px}
+    .form-input{padding:10px 12px}
+    .btn-submit{padding:11px;font-size:14px}
+    .form-logo-mobile{margin-bottom:24px;font-size:18px}
+    .form-logo-icon{width:26px;height:26px;font-size:12px}
+    .mobile-tour-cta{padding:12px 14px;font-size:13px}
   }
 `;
 
+// Six product highlights — matches the brief. Compact single-line copy
+// so all six fit comfortably alongside the testimonial + CTA below.
 const BRAND_FEATS = [
-  { icon: "✦", title: "AI Reply Generation", desc: "Three reply styles crafted by Claude AI in seconds" },
-  { icon: "◉", title: "Real-Time Monitoring", desc: "Instant alerts the moment a new review is posted" },
-  { icon: "◈", title: "Sentiment Analysis", desc: "Automatic positive, neutral, and negative classification" },
-  { icon: "⚠", title: "Crisis Alerts", desc: "Early warning for patterns of negative feedback" },
+  { icon: "✦", label: "Auto-detect new Google reviews" },
+  { icon: "◉", label: "AI reply suggestions in seconds" },
+  { icon: "◈", label: "Three reply styles — sounds like you" },
+  { icon: "⚠", label: "Crisis alerts & weekly reports" },
+  { icon: "▦", label: "Keyword Intelligence analytics" },
+  { icon: "⬡", label: "Competitor tracking (Pro)" },
 ];
+
+const TESTIMONIAL = {
+  quote:
+    "We used to spend an hour every day writing review replies. With Revuly, it's three minutes — and the replies sound more like us than what we used to write ourselves.",
+  name: "Marcus Renaud",
+  role: "Owner, Maison Renaud · Paris",
+  initials: "MR",
+};
 
 export default function LoginPage() {
   const [mode, setMode] = useState("login");
@@ -145,20 +193,37 @@ export default function LoginPage() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} precedence="default" href="login" />
       <div className="layout">
-        {/* LEFT: BRAND PANEL */}
+        {/* LEFT: BRAND PANEL (hidden on mobile) */}
         <div className="brand-panel">
           <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
           <div className="brand-body">
             <h2>The Reputation Platform for <span className="brand-accent">Elite Hospitality</span></h2>
-            <p>Join 10,000+ restaurants using AI to craft perfect Google review replies — and turn guest feedback into lasting loyalty.</p>
+            <p className="brand-lead">Join 10,000+ restaurants using AI to craft perfect Google review replies — and turn guest feedback into lasting loyalty.</p>
+
             <div className="brand-feats">
               {BRAND_FEATS.map((f) => (
-                <div key={f.title} className="brand-feat">
-                  <div className="feat-dot">{f.icon}</div>
-                  <div className="feat-info"><h4>{f.title}</h4><p>{f.desc}</p></div>
+                <div key={f.label} className="brand-feat">
+                  <span className="feat-icon">{f.icon}</span>
+                  <span>{f.label}</span>
                 </div>
               ))}
             </div>
+
+            <div className="brand-testi">
+              <div className="testi-stars">★★★★★</div>
+              <div className="testi-quote">"{TESTIMONIAL.quote}"</div>
+              <div className="testi-author">
+                <div className="testi-avatar">{TESTIMONIAL.initials}</div>
+                <div>
+                  <div className="testi-meta-name">{TESTIMONIAL.name}</div>
+                  <div className="testi-meta-role">{TESTIMONIAL.role}</div>
+                </div>
+              </div>
+            </div>
+
+            <a className="brand-tour-btn" href="/tour">
+              See full product tour →
+            </a>
           </div>
           <div className="brand-footer">© 2026 Revuly Inc. · <a href="/privacy" style={{color:"inherit",textDecoration:"none"}}>Privacy</a> · <a href="/terms" style={{color:"inherit",textDecoration:"none"}}>Terms</a></div>
         </div>
@@ -167,6 +232,7 @@ export default function LoginPage() {
         <div className="form-panel">
           <div className="form-inner">
             <a className="form-logo-mobile" href="/"><span className="form-logo-icon">✦</span>Revuly</a>
+            <a className="back-to-home" href="/">← Back to home</a>
             <h1 className="form-title">{mode === "login" ? "Welcome back" : "Start your free trial"}</h1>
             <p className="form-sub">{mode === "login" ? "Don't have an account? " : "Already have an account? "}<a href="#" onClick={(e) => { e.preventDefault(); setMode(mode === "login" ? "signup" : "login"); setError(""); }}>{mode === "login" ? "Sign up free" : "Log in"}</a></p>
 
@@ -210,6 +276,9 @@ export default function LoginPage() {
               {mode === "signup" && <><a href="/terms" style={{color:"var(--gold)",textDecoration:"none"}}>Terms</a> and <a href="/privacy" style={{color:"var(--gold)",textDecoration:"none"}}>Privacy Policy</a></>}
             </div>
             <div className="form-footer"><a href="/">← Back to Revuly.com</a></div>
+
+            {/* Mobile-only — desktop already has the brand panel with this link */}
+            <a className="mobile-tour-cta" href="/tour">Learn more about Revuly →</a>
           </div>
         </div>
       </div>
