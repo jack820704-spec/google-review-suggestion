@@ -540,6 +540,7 @@ const T = {
     plan_starter: "Starter",
     plan_growth: "Growth",
     plan_pro: "Pro",
+    tt_analytics: "Analytics",
     tt_settings: "Settings",
     tt_help: "Help",
     tt_signout: "Sign Out",
@@ -702,6 +703,7 @@ const T = {
     plan_starter: "入門版",
     plan_growth: "成長版",
     plan_pro: "專業版",
+    tt_analytics: "分析",
     tt_settings: "設定",
     tt_help: "說明",
     tt_signout: "登出",
@@ -1192,6 +1194,7 @@ export default function DashboardPage() {
           >
             {lang === "en" ? "中文" : "EN"}
           </button>
+          <button className="icon-btn" onClick={() => window.location.href = "/dashboard/analytics"} title={t.tt_analytics}>📊</button>
           <button className="icon-btn" onClick={() => window.location.href = "/dashboard/settings"} title={t.tt_settings}>⚙</button>
           <button className="icon-btn" onClick={() => window.location.href = "/help"} title={t.tt_help}>?</button>
           <button className="icon-btn" onClick={handleLogout} title={t.tt_signout}>↩</button>
