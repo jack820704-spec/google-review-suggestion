@@ -248,7 +248,7 @@ const BRAND_VOICE_MAX = 100;
 const T = {
   en: {
     pref_section: "AI Reply Preferences",
-    pref_help: "Customize how Revuly's AI writes replies for your restaurant. These settings shape every generated reply, including auto-synced reviews emailed to you.",
+    pref_help: "These preferences fine-tune all three reply styles (Warm & Personal, Professional & Gracious, Brief & Direct) to match your restaurant's personality. The more you customise, the more the AI sounds like you.",
     pref_restaurant_style: "Restaurant Style",
     pref_restaurant_style_help: "Sets the overall voice the AI uses for your venue.",
     pref_tone_formality: "Tone — Formality",
@@ -317,7 +317,7 @@ const T = {
   },
   zh: {
     pref_section: "AI 回覆偏好設定",
-    pref_help: "客製化 Revuly AI 為你的餐廳撰寫回覆的方式。這些設定會套用到每一則生成的回覆，包含自動同步並寄到你信箱的版本。",
+    pref_help: "這些偏好會微調全部三種回覆風格（Warm & Personal、Professional & Gracious、Brief & Direct），讓它們更符合你餐廳的個性。設定愈完整，AI 寫出來就愈像你本人。",
     pref_restaurant_style: "餐廳風格",
     pref_restaurant_style_help: "決定 AI 為你的店家使用的整體語氣。",
     pref_tone_formality: "語氣 — 正式度",
