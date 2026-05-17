@@ -180,19 +180,25 @@ export async function POST(req) {
       path: candidate.pathname,
       search: candidate.search,
     });
+    // ── Reject short links upfront — they're too unreliable to parse.
+    //     Tell the user to copy the long URL from the browser address bar.
+    const SHORT_LINK_HOSTS = new Set(["maps.app.goo.gl", "goo.gl"]);
+    if (SHORT_LINK_HOSTS.has(candidate.hostname) || candidate.hostname.endsWith(".goo.gl")) {
+      return Response.json({
+        error:
+          "Short links (maps.app.goo.gl) are not supported. " +
+          "Open the Google Maps page in your browser and copy the full URL from the address bar — it should start with https://www.google.com/maps/place/…",
+      }, { status: 400 });
+    }
     if (!isGoogleMapsHost(candidate.hostname)) {
       return Response.json({
-        error: "Only Google Maps links are supported (maps.app.goo.gl, goo.gl/maps, or google.com/maps/...)",
+        error: "Only full Google Maps URLs are supported (must start with google.com/maps/place/...)",
       }, { status: 400 });
     }
 
-    // ── Follow short/cid links to canonical /maps/place/ URL ──
+    // ── Follow cid links to canonical /maps/place/ URL when needed ──
     let canonical = candidate.toString();
-    const needsRedirect =
-      candidate.hostname === "maps.app.goo.gl" ||
-      candidate.hostname.endsWith(".goo.gl") ||
-      candidate.hostname === "goo.gl" ||
-      candidate.searchParams.has("cid");
+    const needsRedirect = candidate.searchParams.has("cid");
     if (needsRedirect) {
       try {
         canonical = await followRedirects(canonical);

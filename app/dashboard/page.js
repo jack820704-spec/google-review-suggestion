@@ -600,6 +600,16 @@ const T = {
     comp_or_search: "Or search by name",
     comp_search_name_placeholder: "Restaurant name",
     comp_search_name_btn: "Search",
+    // ── New: search-first / paste-link-secondary flow ──
+    comp_search_primary_title: "Search competitor by name",
+    comp_search_primary_help: "Find your competitor on Google by restaurant name + city. We'll show the top 5 matches.",
+    comp_search_city_placeholder: "City",
+    comp_search_top_matches: "Top matches",
+    comp_paste_link_toggle: "Or paste a Google Maps link",
+    comp_paste_link_warning: "⚠ Short links (maps.app.goo.gl) are not supported. Please copy the full URL from your browser address bar.",
+    comp_paste_full_placeholder: "https://www.google.com/maps/place/...",
+    comp_paste_full_only: "Only full Google Maps URLs are supported (must start with google.com/maps/place/...)",
+    comp_get_full_url_help: "How to get the full Google Maps URL →",
   },
   zh: {
     live: "即時",
@@ -750,6 +760,16 @@ const T = {
     comp_or_search: "或用店名搜尋",
     comp_search_name_placeholder: "餐廳名稱",
     comp_search_name_btn: "搜尋",
+    // ── 新：以店名搜尋為主，貼連結為輔 ──
+    comp_search_primary_title: "搜尋競爭對手店名",
+    comp_search_primary_help: "輸入餐廳名稱與城市，從 Google 搜尋競爭對手。會顯示前 5 個最相符的商家。",
+    comp_search_city_placeholder: "城市",
+    comp_search_top_matches: "最相符的商家",
+    comp_paste_link_toggle: "或貼上完整 Google Maps 連結",
+    comp_paste_link_warning: "⚠ 不支援短連結（maps.app.goo.gl）。請從瀏覽器網址列複製完整網址。",
+    comp_paste_full_placeholder: "https://www.google.com/maps/place/...",
+    comp_paste_full_only: "只支援完整 Google Maps 網址（開頭必須是 google.com/maps/place/...）",
+    comp_get_full_url_help: "如何取得完整 Google Maps 網址 →",
   },
 };
 
@@ -842,8 +862,9 @@ export default function DashboardPage() {
   const [compResolving, setCompResolving] = useState(false);  // POST /resolve in flight
   const [compAdding, setCompAdding] = useState("");           // place_id currently being added (or "")
   const [compError, setCompError] = useState("");
-  // Name-search fallback
+  // Name-search (now the primary flow)
   const [compNameQuery, setCompNameQuery] = useState("");
+  const [compCityQuery, setCompCityQuery] = useState("");
   const [compNameResults, setCompNameResults] = useState(null);
   const [compNameSearching, setCompNameSearching] = useState(false);
   const drawerTouchStartY = useRef(null);
@@ -1029,6 +1050,12 @@ export default function DashboardPage() {
     setCompCandidates(null);
     const url = compLinkInput.trim();
     if (!url) { setCompError(t.comp_invalid_link); return; }
+    // Client-side reject of short links so the user gets instant feedback
+    // and a precise next step instead of a vague server error.
+    if (/^https?:\/\/(?:maps\.app\.goo\.gl|goo\.gl|[^/]+\.goo\.gl)\b/i.test(url)) {
+      setCompError(t.comp_paste_link_warning);
+      return;
+    }
     setCompResolving(true);
     try {
       const res = await fetch("/api/competitors/resolve", {
@@ -1099,7 +1126,11 @@ export default function DashboardPage() {
       const res = await fetch("/api/places/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: q, city: profile?.city, country: profile?.country }),
+        body: JSON.stringify({
+          name: q,
+          city: (compCityQuery || profile?.city || "").trim(),
+          country: profile?.country,
+        }),
       });
       const data = await res.json();
       if (!res.ok || data.error) { setCompError(data.error || "Search failed"); setCompNameResults([]); return; }
@@ -1519,52 +1550,50 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Add competitor — paste a Google Maps link OR search by name */}
+                  {/* Add competitor — PRIMARY: search by name + city. SECONDARY (collapsed): paste full URL. */}
                   {competitors.length < 3 && (
                     <div className="comp-section">
-                      <div className="comp-section-title">{t.comp_paste_section}</div>
+                      <div className="comp-section-title">{t.comp_search_primary_title}</div>
                       <div className="comp-search-card">
-                        {/* Link input + Preview action */}
+                        <p style={{fontSize:12.5,color:"var(--text2)",margin:"0 0 10px",lineHeight:1.55}}>
+                          {t.comp_search_primary_help}
+                        </p>
+
+                        {/* Name + City inputs side-by-side, then Search button */}
                         <div className="comp-search-row">
                           <input
                             className="comp-search-input"
-                            placeholder={t.comp_paste_placeholder}
-                            value={compLinkInput}
-                            onChange={(e) => setCompLinkInput(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleCompResolve(); }}
+                            placeholder={t.comp_search_name_placeholder}
+                            value={compNameQuery}
+                            onChange={(e) => setCompNameQuery(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") handleCompNameSearch(); }}
+                            style={{flex:2}}
                           />
-                          <button className="comp-search-btn" onClick={handleCompResolve} disabled={compResolving || !compLinkInput.trim()}>
-                            {compResolving ? t.comp_resolving : t.comp_preview_btn}
+                          <input
+                            className="comp-search-input"
+                            placeholder={t.comp_search_city_placeholder}
+                            value={compCityQuery || profile?.city || ""}
+                            onChange={(e) => setCompCityQuery(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") handleCompNameSearch(); }}
+                            style={{flex:1,minWidth:100}}
+                          />
+                          <button
+                            className="comp-search-btn"
+                            onClick={handleCompNameSearch}
+                            disabled={compNameSearching || !compNameQuery.trim()}
+                          >
+                            {compNameSearching ? t.comp_searching : t.comp_search_name_btn}
                           </button>
                         </div>
 
-                        {/* "How to get the link" steps + format examples */}
-                        <details style={{marginTop:10}}>
-                          <summary style={{fontSize:12,color:"var(--gold)",cursor:"pointer",fontWeight:600,padding:"4px 0"}}>
-                            {t.comp_how_to_get_link}
-                          </summary>
-                          <ol style={{margin:"8px 0 6px 18px",padding:0,color:"var(--text2)",fontSize:12,lineHeight:1.7}}>
-                            {t.comp_link_steps.map((s, i) => <li key={i}>{s}</li>)}
-                          </ol>
-                          <div style={{fontSize:11,color:"var(--text3)",marginTop:8}}>
-                            <div style={{fontWeight:700,marginBottom:4}}>{t.comp_supported_examples}</div>
-                            <ul style={{margin:0,padding:"0 0 0 18px",fontFamily:"monospace"}}>
-                              <li>https://maps.app.goo.gl/xxx</li>
-                              <li>https://goo.gl/maps/xxx</li>
-                              <li>https://www.google.com/maps/place/...</li>
-                              <li>https://www.google.com/maps?cid=...</li>
-                            </ul>
-                          </div>
-                        </details>
-
-                        {/* Resolved candidate(s) → pick one */}
-                        {compCandidates && compCandidates.length > 0 && (
+                        {/* Top 5 matches */}
+                        {compNameResults && compNameResults.length > 0 && (
                           <>
                             <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold-lt)",letterSpacing:".3px",marginTop:14,marginBottom:8}}>
-                              {compCandidates.length === 1 ? t.comp_preview_title : t.comp_pick_correct}
+                              {t.comp_search_top_matches}
                             </div>
                             <div className="comp-search-results">
-                              {compCandidates.map((r) => {
+                              {compNameResults.map((r) => {
                                 const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
                                 const isOwn = profile?.place_id === r.place_id;
                                 const isAdding = compAdding === r.place_id;
@@ -1585,6 +1614,7 @@ export default function DashboardPage() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{display:"inline-block",marginTop:6,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
+                                        onClick={(e) => e.stopPropagation()}
                                       >🗺 {t.comp_view_maps}</a>
                                     </div>
                                     <button
@@ -1593,85 +1623,115 @@ export default function DashboardPage() {
                                       disabled={!!compAdding || alreadyTracked || isOwn}
                                       title={isOwn ? "That's your business" : alreadyTracked ? "Already tracking" : ""}
                                     >
-                                      {isAdding ? t.comp_tracking : alreadyTracked ? t.comp_added : isOwn ? "—" : t.comp_confirm_track}
-                                    </button>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <button
-                              className="btn-comp-remove"
-                              style={{marginTop:10,border:"1px solid rgba(255,255,255,.12)",color:"var(--text2)",background:"transparent"}}
-                              onClick={handleCompCancelPreview}
-                              disabled={!!compAdding}
-                            >{t.comp_cancel}</button>
-                          </>
-                        )}
-
-                        {compError && <div className="comp-err">{compError}</div>}
-
-                        {/* Always-available "Or search by name" fallback */}
-                        <div style={{marginTop:18,paddingTop:14,borderTop:"1px dashed rgba(255,255,255,.08)"}}>
-                          <div style={{fontSize:11.5,fontWeight:700,letterSpacing:".5px",textTransform:"uppercase",color:"var(--text3)",marginBottom:8}}>
-                            {t.comp_or_search}
-                          </div>
-                          <div className="comp-search-row">
-                            <input
-                              className="comp-search-input"
-                              placeholder={t.comp_search_name_placeholder}
-                              value={compNameQuery}
-                              onChange={(e) => setCompNameQuery(e.target.value)}
-                              onKeyDown={(e) => { if (e.key === "Enter") handleCompNameSearch(); }}
-                            />
-                            <button
-                              className="comp-search-btn"
-                              onClick={handleCompNameSearch}
-                              disabled={compNameSearching || !compNameQuery.trim()}
-                              style={{background:"transparent",border:"1px solid var(--gold-border)",color:"var(--gold-lt)"}}
-                            >
-                              {compNameSearching ? t.comp_searching : t.comp_search_name_btn}
-                            </button>
-                          </div>
-                          {compNameResults && compNameResults.length > 0 && (
-                            <div className="comp-search-results" style={{marginTop:10}}>
-                              {compNameResults.map((r) => {
-                                const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
-                                const isOwn = profile?.place_id === r.place_id;
-                                const isAdding = compAdding === r.place_id;
-                                return (
-                                  <div key={r.place_id} className="comp-result" style={{cursor:"default"}}>
-                                    <div className="comp-result-info">
-                                      <div className="comp-result-name">{r.name}</div>
-                                      <div className="comp-result-meta">
-                                        {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
-                                        {r.user_rating_count != null && (
-                                          <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>
-                                        )}
-                                      </div>
-                                      {r.address && <div className="comp-result-addr">{r.address}</div>}
-                                      <a
-                                        href={r.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(r.place_id)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{display:"inline-block",marginTop:6,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
-                                      >🗺 {t.comp_view_maps}</a>
-                                    </div>
-                                    <button
-                                      className="comp-track-btn"
-                                      onClick={() => handleCompPick(r)}
-                                      disabled={!!compAdding || alreadyTracked || isOwn}
-                                    >
                                       {isAdding ? t.comp_tracking : alreadyTracked ? t.comp_added : isOwn ? "—" : t.comp_track_btn}
                                     </button>
                                   </div>
                                 );
                               })}
                             </div>
+                          </>
+                        )}
+                        {compNameResults && compNameResults.length === 0 && !compError && (
+                          <p style={{fontSize:12,color:"var(--text3)",marginTop:10}}>{t.comp_no_results}</p>
+                        )}
+
+                        {/* SECONDARY (collapsed): full-URL paste — short links rejected */}
+                        <details style={{marginTop:18,paddingTop:14,borderTop:"1px dashed rgba(255,255,255,.08)"}}>
+                          <summary style={{fontSize:12.5,color:"var(--gold-lt)",cursor:"pointer",fontWeight:700,letterSpacing:".3px",padding:"4px 0"}}>
+                            {t.comp_paste_link_toggle}
+                          </summary>
+                          <div style={{
+                            marginTop:10,
+                            padding:"8px 12px",
+                            background:"rgba(232,184,75,.06)",
+                            border:"1px solid rgba(232,184,75,.25)",
+                            borderRadius:8,
+                            fontSize:11.5,
+                            color:"#e8b84b",
+                            lineHeight:1.5,
+                          }}>
+                            {t.comp_paste_link_warning}
+                          </div>
+                          <div className="comp-search-row" style={{marginTop:10}}>
+                            <input
+                              className="comp-search-input"
+                              placeholder={t.comp_paste_full_placeholder}
+                              value={compLinkInput}
+                              onChange={(e) => setCompLinkInput(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleCompResolve(); }}
+                            />
+                            <button
+                              className="comp-search-btn"
+                              onClick={handleCompResolve}
+                              disabled={compResolving || !compLinkInput.trim()}
+                              style={{background:"transparent",border:"1px solid var(--gold-border)",color:"var(--gold-lt)"}}
+                            >
+                              {compResolving ? t.comp_resolving : t.comp_preview_btn}
+                            </button>
+                          </div>
+                          <a
+                            href="/help#competitor-link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{display:"inline-block",marginTop:8,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
+                          >
+                            {t.comp_get_full_url_help}
+                          </a>
+
+                          {/* Resolved candidate(s) → pick one */}
+                          {compCandidates && compCandidates.length > 0 && (
+                            <>
+                              <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold-lt)",letterSpacing:".3px",marginTop:14,marginBottom:8}}>
+                                {compCandidates.length === 1 ? t.comp_preview_title : t.comp_pick_correct}
+                              </div>
+                              <div className="comp-search-results">
+                                {compCandidates.map((r) => {
+                                  const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
+                                  const isOwn = profile?.place_id === r.place_id;
+                                  const isAdding = compAdding === r.place_id;
+                                  return (
+                                    <div key={r.place_id} className="comp-result" style={{cursor:"default"}}>
+                                      <div className="comp-result-info">
+                                        <div className="comp-result-name">{r.name}</div>
+                                        <div className="comp-result-meta">
+                                          {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
+                                          {r.user_rating_count != null && (
+                                            <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>
+                                          )}
+                                          {r.type && <span style={{color:"var(--text2)"}}> · {r.type}</span>}
+                                        </div>
+                                        {r.address && <div className="comp-result-addr">{r.address}</div>}
+                                        <a
+                                          href={r.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(r.place_id)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          style={{display:"inline-block",marginTop:6,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
+                                          onClick={(e) => e.stopPropagation()}
+                                        >🗺 {t.comp_view_maps}</a>
+                                      </div>
+                                      <button
+                                        className="comp-track-btn"
+                                        onClick={() => handleCompPick(r)}
+                                        disabled={!!compAdding || alreadyTracked || isOwn}
+                                        title={isOwn ? "That's your business" : alreadyTracked ? "Already tracking" : ""}
+                                      >
+                                        {isAdding ? t.comp_tracking : alreadyTracked ? t.comp_added : isOwn ? "—" : t.comp_confirm_track}
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <button
+                                className="btn-comp-remove"
+                                style={{marginTop:10,border:"1px solid rgba(255,255,255,.12)",color:"var(--text2)",background:"transparent"}}
+                                onClick={handleCompCancelPreview}
+                                disabled={!!compAdding}
+                              >{t.comp_cancel}</button>
+                            </>
                           )}
-                          {compNameResults && compNameResults.length === 0 && (
-                            <p style={{fontSize:11.5,color:"var(--text3)",marginTop:8}}>{t.comp_no_results}</p>
-                          )}
-                        </div>
+                        </details>
+
+                        {compError && <div className="comp-err" style={{marginTop:12}}>{compError}</div>}
                       </div>
                     </div>
                   )}

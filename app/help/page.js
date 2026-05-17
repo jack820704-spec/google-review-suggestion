@@ -56,6 +56,7 @@ const NAV = [
   { id:"ai-reply", label:"Using AI Reply" },
   { id:"keyword-intel", label:"Keyword Intelligence" },
   { id:"notifications", label:"Email Notifications" },
+  { id:"competitor-link", label:"Competitor: Full URL Guide" },
   { id:"faq", label:"FAQ" },
   { id:"contact", label:"Contact Support" },
 ];
@@ -247,10 +248,52 @@ export default function HelpPage() {
             <p>Enable weekly reports in Settings to receive a Monday morning summary including: total reviews, average rating vs previous week, top 5 keywords, reply rate, and number of unanswered reviews.</p>
           </div>
 
+          {/* COMPETITOR FULL URL GUIDE */}
+          <div className="section">
+            <div id="competitor-link" className="section-anchor" />
+            <div className="section-badge">07</div>
+            <h2>How to Get a Full Google Maps URL (for Competitor Tracking)</h2>
+            <p>
+              When adding a competitor by link, Revuly needs the <strong>full</strong> Google Maps URL — not the short
+              <code> maps.app.goo.gl/…</code> share link. Short links are deliberately ambiguous and we can't always
+              resolve them back to the correct business. The full URL starts with{" "}
+              <code>https://www.google.com/maps/place/…</code> and contains the place name, coordinates, and an
+              internal ID that uniquely identifies the listing.
+            </p>
+
+            <div className="highlight-box">
+              <p>✓ Tip: Search by name + city is usually faster. Use the link flow only when search can't find your competitor.</p>
+            </div>
+
+            <h3>Desktop (Chrome / Safari / Firefox)</h3>
+            <div className="step-card"><div className="step-n">1</div><div className="step-body"><h4>Open Google Maps</h4><p>Go to <a href="https://www.google.com/maps" target="_blank">google.com/maps</a> in your browser.</p></div></div>
+            <div className="step-card"><div className="step-n">2</div><div className="step-body"><h4>Search for the competitor</h4><p>Type the restaurant's name and city in the Google Maps search bar.</p></div></div>
+            <div className="step-card"><div className="step-n">3</div><div className="step-body"><h4>Click the business in the results</h4><p>The map will recentre and a sidebar with photos, hours, and reviews will appear.</p></div></div>
+            <div className="step-card"><div className="step-n">4</div><div className="step-body"><h4>Click into the browser address bar</h4><p>The URL at the top of your browser window updates as soon as the business panel loads. It should now look like <code>https://www.google.com/maps/place/Some+Restaurant/@40.7128,-74.006,17z/data=…</code></p></div></div>
+            <div className="step-card"><div className="step-n">5</div><div className="step-body"><h4>Copy the full URL</h4><p>Select all of it (⌘A / Ctrl+A) and copy (⌘C / Ctrl+C). Paste it into Revuly's <em>Or paste a Google Maps link</em> box.</p></div></div>
+
+            <h3>Mobile (Google Maps app on iOS / Android)</h3>
+            <div className="step-card"><div className="step-n">1</div><div className="step-body"><h4>Open the Google Maps app</h4><p>Launch the app on your phone.</p></div></div>
+            <div className="step-card"><div className="step-n">2</div><div className="step-body"><h4>Search for the competitor</h4><p>Tap the search bar at the top and enter the restaurant's name.</p></div></div>
+            <div className="step-card"><div className="step-n">3</div><div className="step-body"><h4>Tap the business in the results</h4><p>The full business page opens with photos, address, reviews, and hours.</p></div></div>
+            <div className="step-card"><div className="step-n">4</div><div className="step-body"><h4>Tap the Share button</h4><p>It's the arrow-up icon near the top of the business page.</p></div></div>
+            <div className="step-card"><div className="step-n">5</div><div className="step-body"><h4>Choose "Copy link"</h4><p>Look for <strong>Copy link</strong> in the share sheet — this copies the URL directly to your clipboard.</p></div></div>
+            <div className="step-card"><div className="step-n">6</div><div className="step-body"><h4>⚠ Important — about short links</h4><p>The mobile share sheet sometimes gives you a <code>maps.app.goo.gl/…</code> short link. <strong>Those are not supported.</strong> If you only see a short link, switch to a desktop browser and follow the desktop steps above, or use the <strong>Search competitor by name</strong> flow in Revuly instead.</p></div></div>
+
+            <h3>How to tell if you have the right URL</h3>
+            <p>A valid full URL has all of these:</p>
+            <ul>
+              <li>Starts with <code>https://www.google.com/maps/place/</code></li>
+              <li>Contains the business name in the path (e.g. <code>/maps/place/Maison+Renaud/</code>)</li>
+              <li>Contains coordinates (<code>@40.7128,-74.006,17z</code> or similar)</li>
+              <li>Usually contains a long <code>data=!3m1!4b1!4m6!…</code> block</li>
+            </ul>
+          </div>
+
           {/* FAQ */}
           <div className="section">
             <div id="faq" className="section-anchor" />
-            <div className="section-badge">07</div>
+            <div className="section-badge">08</div>
             <h2>Frequently Asked Questions</h2>
             <div>
               {FAQS.map((faq, i) => (
@@ -265,7 +308,7 @@ export default function HelpPage() {
           {/* CONTACT */}
           <div className="section">
             <div id="contact" className="section-anchor" />
-            <div className="section-badge">08</div>
+            <div className="section-badge">09</div>
             <h2>Contact Support</h2>
             <div className="contact-card">
               <h3>We're here to help</h3>
