@@ -51,6 +51,7 @@ const CSS = `
 
   /* KEYWORD INTELLIGENCE */
   .keyword-section{margin-top:12px}
+  .kw-custom-badge{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(201,168,76,.16);border:1px solid var(--gold-border);color:var(--gold-lt);vertical-align:1px}
   .kw-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s}
   .kw-card:hover{border-color:var(--gold-border)}
   .kw-card.active{border-color:var(--gold)}
@@ -480,6 +481,8 @@ const T = {
     keyword_intel: "Keyword Intelligence",
     kw_empty: "Add reviews to see keyword analysis",
     mentions: (n) => `${n} mentions`,
+    kw_custom_badge: "Custom",
+    kw_custom_tooltip: "Custom keyword you added in Settings",
     tab_all: "All Reviews",
     tab_needs_reply: "Needs Reply",
     showing: (x, y) => `Showing ${x} of ${y} reviews`,
@@ -626,6 +629,8 @@ const T = {
     add_competitor: "+ 新增",
     tracked: (a, b) => `${a} / ${b} 已追蹤`,
     keyword_intel: "關鍵字情報",
+    kw_custom_badge: "自訂",
+    kw_custom_tooltip: "你在「設定」加入的自訂關鍵字",
     kw_empty: "新增評論後會出現關鍵字分析",
     mentions: (n) => `${n} 次提及`,
     tab_all: "全部評論",
@@ -751,16 +756,38 @@ const T = {
 // Resolve a plan's badge label by plan key, in the current language.
 const PLAN_LABEL_KEY = { free_trial: "plan_free_trial", starter: "plan_starter", growth: "plan_growth", pro: "plan_pro" };
 
-function analyseKeywords(reviews) {
-  return KEYWORD_CATS.map((cat) => {
+function analyseKeywords(reviews, customKeywords = []) {
+  // Built-in categories (food / service / vibe / etc.).
+  const baseResults = KEYWORD_CATS.map((cat) => {
     let posCount = 0, negCount = 0;
     reviews.forEach((r) => {
       const text = (r.content || "").toLowerCase();
       cat.pos.forEach((kw) => { if (text.includes(kw)) posCount++; });
       cat.neg.forEach((kw) => { if (text.includes(kw)) negCount++; });
     });
-    return { ...cat, posCount, negCount, total: posCount + negCount };
-  }).filter((c) => c.total > 0);
+    return { ...cat, posCount, negCount, total: posCount + negCount, isCustom: false };
+  });
+
+  // User-defined keywords (Growth/Pro). We bucket each occurrence into
+  // positive/negative purely by the review's star rating since the user
+  // hasn't supplied a polarity for the keyword itself.
+  const customResults = (Array.isArray(customKeywords) ? customKeywords : []).map((kw) => {
+    const lower = String(kw || "").trim().toLowerCase();
+    if (!lower) return null;
+    let posCount = 0, negCount = 0;
+    reviews.forEach((r) => {
+      const text = (r.content || "").toLowerCase();
+      if (text.includes(lower)) {
+        if (r.stars >= 4) posCount++;
+        else if (r.stars <= 2) negCount++;
+        else posCount++; // neutral → tally as positive mention
+      }
+    });
+    return { name: kw, pos: [lower], neg: [], posCount, negCount, total: posCount + negCount, isCustom: true };
+  }).filter(Boolean);
+
+  // Show custom keywords first so the user sees their own taxonomy at the top.
+  return [...customResults, ...baseResults].filter((c) => c.total > 0);
 }
 
 function starsDisplay(n) {
@@ -911,16 +938,20 @@ export default function DashboardPage() {
   const unansweredCount = reviews.filter((r) => !r.replied).length;
   const daysSince = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 86400000));
 
-  const keywords = analyseKeywords(reviews);
+  const customKeywords = Array.isArray(profile?.custom_keywords) ? profile.custom_keywords : [];
+  const keywords = analyseKeywords(reviews, customKeywords);
 
   const filteredReviews = reviews.filter((r) => {
     if (reviewTab === "needs_reply" && r.replied) return false;
     if (kwFilter) {
       const cat = KEYWORD_CATS.find((c) => c.name === kwFilter);
+      const text = (r.content || "").toLowerCase();
       if (cat) {
-        const text = (r.content || "").toLowerCase();
         const allKw = [...cat.pos, ...cat.neg];
         if (!allKw.some((kw) => text.includes(kw))) return false;
+      } else {
+        // Custom keyword filter — match the literal string the user added.
+        if (!text.includes(String(kwFilter).toLowerCase())) return false;
       }
     }
     if (filter === "positive") return r.stars >= 4;
@@ -1347,7 +1378,13 @@ export default function DashboardPage() {
               const negPct = 100 - posPct;
               return (
                 <div key={kw.name} className={`kw-card${kwFilter === kw.name ? " active" : ""}`} onClick={() => setKwFilter(kwFilter === kw.name ? null : kw.name)}>
-                  <div className="kw-header"><span className="kw-name">{kw.name}</span><span className="kw-count">{t.mentions(kw.total)}</span></div>
+                  <div className="kw-header">
+                    <span className="kw-name">
+                      {kw.name}
+                      {kw.isCustom && <span className="kw-custom-badge" title={t.kw_custom_tooltip}>{t.kw_custom_badge}</span>}
+                    </span>
+                    <span className="kw-count">{t.mentions(kw.total)}</span>
+                  </div>
                   <div className="kw-bar-wrap">
                     <div className="kw-bar-pos" style={{ width: `${posPct}%`, background: "var(--pos-fg)" }} />
                     <div className="kw-bar-neg" style={{ width: `${negPct}%`, background: "var(--neg-fg)" }} />
@@ -1655,8 +1692,13 @@ export default function DashboardPage() {
                     const top5 = reviewsForComp.slice(0, 5);
 
                     // Keyword analysis: your store + competitor side-by-side
-                    const yourKw = analyseKeywords(reviews).slice(0, 5);
-                    const compKwAll = analyseKeywords(reviewsForComp.map((r) => ({ content: r.review_content })));
+                    // Apply the same custom-keyword set to both sides so
+                    // the comparison is apples-to-apples.
+                    const yourKw = analyseKeywords(reviews, customKeywords).slice(0, 5);
+                    const compKwAll = analyseKeywords(
+                      reviewsForComp.map((r) => ({ content: r.review_content, stars: r.stars })),
+                      customKeywords
+                    );
                     const compKw = compKwAll.slice(0, 5);
 
                     return (
