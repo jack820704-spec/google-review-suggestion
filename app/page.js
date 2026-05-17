@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -255,13 +256,38 @@ export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // null = still resolving (so the navbar doesn't flash the wrong CTAs),
+  // true/false = signed-in state.
+  const [isAuthed, setIsAuthed] = useState(null);
   const revealRefs = useRef([]);
+  const supabase = useRef(null);
 
   useEffect(() => {
     const fn = () => setNavScrolled(window.scrollY > 20);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  // Resolve the current session once on mount and subscribe to
+  // sign-in / sign-out so the navbar swaps without a hard reload.
+  useEffect(() => {
+    supabase.current = createClient();
+    let mounted = true;
+    supabase.current.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) setIsAuthed(!!session?.user);
+    });
+    const { data: { subscription } } = supabase.current.auth.onAuthStateChange(
+      (_event, session) => { if (mounted) setIsAuthed(!!session?.user); }
+    );
+    return () => { mounted = false; subscription?.unsubscribe(); };
+  }, []);
+
+  const handleSignOut = async () => {
+    if (!supabase.current) return;
+    await supabase.current.auth.signOut();
+    setIsAuthed(false);
+    setMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -292,8 +318,21 @@ export default function LandingPage() {
           ))}
         </ul>
         <div className="nav-ctas">
-          <button className="btn-ghost" onClick={() => window.location.href = "/login"}>Login</button>
-          <button className="btn-gold" onClick={() => window.location.href = "/login"}>Start Free Trial</button>
+          {isAuthed === null ? (
+            // Reserve space while the session check is in flight so the nav
+            // doesn't visibly snap between Login/Dashboard on slow networks.
+            <span style={{width:174,height:34,display:"inline-block"}} aria-hidden="true" />
+          ) : isAuthed ? (
+            <>
+              <button className="btn-ghost" onClick={handleSignOut}>Sign Out</button>
+              <button className="btn-gold" onClick={() => window.location.href = "/dashboard"}>Dashboard</button>
+            </>
+          ) : (
+            <>
+              <button className="btn-ghost" onClick={() => window.location.href = "/login"}>Login</button>
+              <button className="btn-gold" onClick={() => window.location.href = "/login"}>Start Free Trial</button>
+            </>
+          )}
           <button
             className="nav-burger"
             onClick={() => setMobileMenuOpen((v) => !v)}
