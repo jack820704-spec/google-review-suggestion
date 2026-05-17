@@ -330,6 +330,24 @@ const CSS = `
     .m5-row{grid-template-columns:1fr;gap:18px;justify-items:center}
     .m4-body-pad{padding:12px}
   }
+
+  /* Extra-small phones — tighten mockup chrome so the URL bar doesn't
+     overflow at 320px, and scale down the word-cloud sample sizes. */
+  @media (max-width: 480px) {
+    .nav-right{gap:6px}
+    .nav-right .btn-ghost{padding:5px 10px;font-size:11.5px}
+    .nav-right .btn-gold{padding:5px 12px;font-size:11.5px}
+    .hero h1{font-size:30px;line-height:1.15}
+    .step-title{font-size:24px;line-height:1.22}
+    .mock-frame{padding:12px}
+    .mock-url{font-size:9.5px;padding:3px 8px}
+    .m1-search-row{flex-direction:column}
+    .m1-btn{width:100%}
+    .m3-tab{font-size:10px;padding:6px 2px}
+    .m6-cloud{gap:6px 10px;padding:10px 4px;min-height:140px}
+    .m6-word{font-size:90% !important}
+    .cta-section{padding:36px 5vw}
+  }
 `;
 
 export default function TourPage() {

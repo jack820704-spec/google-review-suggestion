@@ -213,6 +213,33 @@ const CSS = `
   .recharts-tooltip-item{color:var(--text2) !important}
 
   .empty-block{padding:48px 20px;text-align:center;color:var(--text3);font-size:14px;font-style:italic}
+
+  /* Phone-only tightening — keep cards & charts inside the viewport
+     on iPhone SE-class widths and stop legends overflowing. */
+  @media (max-width: 600px) {
+    .wrap{padding:28px 4vw 60px}
+    .page-title{font-size:26px}
+    .page-sub{font-size:13px;margin-bottom:22px}
+    .card{padding:16px}
+    .big-rating{font-size:48px}
+    .stat-card{padding:14px}
+    .stat-n{font-size:22px}
+    .star-row{grid-template-columns:36px 1fr 32px;gap:8px;font-size:12px}
+    .rank-row{grid-template-columns:22px 1fr auto;padding:7px 10px}
+    .rank-word{font-size:13px}
+    .compare-row{grid-template-columns:1fr !important}
+    .pie-wrap{height:220px}
+    .line-wrap{height:240px}
+    .bar-wrap{height:240px}
+    .recharts-default-tooltip{font-size:11px !important;padding:6px 10px !important}
+    .cloud{gap:6px 10px;padding:6px 2px}
+  }
+  @media (max-width: 380px) {
+    .topbar{padding:0 12px}
+    .icon-btn,.lang-toggle{padding:0 10px;font-size:11.5px}
+    .big-rating{font-size:42px}
+    .stat-n{font-size:20px}
+  }
 `;
 
 // ───────── Data helpers ─────────

@@ -75,12 +75,24 @@ const CSS = `
   .hero-mock-reply{padding:10px 12px;background:#0a0a0b;border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:11.5px;color:var(--text1);line-height:1.6;flex:1}
   .hero-mock-copy{padding:6px 12px;border-radius:6px;background:transparent;border:1px solid var(--gold-border);color:var(--gold-lt);font-size:10.5px;font-weight:700;font-family:inherit;cursor:default;align-self:flex-end}
   @media (max-width:860px){
+    .hero-mock{margin-top:36px}
     .hero-mock-body{grid-template-columns:1fr;min-height:auto}
-    .hero-mock-side{flex-direction:row;border-right:none;border-bottom:1px solid rgba(255,255,255,.05);padding:12px;gap:8px;overflow-x:auto}
+    .hero-mock-side{flex-direction:row;border-right:none;border-bottom:1px solid rgba(255,255,255,.05);padding:12px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .hero-mock-side::-webkit-scrollbar{display:none}
     .hero-mock-stat{flex:0 0 auto;min-width:96px;padding:8px 10px}
     .hero-mock-mid{border-right:none;border-bottom:1px solid rgba(255,255,255,.05);padding:12px;gap:6px}
     .hero-mock-rev-text{-webkit-line-clamp:1}
     .hero-mock-right{padding:12px}
+    .trust-strip{font-size:11.5px;padding:5px 14px}
+  }
+  /* iPhone SE-class (≤ 380px): one more pass on type sizes */
+  @media (max-width:380px){
+    .hero-mock-stat{min-width:84px}
+    .hero-mock-stat-n{font-size:18px}
+    .hero-mock-rev-name{font-size:11.5px}
+    .hero-mock-rev-text{font-size:11px}
+    .hero-mock-reply{font-size:11px;padding:9px 11px}
+    .hero-mock-url{font-size:9.5px}
   }
 
   .hero-stats{display:flex;justify-content:center;gap:48px;margin-top:64px;padding-top:48px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap}

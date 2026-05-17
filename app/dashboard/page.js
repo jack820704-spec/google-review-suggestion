@@ -367,8 +367,11 @@ const CSS = `
     /* Middle col */
     .mid-col{border-right:none}
     .mid-header{padding:10px 12px}
-    .tabs{height:auto}
-    .tab{padding:6px 4px;margin-right:14px;font-size:12.5px}
+    /* Tab row scrolls horizontally on narrow phones — 3 tabs + counts
+       can otherwise wrap awkwardly on iPhone SE-sized screens. */
+    .tabs{height:auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{padding:6px 4px;margin-right:14px;font-size:12.5px;flex-shrink:0;white-space:nowrap}
     .btn-csv{padding:5px 10px;font-size:11.5px}
     .btn-add{padding:5px 11px;font-size:12px}
     .review-card{padding:12px}
@@ -418,6 +421,27 @@ const CSS = `
     .modal h3{font-size:18px}
     .modal-actions{position:sticky;bottom:0;background:var(--surface);padding-top:8px}
   }
+
+  /* ════════════ EXTRA-SMALL PHONES (≤ 380px, iPhone SE-class) ════════════
+     Tightens horizontal padding so review text doesn't get cramped. */
+  @media (max-width: 380px) {
+    .topbar{padding:0 10px;gap:4px}
+    .topbar-right{gap:4px}
+    .icon-btn{width:28px;height:28px;font-size:13px}
+    .btn-analytics-cta{width:30px;height:28px}
+    .left-col{padding:10px}
+    .stat-card{padding:8px}
+    .stat-n{font-size:16px}
+    .review-card{padding:10px}
+    .review-name{font-size:12.5px}
+    .review-text{font-size:12.5px}
+    .tab{margin-right:10px;font-size:12px}
+    .right-col{max-height:95vh;height:95vh}
+  }
+
+  /* Lock background scroll when the bottom drawer is open so the page
+     behind doesn't scroll under your finger on iOS. */
+  body.drawer-locked{overflow:hidden;touch-action:none}
 `;
 
 const KEYWORD_CATS = [
@@ -928,6 +952,14 @@ export default function DashboardPage() {
     if (typeof window === "undefined") return;
     if (selectedReview && window.innerWidth <= 768) setMobileEditorOpen(true);
   }, [selectedReview]);
+
+  // Lock background scroll while the drawer is open so the page behind
+  // doesn't scroll under your finger on iOS Safari.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("drawer-locked", mobileEditorOpen);
+    return () => document.body.classList.remove("drawer-locked");
+  }, [mobileEditorOpen]);
 
   const closeMobileDrawer = () => {
     setMobileEditorOpen(false);
