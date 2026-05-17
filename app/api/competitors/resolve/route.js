@@ -98,13 +98,16 @@ async function fetchPlaceDetails(placeId, apiKey) {
   return data;
 }
 
-async function searchByText({ apiKey, query, coords }) {
-  const body = { textQuery: query, maxResultCount: 1 };
+async function searchByText({ apiKey, query, coords, maxResults = 5 }) {
+  const body = { textQuery: query, maxResultCount: maxResults };
   if (coords) {
     body.locationBias = {
       circle: {
         center: { latitude: coords.lat, longitude: coords.lng },
-        radius: 200,
+        // 500m bias is tight enough to favour the right place when we
+        // have decent coords from the URL, but wide enough to still
+        // surface neighbours if our parsed name was approximate.
+        radius: 500,
       },
     };
   }
@@ -122,7 +125,7 @@ async function searchByText({ apiKey, query, coords }) {
   if (!res.ok) {
     throw new Error(data?.error?.message || `Places searchText ${res.status}`);
   }
-  return (data.places || [])[0] || null;
+  return data.places || [];
 }
 
 function shapeResult(place) {
@@ -165,55 +168,73 @@ export async function POST(req) {
     }
     if (!isGoogleMapsHost(candidate.hostname)) {
       return Response.json({
-        error: "Only Google Maps links are supported (maps.app.goo.gl or google.com/maps/...)",
+        error: "Only Google Maps links are supported (maps.app.goo.gl, goo.gl/maps, or google.com/maps/...)",
       }, { status: 400 });
     }
 
-    // ── Resolve short link to canonical ──
+    // ── Resolve short link / cid URL to canonical ──
+    // Short links and ?cid= URLs both redirect to a canonical /maps/place/...
+    // landing. Follow redirects in all those cases.
     let canonical = candidate.toString();
-    if (candidate.hostname === "maps.app.goo.gl" || candidate.hostname.endsWith(".goo.gl") || candidate.hostname === "goo.gl") {
+    const needsRedirect =
+      candidate.hostname === "maps.app.goo.gl" ||
+      candidate.hostname.endsWith(".goo.gl") ||
+      candidate.hostname === "goo.gl" ||
+      candidate.searchParams.has("cid");
+    if (needsRedirect) {
       try {
         canonical = await followRedirects(canonical);
-        console.log("[competitors/resolve] short link →", canonical);
+        console.log("[competitors/resolve] followed →", canonical);
       } catch (e) {
-        return Response.json({ error: `Couldn't follow the short link: ${e.message}` }, { status: 400 });
+        return Response.json({ error: `Couldn't follow the link: ${e.message}` }, { status: 400 });
       }
     }
 
     const parsed = extractFromCanonical(canonical);
     console.log("[competitors/resolve] parsed:", parsed);
 
-    // ── Path A: direct place_id hint ──
+    // ── Path A: direct place_id hint → return as single-candidate result ──
     if (parsed.placeIdHint) {
       try {
         const details = await fetchPlaceDetails(parsed.placeIdHint, apiKey);
-        return Response.json({ ok: true, preview: shapeResult(details), source: "place_id" });
+        return Response.json({
+          ok: true,
+          candidates: [shapeResult(details)],
+          source: "place_id",
+          parsed_name: parsed.name,
+        });
       } catch (e) {
         console.warn("[competitors/resolve] direct place_id failed:", e.message);
         // fall through to text search
       }
     }
 
-    // ── Path B: text search with coords bias ──
+    // ── Path B: text search with coords bias → return up to 5 candidates ──
     if (!parsed.name) {
       return Response.json({
-        error: "Couldn't find a place name in that URL. Try opening the listing in Google Maps and copying the full Share link.",
+        error: "Couldn't find a place name in that URL. Open the listing in Google Maps → tap Share → copy the link, then paste it again. Or search by name below.",
       }, { status: 400 });
     }
 
-    let place;
+    let places = [];
     try {
-      place = await searchByText({ apiKey, query: parsed.name, coords: parsed.coords });
+      places = await searchByText({ apiKey, query: parsed.name, coords: parsed.coords, maxResults: 5 });
     } catch (e) {
-      return Response.json({ error: `Search failed: ${e.message}` }, { status: 500 });
+      return Response.json({ error: `Search failed: ${e.message}`, parsed_name: parsed.name }, { status: 500 });
     }
-    if (!place) {
+    if (places.length === 0) {
       return Response.json({
-        error: `Couldn't find "${parsed.name}" on Google Places. Try a different URL.`,
+        error: `Couldn't find "${parsed.name}" on Google Places. Try the long URL or search by name below.`,
+        parsed_name: parsed.name,
       }, { status: 404 });
     }
 
-    return Response.json({ ok: true, preview: shapeResult(place), source: "text_search" });
+    return Response.json({
+      ok: true,
+      candidates: places.map(shapeResult),
+      source: "text_search",
+      parsed_name: parsed.name,
+    });
   } catch (err) {
     console.error("[competitors/resolve] fatal:", err);
     return Response.json({ error: err.message }, { status: 500 });
