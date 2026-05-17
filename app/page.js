@@ -47,6 +47,42 @@ const CSS = `
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,.5)}
   .btn-secondary{padding:14px 34px;border-radius:10px;font-size:15px;font-weight:600;font-family:inherit;color:var(--text1);background:transparent;border:1px solid rgba(240,237,230,.15);cursor:pointer;transition:all .25s}
   .btn-secondary:hover{border-color:var(--gold-border);color:var(--gold-lt);background:var(--gold-glow)}
+  /* Trust strip — between CTAs and the dashboard mockup */
+  .trust-strip{display:inline-flex;align-items:center;gap:8px;margin:36px auto 0;padding:6px 16px;border-radius:999px;background:rgba(93,186,122,.07);border:1px solid rgba(93,186,122,.22);font-size:12px;font-weight:600;color:var(--pos);letter-spacing:.4px}
+  .trust-dot{width:6px;height:6px;border-radius:50%;background:var(--pos);box-shadow:0 0 6px var(--pos)}
+
+  /* Hero dashboard mockup — three-pane mini dashboard rendered in pure CSS */
+  .hero-mock{margin:46px auto 0;max-width:920px;background:linear-gradient(180deg,#17171c,#111114);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 40px 100px -20px rgba(0,0,0,.6),0 0 0 1px rgba(201,168,76,.05);overflow:hidden;text-align:left}
+  .hero-mock-chrome{display:flex;align-items:center;gap:6px;padding:10px 14px;background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.05)}
+  .hero-mock-dot{width:9px;height:9px;border-radius:50%}
+  .hero-mock-dot.r{background:#e06060}.hero-mock-dot.y{background:#e8b84b}.hero-mock-dot.g{background:#5dba7a}
+  .hero-mock-url{flex:1;margin-left:10px;padding:4px 10px;background:rgba(255,255,255,.04);border-radius:6px;font-size:10.5px;color:var(--text3);font-family:monospace}
+  .hero-mock-body{display:grid;grid-template-columns:170px 1fr 240px;gap:0;min-height:280px}
+  .hero-mock-side{padding:16px 14px;border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:10px}
+  .hero-mock-stat{padding:10px 12px;background:#0a0a0b;border:1px solid rgba(255,255,255,.06);border-radius:8px}
+  .hero-mock-stat-n{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold-lt);line-height:1}
+  .hero-mock-stat-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-top:4px}
+  .hero-mock-mid{padding:14px;display:flex;flex-direction:column;gap:8px;border-right:1px solid rgba(255,255,255,.05);overflow:hidden}
+  .hero-mock-rev{padding:10px 12px;background:#0a0a0b;border:1px solid rgba(255,255,255,.05);border-radius:8px}
+  .hero-mock-rev-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px}
+  .hero-mock-rev-name{font-size:12px;font-weight:700;color:var(--text1)}
+  .hero-mock-rev-stars{color:var(--gold);letter-spacing:1.5px;font-size:11px}
+  .hero-mock-rev-text{font-size:11.5px;color:var(--text2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hero-mock-right{padding:14px;display:flex;flex-direction:column;gap:10px}
+  .hero-mock-tab-row{display:flex;gap:5px}
+  .hero-mock-tab{flex:1;padding:5px 4px;border-radius:6px;font-size:10.5px;font-weight:600;text-align:center;background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--text2)}
+  .hero-mock-tab.active{background:rgba(201,168,76,.12);border-color:var(--gold-border);color:var(--gold-lt)}
+  .hero-mock-reply{padding:10px 12px;background:#0a0a0b;border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:11.5px;color:var(--text1);line-height:1.6;flex:1}
+  .hero-mock-copy{padding:6px 12px;border-radius:6px;background:transparent;border:1px solid var(--gold-border);color:var(--gold-lt);font-size:10.5px;font-weight:700;font-family:inherit;cursor:default;align-self:flex-end}
+  @media (max-width:860px){
+    .hero-mock-body{grid-template-columns:1fr;min-height:auto}
+    .hero-mock-side{flex-direction:row;border-right:none;border-bottom:1px solid rgba(255,255,255,.05);padding:12px;gap:8px;overflow-x:auto}
+    .hero-mock-stat{flex:0 0 auto;min-width:96px;padding:8px 10px}
+    .hero-mock-mid{border-right:none;border-bottom:1px solid rgba(255,255,255,.05);padding:12px;gap:6px}
+    .hero-mock-rev-text{-webkit-line-clamp:1}
+    .hero-mock-right{padding:12px}
+  }
+
   .hero-stats{display:flex;justify-content:center;gap:48px;margin-top:64px;padding-top:48px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
   .stat-n{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold-lt)}
   .stat-l{font-size:13px;color:var(--text2);margin-top:2px}
@@ -72,6 +108,11 @@ const CSS = `
   .feat-card h3{font-size:15.5px;font-weight:700;margin-bottom:10px}
   .feat-card p{font-size:13.5px;color:var(--text2);line-height:1.65}
   .feat-tag{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.4px;background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+  /* Learn-more reveal: collapsed by default, animates open on click. */
+  .feat-more{max-height:0;overflow:hidden;font-size:13px;color:var(--text2);line-height:1.7;transition:max-height .4s ease,margin-top .35s ease}
+  .feat-more.open{max-height:280px;margin-top:12px}
+  .feat-more-btn{margin-top:10px;padding:0;background:transparent;border:none;color:var(--gold);font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.3px}
+  .feat-more-btn:hover{color:var(--gold-lt)}
 
   /* HOW IT WORKS */
   .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;position:relative}
@@ -223,12 +264,12 @@ const CSS = `
 `;
 
 const FEATURES = [
-  { icon: "✦", title: "AI Reply Generation", desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Claude AI" },
-  { icon: "◉", title: "Real-Time Monitoring", desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.", tag: "Instant Alerts" },
-  { icon: "◈", title: "Sentiment Analysis", desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.", tag: "AI-Powered" },
-  { icon: "⚠", title: "Crisis Alerts", desc: "Detect patterns of negative feedback before they escalate. Receive immediate alerts when 3+ low-rating reviews appear in 24 hours.", tag: "Growth & Pro" },
-  { icon: "▦", title: "Competitor Tracking", desc: "Monitor up to 3 competitor restaurants' review trends. Understand what your market peers are doing right — and wrong.", tag: "Pro Only" },
-  { icon: "⬡", title: "Multi-Language", desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.", tag: "6+ Languages" },
+  { icon: "✦", title: "AI Reply Generation",   desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Claude AI",        more: "Every reply opens with the guest's first name, picks the right tone for the star rating, and reads like a real owner — never corporate filler. Pro plans add a fourth 'Your Style' tab that learns from your actual posted replies." },
+  { icon: "◉", title: "Real-Time Monitoring",  desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.",                                          tag: "Instant Alerts",   more: "Choose Immediate / Daily Digest / Weekly cadences. Every email ships with all three AI reply suggestions inside — copy and paste straight into Google Business Profile." },
+  { icon: "◈", title: "Sentiment Analysis",    desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.",                            tag: "AI-Powered",       more: "Sentiment is tagged at sync time and surfaces in the dashboard filter rail, the keyword bars, and the 6-month sentiment trend chart on the Analytics page." },
+  { icon: "⚠", title: "Crisis Alerts",         desc: "Detect patterns of negative feedback before they escalate. Receive immediate alerts when 3+ low-rating reviews appear in 24 hours.",                            tag: "Growth & Pro",     more: "Crisis emails ignore your notification cadence — they always send immediately with a red banner and a one-click jump to the affected reviews so you can respond inside the hour." },
+  { icon: "▦", title: "Competitor Tracking",   desc: "Monitor up to 3 competitor restaurants' review trends. Understand what your market peers are doing right — and wrong.",                                          tag: "Pro Only",         more: "Add competitors by Google name + city search. The dashboard shows side-by-side rating cards, keyword comparison bars, and their latest reviews. Daily sync keeps everything fresh." },
+  { icon: "⬡", title: "Multi-Language",        desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.",                tag: "6+ Languages",     more: "Pick the reply language per-review from the AI editor. The full UI ships with EN ↔ 中文 toggle, persisted across dashboard, settings, analytics, and the product tour." },
 ];
 
 const PRICING = [
@@ -255,6 +296,7 @@ const FAQS = [
 export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [openFeat, setOpenFeat] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // null = still resolving (so the navbar doesn't flash the wrong CTAs),
   // true/false = signed-in state.
@@ -308,6 +350,10 @@ export default function LandingPage() {
       <nav className={`nav${navScrolled ? " scrolled" : ""}`}>
         <a className="logo" href="#"><span className="logo-icon">✦</span>Revuly</a>
         <ul className={`nav-links${mobileMenuOpen ? " open" : ""}`}>
+          {/* Product Tour navigates to a real page; the rest scroll to in-page sections. */}
+          <li>
+            <a href="/tour" onClick={() => setMobileMenuOpen(false)}>Product Tour</a>
+          </li>
           {["Features", "Pricing", "Testimonials", "FAQ"].map((l) => (
             <li key={l}>
               <a
@@ -353,8 +399,55 @@ export default function LandingPage() {
           <p className="hero-sub">The intelligent Google review management platform built exclusively for elite hospitality brands. Reply perfectly in seconds. Monitor sentiment in real time.</p>
           <div className="hero-ctas">
             <button className="btn-primary" onClick={() => window.location.href = "/login"}>Start Free Trial — No Card Required</button>
-            <button className="btn-secondary" onClick={() => go("features")}>See How It Works</button>
+            <button className="btn-secondary" onClick={() => window.location.href = "/tour"}>See How It Works →</button>
           </div>
+
+          {/* Social proof strip — sits between the CTAs and the stat block */}
+          <div className="trust-strip">
+            <span className="trust-dot" />Trusted by restaurants in 12 countries
+          </div>
+
+          {/* Dashboard preview mockup (HTML/CSS — no real screenshot) */}
+          <div className="hero-mock">
+            <div className="hero-mock-chrome">
+              <span className="hero-mock-dot r" /><span className="hero-mock-dot y" /><span className="hero-mock-dot g" />
+              <span className="hero-mock-url">revuly.dev/dashboard</span>
+            </div>
+            <div className="hero-mock-body">
+              <div className="hero-mock-side">
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">4.8★</div><div className="hero-mock-stat-l">Avg rating</div></div>
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">94%</div><div className="hero-mock-stat-l">Reply rate</div></div>
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">+12</div><div className="hero-mock-stat-l">This month</div></div>
+              </div>
+              <div className="hero-mock-mid">
+                {[
+                  { name: "Sarah Chen", stars: 5, text: "Hands down the freshest seafood — the salmon sashimi melts. Came back twice this week." },
+                  { name: "Marcus T.",  stars: 4, text: "Great vibe, generous portions. Service was a tiny bit slow at peak but worth it." },
+                  { name: "Jenny W.",   stars: 5, text: "Best izakaya in the area. The grilled mackerel and sake pairing — chef's kiss." },
+                ].map((r, i) => (
+                  <div key={i} className="hero-mock-rev">
+                    <div className="hero-mock-rev-head">
+                      <span className="hero-mock-rev-name">{r.name}</span>
+                      <span className="hero-mock-rev-stars">{"★".repeat(r.stars)}</span>
+                    </div>
+                    <div className="hero-mock-rev-text">{r.text}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="hero-mock-right">
+                <div className="hero-mock-tab-row">
+                  <div className="hero-mock-tab active">Warm</div>
+                  <div className="hero-mock-tab">Pro</div>
+                  <div className="hero-mock-tab">Brief</div>
+                </div>
+                <div className="hero-mock-reply">
+                  "Sarah! You just made our night. Save us a seat next time — we want to send out something special. — James, Owner"
+                </div>
+                <button className="hero-mock-copy">📋 Copy</button>
+              </div>
+            </div>
+          </div>
+
           <div className="hero-stats">
             {[["10,000+","Restaurants worldwide"],["4.8★","Average platform rating"],["2M+","AI replies generated"],["< 30s","Reply crafted"]].map(([n,l]) => (
               <div key={l} style={{textAlign:"center"}}><div className="stat-n">{n}</div><div className="stat-l">{l}</div></div>
@@ -368,13 +461,29 @@ export default function LandingPage() {
         <div className="section-wrap">
           <div className="section-header center" {...r()}><div className="section-label">Platform Features</div><h2 className="section-title">Everything Your <span className="accent">Reputation Demands</span></h2><p className="section-sub">Precision-engineered for establishments where guest experience is the brand.</p></div>
           <div className="feat-grid">
-            {FEATURES.map((f, i) => (
-              <div key={f.title} className="feat-card" {...r(Math.min(i+1,5))}>
-                <div className="feat-icon">{f.icon}</div>
-                <h3>{f.title}</h3><p>{f.desc}</p>
-                <span className="feat-tag">{f.tag}</span>
-              </div>
-            ))}
+            {FEATURES.map((f, i) => {
+              const open = openFeat === f.title;
+              return (
+                <div key={f.title} className={`feat-card${open ? " expanded" : ""}`} {...r(Math.min(i+1,5))}>
+                  <div className="feat-icon">{f.icon}</div>
+                  <h3>{f.title}</h3><p>{f.desc}</p>
+                  {f.more && (
+                    <>
+                      <div className={`feat-more${open ? " open" : ""}`}>{f.more}</div>
+                      <button
+                        type="button"
+                        className="feat-more-btn"
+                        onClick={() => setOpenFeat(open ? null : f.title)}
+                        aria-expanded={open}
+                      >
+                        {open ? "Show less ↑" : "Learn more →"}
+                      </button>
+                    </>
+                  )}
+                  <span className="feat-tag">{f.tag}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
