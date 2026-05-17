@@ -22,6 +22,9 @@ const CSS = `
   .restaurant-name{font-size:13.5px;font-weight:600;color:var(--text1)}
   .icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
   .icon-btn:hover{border-color:var(--gold-border);color:var(--gold-lt)}
+  /* Labeled CTA so users actually notice the Analytics entry point. */
+  .btn-analytics-cta{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--gold-border);background:rgba(201,168,76,.08);color:var(--gold-lt);font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;letter-spacing:.3px}
+  .btn-analytics-cta:hover{background:rgba(201,168,76,.16);border-color:var(--gold)}
 
   /* LAYOUT */
   .body{display:grid;grid-template-columns:252px 1fr 400px;height:calc(100vh - 58px)}
@@ -316,6 +319,9 @@ const CSS = `
     .lang-toggle{padding:3px 8px;font-size:11px}
     .topbar-right{gap:6px}
     .icon-btn{width:30px;height:30px;font-size:14px}
+    /* On phones, drop the label and keep just the emoji to save space */
+    .btn-analytics-cta{height:30px;padding:0;width:34px;justify-content:center;font-size:0;gap:0}
+    .btn-analytics-cta::before{content:"📊";font-size:14px}
     .logo{font-size:15px}
     .logo-icon{width:22px;height:22px;font-size:11px}
 
@@ -1194,7 +1200,13 @@ export default function DashboardPage() {
           >
             {lang === "en" ? "中文" : "EN"}
           </button>
-          <button className="icon-btn" onClick={() => window.location.href = "/dashboard/analytics"} title={t.tt_analytics}>📊</button>
+          <button
+            className="btn-analytics-cta"
+            onClick={() => window.location.href = "/dashboard/analytics"}
+            title={t.tt_analytics}
+          >
+            📊 {t.tt_analytics}
+          </button>
           <button className="icon-btn" onClick={() => window.location.href = "/dashboard/settings"} title={t.tt_settings}>⚙</button>
           <button className="icon-btn" onClick={() => window.location.href = "/help"} title={t.tt_help}>?</button>
           <button className="icon-btn" onClick={handleLogout} title={t.tt_signout}>↩</button>
