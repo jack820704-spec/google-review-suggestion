@@ -146,6 +146,47 @@ const CSS = `
   .pref-length-opt.active{background:rgba(201,168,76,.12);border-color:var(--gold-border);color:var(--gold-lt)}
   .pref-locked-note{font-size:12px;color:var(--text3);font-style:italic;margin-top:6px}
 
+  /* COMPETITOR TRACKING */
+  .comp-row{display:flex;gap:8px;align-items:stretch}
+  .comp-row .form-input{flex:1;min-width:0}
+  .comp-row-btn{padding:10px 16px;border-radius:var(--r);font-size:13px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;white-space:nowrap}
+  .comp-row-btn:disabled{opacity:.55;cursor:not-allowed}
+  .comp-row-btn.secondary{background:transparent;border:1px solid var(--gold-border);color:var(--gold-lt)}
+  .comp-results{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .comp-result-card{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .comp-result-card:hover{border-color:var(--gold-border)}
+  .comp-result-body{min-width:0;flex:1}
+  .comp-result-title{font-size:14px;font-weight:700;color:var(--text1);margin-bottom:3px}
+  .comp-result-meta{font-size:12px;color:var(--gold);margin-bottom:4px}
+  .comp-result-addr{font-size:12.5px;color:var(--text2);line-height:1.5}
+  .comp-result-maps{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--gold);text-decoration:none;font-weight:600}
+  .comp-result-maps:hover{text-decoration:underline}
+  .comp-track-btn{padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .comp-track-btn:disabled{opacity:.55;cursor:not-allowed;background:rgba(255,255,255,.08);color:var(--text3)}
+  .comp-warning{margin-top:10px;padding:8px 12px;background:rgba(232,184,75,.06);border:1px solid rgba(232,184,75,.25);border-radius:8px;font-size:11.5px;color:#e8b84b;line-height:1.5}
+  .comp-err{margin-top:10px;padding:8px 12px;background:rgba(224,96,96,.08);border:1px solid rgba(224,96,96,.25);border-radius:8px;font-size:12px;color:var(--neg);line-height:1.5}
+  .comp-list{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+  .comp-list-empty{font-size:12.5px;color:var(--text3);font-style:italic;padding:14px;text-align:center;background:var(--bg2);border-radius:8px;border:1px dashed rgba(255,255,255,.06)}
+  .comp-card{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .comp-card-body{min-width:0;flex:1}
+  .comp-card-name{font-size:14px;font-weight:700;color:var(--text1);margin-bottom:3px}
+  .comp-card-meta{font-size:12.5px;color:var(--gold);margin-bottom:4px}
+  .comp-card-addr{font-size:12px;color:var(--text2);margin-bottom:6px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .comp-card-maps{font-size:11.5px;color:var(--gold);text-decoration:none;font-weight:600}
+  .comp-card-maps:hover{text-decoration:underline}
+  .comp-card-sync{font-size:10.5px;color:var(--text3);margin-top:6px;letter-spacing:.3px}
+  .comp-card-remove{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text2);cursor:pointer;transition:all .2s;flex-shrink:0}
+  .comp-card-remove:hover{border-color:rgba(224,96,96,.35);color:var(--neg)}
+  .comp-count-chip{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:600;letter-spacing:.3px;color:var(--gold-lt);background:rgba(201,168,76,.1);border:1px solid var(--gold-border);padding:2px 10px;border-radius:999px;vertical-align:2px}
+  @media (max-width:768px){
+    .comp-row{flex-direction:column}
+    .comp-row-btn{width:100%}
+    .comp-card{flex-direction:column;align-items:stretch}
+    .comp-card-remove{width:100%;padding:8px}
+    .comp-result-card{flex-direction:column;align-items:stretch}
+    .comp-track-btn{width:100%;padding:9px}
+  }
+
   /* ════════════ MOBILE (≤ 768px) ════════════ */
   @media (max-width: 768px) {
     .topbar{padding:0 12px;height:54px}
@@ -235,6 +276,44 @@ const T = {
     pref_length_help: "Overrides the default 50–80 word target.",
     pref_pro_only: "Pro only",
     pref_pro_locked: "Upgrade to Pro to use banned/required word lists and length targeting.",
+    // Competitor tracking
+    comp_section: "Competitor Tracking",
+    comp_pro_only_note: "(Pro)",
+    comp_section_help: "Track up to 3 rival restaurants. New reviews and ratings sync daily; comparison views live on your dashboard.",
+    comp_locked_msg: "Competitor tracking is a Pro plan feature.",
+    comp_upgrade_link: "Upgrade to Pro →",
+    comp_max_label: (n, max) => `${n} / ${max} tracked`,
+    comp_max_reached: (max) => `Maximum ${max} competitors reached. Remove one to add another.`,
+    comp_add_title: "Add a competitor",
+    comp_add_help: "Search Google by restaurant name and city — pick the right business from the top 5 matches.",
+    comp_name_ph: "Restaurant name",
+    comp_city_ph: "City",
+    comp_search_btn: "Search",
+    comp_searching: "Searching…",
+    comp_no_results: "No matches. Try a different name or city.",
+    comp_top_matches: "Top matches",
+    comp_track_btn: "Track →",
+    comp_tracking: "Adding…",
+    comp_already_tracked: "Tracking",
+    comp_thats_you: "That's your business",
+    comp_paste_link_toggle: "Or paste a Google Maps link",
+    comp_paste_link_warning: "⚠ Short links (maps.app.goo.gl) are not supported. Please copy the full URL from your browser address bar.",
+    comp_paste_full_ph: "https://www.google.com/maps/place/...",
+    comp_preview_btn: "Preview",
+    comp_resolving: "Resolving…",
+    comp_confirm_track: "Confirm & Track",
+    comp_cancel: "Cancel",
+    comp_invalid_link: "Not a valid Google Maps link",
+    comp_resolve_failed: "Couldn't resolve that link",
+    comp_pick_correct: "Pick the correct business:",
+    comp_preview_title: "Is this the right business?",
+    comp_full_url_help: "How to get the full Google Maps URL →",
+    comp_view_maps: "View on Google Maps →",
+    comp_list_title: "Tracked competitors",
+    comp_list_empty: "No competitors yet — add one above.",
+    comp_remove_btn: "Remove",
+    comp_remove_confirm: "Remove this competitor and its cached reviews?",
+    comp_synced_at: (date) => `Last synced ${date}`,
   },
   zh: {
     pref_section: "AI 回覆偏好設定",
@@ -266,6 +345,44 @@ const T = {
     pref_length_help: "覆寫預設的 50–80 字長度。",
     pref_pro_only: "僅限 Pro 方案",
     pref_pro_locked: "升級至 Pro 才能使用禁用/必用詞彙清單與長度控制。",
+    // Competitor tracking — zh
+    comp_section: "競爭對手追蹤",
+    comp_pro_only_note: "（Pro）",
+    comp_section_help: "最多追蹤 3 家對手餐廳。新評論與評分每天自動同步，比較分析會顯示在 Dashboard。",
+    comp_locked_msg: "競爭對手追蹤是 Pro 方案功能。",
+    comp_upgrade_link: "升級至 Pro →",
+    comp_max_label: (n, max) => `已追蹤 ${n} / ${max} 家`,
+    comp_max_reached: (max) => `已達 ${max} 家上限，請先移除其中一家再新增。`,
+    comp_add_title: "新增競爭對手",
+    comp_add_help: "輸入餐廳名稱與城市，從前 5 個最相符的商家中選擇。",
+    comp_name_ph: "餐廳名稱",
+    comp_city_ph: "城市",
+    comp_search_btn: "搜尋",
+    comp_searching: "搜尋中…",
+    comp_no_results: "找不到符合的商家，請換個名稱或城市試試。",
+    comp_top_matches: "最相符的商家",
+    comp_track_btn: "追蹤 →",
+    comp_tracking: "新增中…",
+    comp_already_tracked: "已追蹤",
+    comp_thats_you: "這是你的店",
+    comp_paste_link_toggle: "或貼上完整 Google Maps 連結",
+    comp_paste_link_warning: "⚠ 不支援短連結（maps.app.goo.gl）。請從瀏覽器網址列複製完整網址。",
+    comp_paste_full_ph: "https://www.google.com/maps/place/...",
+    comp_preview_btn: "預覽",
+    comp_resolving: "解析中…",
+    comp_confirm_track: "確認並追蹤",
+    comp_cancel: "取消",
+    comp_invalid_link: "不是有效的 Google Maps 連結",
+    comp_resolve_failed: "無法解析此連結",
+    comp_pick_correct: "請選擇正確的商家：",
+    comp_preview_title: "確認是這家商家嗎？",
+    comp_full_url_help: "如何取得完整 Google Maps 網址 →",
+    comp_view_maps: "在 Google Maps 查看 →",
+    comp_list_title: "已追蹤的競爭對手",
+    comp_list_empty: "尚未新增競爭對手——從上方新增。",
+    comp_remove_btn: "移除",
+    comp_remove_confirm: "確定要移除這位競爭對手及其已快取的評論嗎？",
+    comp_synced_at: (date) => `最後同步：${date}`,
   },
 };
 
@@ -311,11 +428,39 @@ export default function SettingsPage() {
   const [placesSaving, setPlacesSaving] = useState(false);
   const [placesError, setPlacesError] = useState("");
   const [lang, setLang] = useState("en");
+  // Competitor tracking (Pro) — list, add via name-search (primary) or
+  // full-URL paste (secondary). All add/remove flow lives here now;
+  // the dashboard tab is analysis-only.
+  const [competitors, setCompetitors] = useState([]);
+  const [compNameQuery, setCompNameQuery] = useState("");
+  const [compCityQuery, setCompCityQuery] = useState("");
+  const [compNameResults, setCompNameResults] = useState(null);
+  const [compNameSearching, setCompNameSearching] = useState(false);
+  const [compLinkInput, setCompLinkInput] = useState("");
+  const [compCandidates, setCompCandidates] = useState(null);
+  const [compResolving, setCompResolving] = useState(false);
+  const [compAdding, setCompAdding] = useState("");
+  const [compError, setCompError] = useState("");
   const supabase = createClient();
   const t = T[lang];
 
   // Mirror the dashboard's language choice (stored in localStorage on toggle).
   useEffect(() => { setLang(detectLang()); }, []);
+
+  // Load competitors once we know the user is Pro.
+  const reloadCompetitors = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("competitors")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true });
+    setCompetitors(data || []);
+  };
+  useEffect(() => {
+    if (profile?.plan === "pro") reloadCompetitors();
+  }, [profile?.plan]);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -481,6 +626,107 @@ export default function SettingsPage() {
     }).eq("id", user.id);
     setPlacesSaving(false);
     setProfile((p) => ({ ...p, place_id: null, place_name: null, place_address: null, place_rating: null, place_user_rating_count: null, place_first_sync_done: false }));
+  };
+
+  // ───────── Competitor tracking handlers (Pro) ─────────
+  const handleCompNameSearch = async () => {
+    const q = compNameQuery.trim();
+    if (!q) return;
+    setCompError("");
+    setCompNameResults(null);
+    setCompNameSearching(true);
+    try {
+      const res = await fetch("/api/places/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: q,
+          city: (compCityQuery || profile?.city || "").trim(),
+          country: profile?.country,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setCompError(data.error || "Search failed");
+        setCompNameResults([]);
+        return;
+      }
+      setCompNameResults(data.results || []);
+    } catch (e) {
+      setCompError(e.message);
+      setCompNameResults([]);
+    } finally {
+      setCompNameSearching(false);
+    }
+  };
+
+  const handleCompResolve = async () => {
+    setCompError("");
+    setCompCandidates(null);
+    const url = compLinkInput.trim();
+    if (!url) { setCompError(t.comp_invalid_link); return; }
+    if (/^https?:\/\/(?:maps\.app\.goo\.gl|goo\.gl|[^/]+\.goo\.gl)\b/i.test(url)) {
+      setCompError(t.comp_paste_link_warning);
+      return;
+    }
+    setCompResolving(true);
+    try {
+      const res = await fetch("/api/competitors/resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setCompError(data.error || t.comp_resolve_failed);
+        if (data?.parsed_name) setCompNameQuery(data.parsed_name);
+        return;
+      }
+      setCompCandidates(data.candidates || []);
+    } catch (e) {
+      setCompError(e.message);
+    } finally {
+      setCompResolving(false);
+    }
+  };
+
+  const handleCompPick = async (pickedPlace) => {
+    if (!pickedPlace?.place_id) return;
+    setCompAdding(pickedPlace.place_id);
+    setCompError("");
+    try {
+      const res = await fetch("/api/competitors/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pickedPlace),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setCompError(data.error || "Failed to add"); return; }
+      await reloadCompetitors();
+      setCompCandidates(null);
+      setCompLinkInput("");
+      setCompNameResults(null);
+      setCompNameQuery("");
+    } catch (e) {
+      setCompError(e.message);
+    } finally {
+      setCompAdding("");
+    }
+  };
+
+  const handleCompRemove = async (compId) => {
+    if (!confirm(t.comp_remove_confirm)) return;
+    setCompError("");
+    try {
+      await fetch("/api/competitors/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: compId }),
+      });
+      setCompetitors((prev) => prev.filter((c) => c.id !== compId));
+    } catch (e) {
+      setCompError(e.message);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -819,6 +1065,238 @@ export default function SettingsPage() {
               </>
             ) : (
               <p className="locked-msg">Custom keyword tracking is available on Growth and Pro plans. <a href="#plan-section" style={{color:"var(--gold)",textDecoration:"none"}}>Upgrade →</a></p>
+            )}
+          </div>
+        </div>
+
+        {/* COMPETITOR TRACKING — Pro only */}
+        <div className="section" id="comp-section">
+          <div className="section-header">
+            {t.comp_section} {planKey !== "pro" && t.comp_pro_only_note}
+            {planKey === "pro" && (
+              <span className="comp-count-chip">{t.comp_max_label(competitors.length, 3)}</span>
+            )}
+          </div>
+          <div className="card">
+            {planKey !== "pro" ? (
+              <p className="places-locked">
+                {t.comp_locked_msg}{" "}
+                <a href="#plan-section" style={{color:"var(--gold)",textDecoration:"none"}}>{t.comp_upgrade_link}</a>
+              </p>
+            ) : (
+              <>
+                <p style={{fontSize:13.5,color:"var(--text2)",marginBottom:14,lineHeight:1.6}}>
+                  {t.comp_section_help}
+                </p>
+
+                {/* Add competitor (only if under cap) */}
+                {competitors.length < 3 ? (
+                  <>
+                    <label className="pref-label">{t.comp_add_title}</label>
+                    <p style={{fontSize:12,color:"var(--text3)",margin:"-4px 0 10px",lineHeight:1.5}}>{t.comp_add_help}</p>
+
+                    {/* PRIMARY: name + city search */}
+                    <div className="comp-row">
+                      <input
+                        className="form-input"
+                        placeholder={t.comp_name_ph}
+                        value={compNameQuery}
+                        onChange={(e) => setCompNameQuery(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleCompNameSearch(); }}
+                        style={{flex:2}}
+                      />
+                      <input
+                        className="form-input"
+                        placeholder={t.comp_city_ph}
+                        value={compCityQuery || profile?.city || ""}
+                        onChange={(e) => setCompCityQuery(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleCompNameSearch(); }}
+                        style={{flex:1,minWidth:100}}
+                      />
+                      <button
+                        className="comp-row-btn"
+                        onClick={handleCompNameSearch}
+                        disabled={compNameSearching || !compNameQuery.trim()}
+                      >
+                        {compNameSearching ? t.comp_searching : t.comp_search_btn}
+                      </button>
+                    </div>
+
+                    {compNameResults && compNameResults.length > 0 && (
+                      <>
+                        <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold-lt)",letterSpacing:".3px",marginTop:14,marginBottom:8}}>
+                          {t.comp_top_matches}
+                        </div>
+                        <div className="comp-results">
+                          {compNameResults.map((r) => {
+                            const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
+                            const isOwn = profile?.place_id === r.place_id;
+                            const isAdding = compAdding === r.place_id;
+                            return (
+                              <div key={r.place_id} className="comp-result-card">
+                                <div className="comp-result-body">
+                                  <div className="comp-result-title">{r.name}</div>
+                                  <div className="comp-result-meta">
+                                    {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
+                                    {r.user_rating_count != null && (
+                                      <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>
+                                    )}
+                                    {r.type && <span style={{color:"var(--text2)"}}> · {r.type}</span>}
+                                  </div>
+                                  {r.address && <div className="comp-result-addr">{r.address}</div>}
+                                  <a
+                                    className="comp-result-maps"
+                                    href={r.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(r.place_id)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >🗺 {t.comp_view_maps}</a>
+                                </div>
+                                <button
+                                  className="comp-track-btn"
+                                  onClick={() => handleCompPick(r)}
+                                  disabled={!!compAdding || alreadyTracked || isOwn}
+                                  title={isOwn ? t.comp_thats_you : alreadyTracked ? t.comp_already_tracked : ""}
+                                >
+                                  {isAdding ? t.comp_tracking : alreadyTracked ? t.comp_already_tracked : isOwn ? "—" : t.comp_track_btn}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                    {compNameResults && compNameResults.length === 0 && !compError && (
+                      <p style={{fontSize:12,color:"var(--text3)",marginTop:10}}>{t.comp_no_results}</p>
+                    )}
+
+                    {/* SECONDARY (collapsed): full-URL paste */}
+                    <details style={{marginTop:18,paddingTop:14,borderTop:"1px dashed rgba(255,255,255,.08)"}}>
+                      <summary style={{fontSize:12.5,color:"var(--gold-lt)",cursor:"pointer",fontWeight:700,letterSpacing:".3px",padding:"4px 0"}}>
+                        {t.comp_paste_link_toggle}
+                      </summary>
+                      <div className="comp-warning">{t.comp_paste_link_warning}</div>
+                      <div className="comp-row" style={{marginTop:10}}>
+                        <input
+                          className="form-input"
+                          placeholder={t.comp_paste_full_ph}
+                          value={compLinkInput}
+                          onChange={(e) => setCompLinkInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") handleCompResolve(); }}
+                        />
+                        <button
+                          className="comp-row-btn secondary"
+                          onClick={handleCompResolve}
+                          disabled={compResolving || !compLinkInput.trim()}
+                        >
+                          {compResolving ? t.comp_resolving : t.comp_preview_btn}
+                        </button>
+                      </div>
+                      <a
+                        href="/help#competitor-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{display:"inline-block",marginTop:8,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
+                      >
+                        {t.comp_full_url_help}
+                      </a>
+
+                      {compCandidates && compCandidates.length > 0 && (
+                        <>
+                          <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold-lt)",letterSpacing:".3px",marginTop:14,marginBottom:8}}>
+                            {compCandidates.length === 1 ? t.comp_preview_title : t.comp_pick_correct}
+                          </div>
+                          <div className="comp-results">
+                            {compCandidates.map((r) => {
+                              const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
+                              const isOwn = profile?.place_id === r.place_id;
+                              const isAdding = compAdding === r.place_id;
+                              return (
+                                <div key={r.place_id} className="comp-result-card">
+                                  <div className="comp-result-body">
+                                    <div className="comp-result-title">{r.name}</div>
+                                    <div className="comp-result-meta">
+                                      {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
+                                      {r.user_rating_count != null && (
+                                        <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>
+                                      )}
+                                    </div>
+                                    {r.address && <div className="comp-result-addr">{r.address}</div>}
+                                    <a
+                                      className="comp-result-maps"
+                                      href={r.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(r.place_id)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >🗺 {t.comp_view_maps}</a>
+                                  </div>
+                                  <button
+                                    className="comp-track-btn"
+                                    onClick={() => handleCompPick(r)}
+                                    disabled={!!compAdding || alreadyTracked || isOwn}
+                                  >
+                                    {isAdding ? t.comp_tracking : alreadyTracked ? t.comp_already_tracked : isOwn ? "—" : t.comp_confirm_track}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <button
+                            className="comp-card-remove"
+                            style={{marginTop:10}}
+                            onClick={() => { setCompCandidates(null); setCompError(""); }}
+                          >
+                            {t.comp_cancel}
+                          </button>
+                        </>
+                      )}
+                    </details>
+
+                    {compError && <div className="comp-err">{compError}</div>}
+                  </>
+                ) : (
+                  <div className="comp-warning" style={{margin:"0 0 14px"}}>
+                    {t.comp_max_reached(3)}
+                  </div>
+                )}
+
+                {/* Tracked list */}
+                <div style={{marginTop:18}}>
+                  <label className="pref-label">{t.comp_list_title}</label>
+                  {competitors.length === 0 ? (
+                    <div className="comp-list-empty">{t.comp_list_empty}</div>
+                  ) : (
+                    <div className="comp-list">
+                      {competitors.map((c) => (
+                        <div key={c.id} className="comp-card">
+                          <div className="comp-card-body">
+                            <div className="comp-card-name">{c.name || "Competitor"}</div>
+                            <div className="comp-card-meta">
+                              {typeof c.rating === "number" ? `${c.rating.toFixed(1)} ★` : "—"}
+                              {c.user_rating_count != null && (
+                                <span style={{color:"var(--text2)"}}> · {c.user_rating_count.toLocaleString()} reviews</span>
+                              )}
+                            </div>
+                            {c.address && <div className="comp-card-addr" title={c.address}>{c.address}</div>}
+                            <a
+                              className="comp-card-maps"
+                              href={c.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(c.place_id)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >🗺 {t.comp_view_maps}</a>
+                            {c.last_synced_at && (
+                              <div className="comp-card-sync">
+                                {t.comp_synced_at(new Date(c.last_synced_at).toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US"))}
+                              </div>
+                            )}
+                          </div>
+                          <button className="comp-card-remove" onClick={() => handleCompRemove(c.id)}>
+                            {t.comp_remove_btn}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
