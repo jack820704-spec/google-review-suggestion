@@ -51,6 +51,9 @@ async function runSync(req) {
       log(`competitor=${comp.id} user=${comp.user_id} place_id=${comp.place_id} (${comp.name || "?"})`);
       const details = await fetchPlaceDetails(comp.place_id, placesKey);
       const reviews = details.reviews || [];
+      const competitorUrl =
+        details.googleMapsUri ||
+        `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(comp.place_id)}`;
 
       // Refresh rating snapshot + name
       await supa.from("competitors").update({
@@ -78,7 +81,7 @@ async function runSync(req) {
 
         const { error: insErr } = await supa.from("competitor_reviews").insert({
           user_id: comp.user_id,
-          competitor_url: null,
+          competitor_url: competitorUrl,
           competitor_name: details.displayName?.text || comp.name || null,
           competitor_place_id: comp.place_id,
           google_review_id: gr.name,

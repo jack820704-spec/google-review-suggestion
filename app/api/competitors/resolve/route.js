@@ -146,6 +146,7 @@ export async function POST(req) {
     if (!apiKey) return Response.json({ error: "GOOGLE_PLACES_API_KEY not configured" }, { status: 500 });
 
     const { url: rawUrl } = await req.json();
+    console.log("[competitors/resolve] STEP 1 input:", { rawUrl, type: typeof rawUrl });
     if (!rawUrl || typeof rawUrl !== "string") {
       return Response.json({ error: "Paste a Google Maps URL" }, { status: 400 });
     }
@@ -159,6 +160,7 @@ export async function POST(req) {
     );
     const { data: { user } } = await userSupa.auth.getUser();
     if (!user) return Response.json({ error: "Not authenticated" }, { status: 401 });
+    console.log("[competitors/resolve] STEP 2 auth ok user=", user.id);
 
     let candidate;
     try {
@@ -166,6 +168,11 @@ export async function POST(req) {
     } catch {
       return Response.json({ error: "That doesn't look like a valid URL." }, { status: 400 });
     }
+    console.log("[competitors/resolve] STEP 3 parsed URL:", {
+      host: candidate.hostname,
+      path: candidate.pathname,
+      search: candidate.search,
+    });
     if (!isGoogleMapsHost(candidate.hostname)) {
       return Response.json({
         error: "Only Google Maps links are supported (maps.app.goo.gl, goo.gl/maps, or google.com/maps/...)",
@@ -184,42 +191,52 @@ export async function POST(req) {
     if (needsRedirect) {
       try {
         canonical = await followRedirects(canonical);
-        console.log("[competitors/resolve] followed →", canonical);
+        console.log("[competitors/resolve] STEP 4 followed →", canonical);
       } catch (e) {
+        console.error("[competitors/resolve] STEP 4 redirect failed:", e.message);
         return Response.json({ error: `Couldn't follow the link: ${e.message}` }, { status: 400 });
       }
+    } else {
+      console.log("[competitors/resolve] STEP 4 no redirect needed, using:", canonical);
     }
 
     const parsed = extractFromCanonical(canonical);
-    console.log("[competitors/resolve] parsed:", parsed);
+    console.log("[competitors/resolve] STEP 5 extracted:", parsed);
 
     // ── Path A: direct place_id hint → return as single-candidate result ──
     if (parsed.placeIdHint) {
+      console.log("[competitors/resolve] STEP 6a Path A (place_id hint):", parsed.placeIdHint);
       try {
         const details = await fetchPlaceDetails(parsed.placeIdHint, apiKey);
+        const shaped = [shapeResult(details)];
+        console.log("[competitors/resolve] STEP 7a returning place_id result:", shaped);
         return Response.json({
           ok: true,
-          candidates: [shapeResult(details)],
+          candidates: shaped,
           source: "place_id",
           parsed_name: parsed.name,
         });
       } catch (e) {
-        console.warn("[competitors/resolve] direct place_id failed:", e.message);
+        console.warn("[competitors/resolve] STEP 7a direct place_id failed:", e.message);
         // fall through to text search
       }
     }
 
     // ── Path B: text search with coords bias → return up to 5 candidates ──
     if (!parsed.name) {
+      console.warn("[competitors/resolve] STEP 6b no name parsed, giving up");
       return Response.json({
         error: "Couldn't find a place name in that URL. Open the listing in Google Maps → tap Share → copy the link, then paste it again. Or search by name below.",
       }, { status: 400 });
     }
 
+    console.log("[competitors/resolve] STEP 6b Path B searchText:", { name: parsed.name, coords: parsed.coords });
     let places = [];
     try {
       places = await searchByText({ apiKey, query: parsed.name, coords: parsed.coords, maxResults: 5 });
+      console.log("[competitors/resolve] STEP 7b searchText returned", places.length, "candidates");
     } catch (e) {
+      console.error("[competitors/resolve] STEP 7b searchText failed:", e.message);
       return Response.json({ error: `Search failed: ${e.message}`, parsed_name: parsed.name }, { status: 500 });
     }
     if (places.length === 0) {
@@ -229,9 +246,11 @@ export async function POST(req) {
       }, { status: 404 });
     }
 
+    const shaped = places.map(shapeResult);
+    console.log("[competitors/resolve] STEP 8 final candidates:", shaped.map((p) => ({ id: p.place_id, name: p.name })));
     return Response.json({
       ok: true,
-      candidates: places.map(shapeResult),
+      candidates: shaped,
       source: "text_search",
       parsed_name: parsed.name,
     });

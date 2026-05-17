@@ -60,6 +60,19 @@ export async function POST(req) {
       return Response.json({ error: `Maximum ${MAX_COMPETITORS} competitors. Remove one first.` }, { status: 400 });
     }
 
+    // Build a stable Maps URL we can also persist into competitor_reviews
+    // (that column is NOT NULL — Google sometimes omits googleMapsUri so we
+    // synthesize a deep-link fallback from the place_id).
+    const fallbackMapsUri = `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(place_id)}`;
+    const competitorUrl = maps_uri || fallbackMapsUri;
+
+    console.log("[competitors/add] inserting competitor", {
+      user_id: user.id,
+      place_id,
+      name: name || null,
+      competitorUrl,
+    });
+
     // ── Insert competitor row ──
     const { data: inserted, error: insertErr } = await supa
       .from("competitors")
@@ -70,17 +83,36 @@ export async function POST(req) {
         address: address || null,
         rating: typeof rating === "number" ? rating : null,
         user_rating_count: typeof user_rating_count === "number" ? user_rating_count : null,
-        maps_uri: maps_uri || null,
+        maps_uri: competitorUrl,
         last_synced_at: new Date().toISOString(),
       })
       .select()
       .single();
 
     if (insertErr) {
+      console.error("[competitors/add] competitors insert error:", insertErr);
       if (insertErr.code === "23505") {
         return Response.json({ error: "You're already tracking this business" }, { status: 400 });
       }
       return Response.json({ error: insertErr.message }, { status: 500 });
+    }
+
+    // ── Mirror into profiles.competitor_urls (text[]) for backward compat ──
+    try {
+      const { data: prof } = await supa
+        .from("profiles")
+        .select("competitor_urls")
+        .eq("id", user.id)
+        .single();
+      const current = Array.isArray(prof?.competitor_urls) ? prof.competitor_urls : [];
+      if (!current.includes(competitorUrl)) {
+        await supa
+          .from("profiles")
+          .update({ competitor_urls: [...current, competitorUrl] })
+          .eq("id", user.id);
+      }
+    } catch (e) {
+      console.warn("[competitors/add] profiles.competitor_urls mirror failed:", e.message);
     }
 
     // ── Pull initial reviews ──
@@ -108,7 +140,7 @@ export async function POST(req) {
 
         const { error: revErr } = await supa.from("competitor_reviews").insert({
           user_id: user.id,
-          competitor_url: maps_uri || null,
+          competitor_url: competitorUrl,
           competitor_name: details.displayName?.text || inserted.name || null,
           competitor_place_id: place_id,
           google_review_id: gr.name,
@@ -120,7 +152,7 @@ export async function POST(req) {
         });
         if (!revErr) reviewsInserted++;
         else if (revErr.code !== "23505") {
-          console.warn("[competitors/add] review insert failed:", revErr.message);
+          console.warn("[competitors/add] review insert failed:", revErr.message, "code=", revErr.code);
         }
       }
     } catch (e) {
