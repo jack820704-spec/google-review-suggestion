@@ -571,9 +571,20 @@ const T = {
     comp_view_maps: "View on Google Maps →",
     comp_synced_at: (date) => `Last synced ${date}`,
     comp_empty_title: "No competitors yet",
-    comp_empty_sub: "Search and add up to 3 competitor Google businesses to start tracking their reviews and keyword trends.",
+    comp_empty_sub: "Paste a Google Maps link for up to 3 competitor businesses to start tracking their reviews and keyword trends.",
     kw_pos: "positive mentions",
     kw_neg: "negative mentions",
+    // Paste-link flow
+    comp_paste_section: "Add a competitor",
+    comp_paste_placeholder: "Paste a Google Maps link (maps.app.goo.gl/… or google.com/maps/place/…)",
+    comp_paste_help: "Open the competitor's Google Maps listing → tap Share → copy the link → paste it here.",
+    comp_preview_btn: "Preview",
+    comp_resolving: "Resolving link…",
+    comp_preview_title: "Is this the right business?",
+    comp_confirm_track: "Confirm & Track",
+    comp_cancel: "Cancel",
+    comp_invalid_link: "Not a valid Google Maps link",
+    comp_resolve_failed: "Couldn't resolve that link",
   },
   zh: {
     live: "即時",
@@ -696,9 +707,20 @@ const T = {
     comp_view_maps: "在 Google Maps 查看 →",
     comp_synced_at: (date) => `最後同步：${date}`,
     comp_empty_title: "尚未新增競爭對手",
-    comp_empty_sub: "搜尋並新增最多 3 家競爭對手的 Google 商家，開始追蹤他們的評論和關鍵字趨勢。",
+    comp_empty_sub: "貼上競爭對手的 Google Maps 連結（最多 3 家）即可開始追蹤評論與關鍵字趨勢。",
     kw_pos: "次正向提及",
     kw_neg: "次負向提及",
+    // Paste-link flow
+    comp_paste_section: "新增競爭對手",
+    comp_paste_placeholder: "貼上 Google Maps 連結（maps.app.goo.gl/… 或 google.com/maps/place/…）",
+    comp_paste_help: "在 Google Maps 上開啟競爭對手店家 → 點選「分享」→ 複製連結 → 貼到這裡。",
+    comp_preview_btn: "預覽",
+    comp_resolving: "解析連結中…",
+    comp_preview_title: "確認是這家商家嗎？",
+    comp_confirm_track: "確認並追蹤",
+    comp_cancel: "取消",
+    comp_invalid_link: "不是有效的 Google Maps 連結",
+    comp_resolve_failed: "無法解析此連結",
   },
 };
 
@@ -764,10 +786,10 @@ export default function DashboardPage() {
   // Competitors tab state
   const [competitors, setCompetitors] = useState([]);
   const [competitorReviews, setCompetitorReviews] = useState([]);
-  const [compSearchQuery, setCompSearchQuery] = useState("");
-  const [compSearchResults, setCompSearchResults] = useState(null);
-  const [compSearching, setCompSearching] = useState(false);
-  const [compAdding, setCompAdding] = useState(false);
+  const [compLinkInput, setCompLinkInput] = useState("");
+  const [compPreview, setCompPreview] = useState(null);      // resolved business shown for confirmation
+  const [compResolving, setCompResolving] = useState(false);  // POST /resolve in flight
+  const [compAdding, setCompAdding] = useState(false);        // POST /add in flight
   const [compError, setCompError] = useState("");
   const drawerTouchStartY = useRef(null);
   const drawerTouchDelta = useRef(0);
@@ -942,42 +964,41 @@ export default function DashboardPage() {
     setProfile((p) => ({ ...p, competitor_urls: next }));
   };
 
-  // ────────── Competitors tab handlers ──────────
-  const handleCompSearch = async () => {
+  // ────────── Competitors tab handlers (paste-link flow) ──────────
+  const handleCompResolve = async () => {
     setCompError("");
-    setCompSearchResults(null);
-    const q = compSearchQuery.trim();
-    if (!q) { setCompError("Enter a restaurant name"); return; }
-    setCompSearching(true);
+    setCompPreview(null);
+    const url = compLinkInput.trim();
+    if (!url) { setCompError(t.comp_invalid_link); return; }
+    setCompResolving(true);
     try {
-      const res = await fetch("/api/places/search", {
+      const res = await fetch("/api/competitors/resolve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: q, city: profile?.city, country: profile?.country }),
+        body: JSON.stringify({ url }),
       });
       const data = await res.json();
-      if (!res.ok || data.error) { setCompError(data.error || "Search failed"); setCompSearchResults([]); return; }
-      setCompSearchResults(data.results || []);
+      if (!res.ok || data.error) { setCompError(data.error || t.comp_resolve_failed); return; }
+      setCompPreview(data.preview);
     } catch (e) {
       setCompError(e.message);
-      setCompSearchResults([]);
     } finally {
-      setCompSearching(false);
+      setCompResolving(false);
     }
   };
 
-  const handleCompAdd = async (result) => {
+  const handleCompConfirm = async () => {
+    if (!compPreview) return;
     setCompAdding(true);
     setCompError("");
     try {
       const res = await fetch("/api/competitors/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result),
+        body: JSON.stringify(compPreview),
       });
       const data = await res.json();
       if (!res.ok || data.error) { setCompError(data.error || "Failed to add"); return; }
-      // Refresh list + reviews
       const { data: { user } } = await supabase.auth.getUser();
       const [{ data: comps }, { data: compRevs }] = await Promise.all([
         supabase.from("competitors").select("*").eq("user_id", user.id).order("created_at", { ascending: true }),
@@ -985,13 +1006,18 @@ export default function DashboardPage() {
       ]);
       setCompetitors(comps || []);
       setCompetitorReviews(compRevs || []);
-      setCompSearchResults(null);
-      setCompSearchQuery("");
+      setCompPreview(null);
+      setCompLinkInput("");
     } catch (e) {
       setCompError(e.message);
     } finally {
       setCompAdding(false);
     }
+  };
+
+  const handleCompCancelPreview = () => {
+    setCompPreview(null);
+    setCompError("");
   };
 
   const handleCompRemove = async (compId) => {
@@ -1109,6 +1135,9 @@ export default function DashboardPage() {
       replied: false,
       source: "manual",
       review_date: new Date().toISOString(),
+      // Manually-added reviews are user-aware — mark as already notified so
+      // cron / any downstream notify path never re-fires email for them.
+      notified_at: new Date().toISOString(),
     }).select().single();
     setSavingReview(false);
     if (error) {
@@ -1392,54 +1421,63 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Add competitor */}
+                  {/* Add competitor — paste a Google Maps link */}
                   {competitors.length < 3 && (
                     <div className="comp-section">
-                      <div className="comp-section-title">{t.comp_add_section}</div>
+                      <div className="comp-section-title">{t.comp_paste_section}</div>
                       <div className="comp-search-card">
-                        <div className="comp-search-row">
-                          <input
-                            className="comp-search-input"
-                            placeholder={t.comp_search_placeholder}
-                            value={compSearchQuery}
-                            onChange={(e) => setCompSearchQuery(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleCompSearch(); }}
-                          />
-                          <button className="comp-search-btn" onClick={handleCompSearch} disabled={compSearching}>
-                            {compSearching ? t.comp_searching : t.comp_search_btn}
-                          </button>
-                        </div>
-
-                        {compSearchResults && compSearchResults.length > 0 && (
-                          <div className="comp-search-results">
-                            {compSearchResults.map((r) => {
-                              const alreadyTracked = competitors.some((c) => c.place_id === r.place_id);
-                              const isOwn = profile?.place_id === r.place_id;
-                              return (
-                                <div key={r.place_id} className="comp-result">
-                                  <div className="comp-result-info">
-                                    <div className="comp-result-name">{r.name}</div>
-                                    <div className="comp-result-meta">
-                                      {r.rating != null ? `${r.rating.toFixed(1)} ★` : "—"}
-                                      {r.user_rating_count != null && <span style={{color:"var(--text2)"}}> · {r.user_rating_count.toLocaleString()} reviews</span>}
-                                    </div>
-                                    {r.address && <div className="comp-result-addr">{r.address}</div>}
-                                  </div>
-                                  <button
-                                    className="comp-track-btn"
-                                    onClick={() => handleCompAdd(r)}
-                                    disabled={compAdding || alreadyTracked || isOwn}
-                                    title={isOwn ? "That's your business" : alreadyTracked ? "Already tracking" : ""}
-                                  >
-                                    {compAdding ? t.comp_tracking : alreadyTracked ? t.comp_added : isOwn ? "—" : t.comp_track_btn}
-                                  </button>
+                        {!compPreview ? (
+                          <>
+                            <div className="comp-search-row">
+                              <input
+                                className="comp-search-input"
+                                placeholder={t.comp_paste_placeholder}
+                                value={compLinkInput}
+                                onChange={(e) => setCompLinkInput(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") handleCompResolve(); }}
+                              />
+                              <button className="comp-search-btn" onClick={handleCompResolve} disabled={compResolving || !compLinkInput.trim()}>
+                                {compResolving ? t.comp_resolving : t.comp_preview_btn}
+                              </button>
+                            </div>
+                            <p style={{fontSize:11.5,color:"var(--text3)",marginTop:8,lineHeight:1.5}}>{t.comp_paste_help}</p>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold-lt)",letterSpacing:".3px",marginBottom:10}}>{t.comp_preview_title}</div>
+                            <div className="comp-result" style={{cursor:"default"}}>
+                              <div className="comp-result-info">
+                                <div className="comp-result-name">{compPreview.name}</div>
+                                <div className="comp-result-meta">
+                                  {compPreview.rating != null ? `${compPreview.rating.toFixed(1)} ★` : "—"}
+                                  {compPreview.user_rating_count != null && (
+                                    <span style={{color:"var(--text2)"}}> · {compPreview.user_rating_count.toLocaleString()} reviews</span>
+                                  )}
+                                  {compPreview.type && <span style={{color:"var(--text2)"}}> · {compPreview.type}</span>}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {compSearchResults && compSearchResults.length === 0 && !compError && (
-                          <p style={{fontSize:12.5,color:"var(--text3)",marginTop:10}}>{t.comp_no_results}</p>
+                                {compPreview.address && <div className="comp-result-addr">{compPreview.address}</div>}
+                                {(compPreview.maps_uri || compPreview.place_id) && (
+                                  <a
+                                    href={compPreview.maps_uri || `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(compPreview.place_id)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{display:"inline-block",marginTop:6,fontSize:11.5,color:"var(--gold)",textDecoration:"none",fontWeight:600}}
+                                  >🗺 {t.comp_view_maps}</a>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{display:"flex",gap:8,marginTop:12}}>
+                              <button className="comp-track-btn" style={{flex:1}} onClick={handleCompConfirm} disabled={compAdding}>
+                                {compAdding ? t.comp_tracking : t.comp_confirm_track}
+                              </button>
+                              <button
+                                className="btn-comp-remove"
+                                style={{flex:1,border:"1px solid rgba(255,255,255,.12)",color:"var(--text2)",background:"transparent"}}
+                                onClick={handleCompCancelPreview}
+                                disabled={compAdding}
+                              >{t.comp_cancel}</button>
+                            </div>
+                          </>
                         )}
                         {compError && <div className="comp-err">{compError}</div>}
                       </div>

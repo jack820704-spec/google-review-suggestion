@@ -183,6 +183,9 @@ export async function POST(req) {
         replied: false,
         google_review_id: synthId,
         review_date: parseDate(row.review_date),
+        // Bulk-imported historical reviews are explicitly user-aware — mark
+        // as already-notified so the daily cron never queues emails for them.
+        notified_at: new Date().toISOString(),
       };
 
       const { error: insErr } = await supa.from("reviews").insert(review);

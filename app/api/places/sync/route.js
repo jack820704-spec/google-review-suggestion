@@ -124,10 +124,12 @@ async function runSync(req) {
       // ──────────────────────────────────────────────────────
       if (!profile.place_first_sync_done) {
         const digestItems = [];
+        const insertedIds = [];
         for (const gr of reviewsFromGoogle) {
           try {
             const result = await ingestReview({ supa, openai, profile, googleReview: gr });
             if (result) {
+              insertedIds.push(result.review.id);
               digestItems.push({
                 review: {
                   reviewer_name: result.review.reviewer_name,
@@ -145,6 +147,7 @@ async function runSync(req) {
 
         summary.new_reviews += digestItems.length;
 
+        let digestSent = false;
         if (digestItems.length > 0 && profile.email && profile.email_notifications !== false) {
           try {
             await sendDigestEmail({
@@ -154,14 +157,26 @@ async function runSync(req) {
               isInitialSync: true,
             });
             summary.initial_digests++;
+            digestSent = true;
           } catch (mailErr) {
             log("initial digest email failed:", mailErr.message);
             summary.errors.push({ user: profile.id, error: mailErr.message });
           }
         }
 
+        // Stamp notified_at on every review we ingested in this initial pass —
+        // either the digest succeeded (real notification), or the user has
+        // email_notifications=false (they're aware these exist), or there was
+        // nothing to email. In all cases, future cron runs must not re-notify.
+        if (insertedIds.length > 0) {
+          await supa
+            .from("reviews")
+            .update({ notified_at: new Date().toISOString() })
+            .in("id", insertedIds);
+        }
+
         await supa.from("profiles").update({ place_first_sync_done: true }).eq("id", profile.id);
-        log(`user ${profile.id}: initial digest sent (${digestItems.length} reviews)`);
+        log(`user ${profile.id}: initial digest sent=${digestSent} (${digestItems.length} reviews, marked notified)`);
         continue;
       }
 
@@ -198,10 +213,14 @@ async function runSync(req) {
           if (!result) continue;
           summary.new_reviews++;
 
-          // Per-review notify email (matches existing /api/email/notify shape)
+          // notified_at is NULL after fresh insert. Per-review notify email,
+          // stamped exactly once after the email succeeds (or after we decide
+          // not to email this row — see below) so a future re-run can never
+          // double-notify the same review.
           const isCrisis = result.isCrisis;
           const wantsImmediate = profile.email_notifications && profile.notification_frequency === "immediately";
           const crisisOverride = isCrisis && profile.crisis_alerts;
+          let didSend = false;
           if (profile.email && result.replies && (wantsImmediate || crisisOverride)) {
             try {
               await resend.emails.send({
@@ -218,10 +237,20 @@ async function runSync(req) {
                 }),
               });
               summary.notify_emails++;
+              didSend = true;
             } catch (mailErr) {
               log("notify email failed:", mailErr.message);
             }
           }
+
+          // Always stamp notified_at — either email went out, or user opted
+          // out / non-immediate digest schedule. Either way, this review is
+          // accounted for and must never be re-notified.
+          await supa
+            .from("reviews")
+            .update({ notified_at: new Date().toISOString() })
+            .eq("id", result.review.id);
+          if (!didSend) log(`  ${result.review.id} ingested, marked notified (no email sent)`);
         } catch (err) {
           log("ingest failed:", err.message);
           summary.errors.push({ user: profile.id, error: err.message });

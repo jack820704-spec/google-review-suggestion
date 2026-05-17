@@ -336,6 +336,9 @@ export async function POST(req) {
       log("user has email_notifications disabled, skipping notify");
     }
 
+    // Stamp notified_at so cron never re-fires for this review.
+    await db.from("reviews").update({ notified_at: new Date().toISOString() }).eq("id", review.id);
+
     log("==== DONE in", Date.now() - t0, "ms ====");
     return Response.json({ success: true, reviewId: review.id });
   } catch (e) {

@@ -87,11 +87,13 @@ export async function POST(req) {
 
     const openai = getOpenAI();
     const digestItems = [];
+    const insertedIds = [];
 
     for (const gr of reviews) {
       try {
         const result = await ingestReview({ supa, openai, profile, googleReview: gr });
         if (result) {
+          insertedIds.push(result.review.id);
           digestItems.push({
             review: {
               reviewer_name: result.review.reviewer_name,
@@ -121,6 +123,15 @@ export async function POST(req) {
       } catch (mailErr) {
         console.error("[places/connect] digest email threw:", mailErr.message);
       }
+    }
+
+    // ── Stamp notified_at on every just-ingested review so the daily cron
+    //    never re-fires emails for the same rows.
+    if (insertedIds.length > 0) {
+      await supa
+        .from("reviews")
+        .update({ notified_at: new Date().toISOString() })
+        .in("id", insertedIds);
     }
 
     // ── Mark first sync complete ──
