@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
-import { getPlan, canUseFeature, usagePercent } from "@/lib/plans";
+import { getPlan, canUseFeature, usagePercent, PLANS } from "@/lib/plans";
+import { startCheckout } from "@/lib/paddle-client";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
@@ -414,6 +415,14 @@ const DEFAULT_AI_PREFS = {
 // Normalize comma-separated text input back to an array (trimmed, no empties).
 const csvToArray = (s) => String(s || "").split(",").map((x) => x.trim()).filter(Boolean);
 
+// Plan tiering for the Settings upgrade panel.
+const PLAN_ORDER = ["free_trial", "starter", "growth", "pro"];
+const UPGRADE_BLURBS = {
+  starter: "30 AI replies / month · sentiment analysis · email support",
+  growth: "150 AI replies · auto Google sync · crisis alerts · multi-language",
+  pro: "Unlimited replies · AI learns your style · competitor tracking",
+};
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -428,6 +437,9 @@ export default function SettingsPage() {
   const [placesSaving, setPlacesSaving] = useState(false);
   const [placesError, setPlacesError] = useState("");
   const [lang, setLang] = useState("en");
+  // Paddle upgrade flow
+  const [upgradeBusy, setUpgradeBusy] = useState("");
+  const [upgradeError, setUpgradeError] = useState("");
   // Competitor tracking (Pro) — list, add via name-search (primary) or
   // full-URL paste (secondary). All add/remove flow lives here now;
   // the dashboard tab is analysis-only.
@@ -544,6 +556,19 @@ export default function SettingsPage() {
   };
 
   const removeKw = (kw) => update("custom_keywords", (profile.custom_keywords || []).filter((k) => k !== kw));
+
+  // Open the Paddle checkout overlay for a higher plan.
+  const handleUpgrade = async (targetPlan) => {
+    setUpgradeError("");
+    setUpgradeBusy(targetPlan);
+    try {
+      await startCheckout(targetPlan);
+    } catch (err) {
+      setUpgradeError(err.message || "Could not start checkout. Please try again.");
+    } finally {
+      setUpgradeBusy("");
+    }
+  };
 
   const canAutoSync = canUseFeature(planKey, "auto_sync");
 
@@ -1431,8 +1456,35 @@ export default function SettingsPage() {
           <div className="section-header">Plan & Usage</div>
           <div className="card">
             <div className="plan-row">
-              <div><div className="plan-name">{plan.name}</div><div className="plan-price">{plan.price === 0 ? "Free Trial" : `$${plan.price}/month`}</div></div>
-              {planKey !== "pro" && <button className="btn-upgrade" onClick={() => window.location.href = "/#pricing"}>Upgrade Plan</button>}
+              <div>
+                <div className="plan-name">{plan.name}</div>
+                <div className="plan-price">
+                  {plan.price === 0 ? "Free Trial" : `$${plan.price}/month`}
+                  {profile.subscription_status === "past_due" && (
+                    <span style={{color:"var(--neg)",fontWeight:600}}> · Payment past due</span>
+                  )}
+                  {profile.subscription_status === "canceled" && planKey !== "free_trial" && (
+                    <span style={{color:"var(--text3)"}}> · Cancelled</span>
+                  )}
+                </div>
+                {(() => {
+                  // Free trial → trial_ends_at; paid → plan_expires_at.
+                  const raw = planKey === "free_trial" ? profile.trial_ends_at : profile.plan_expires_at;
+                  if (!raw) return null;
+                  const d = new Date(raw);
+                  const dateStr = d.toLocaleDateString(lang === "zh" ? "zh-TW" : "en-US", { year: "numeric", month: "short", day: "numeric" });
+                  const expired = d.getTime() < Date.now();
+                  let label;
+                  if (planKey === "free_trial") {
+                    label = expired ? `Trial expired on ${dateStr}` : `Trial ends ${dateStr}`;
+                  } else if (profile.subscription_status === "canceled") {
+                    label = `Access until ${dateStr}`;
+                  } else {
+                    label = `Renews ${dateStr}`;
+                  }
+                  return <div style={{fontSize:12.5,color: expired ? "var(--neg)" : "var(--text3)",marginTop:4}}>{label}</div>;
+                })()}
+              </div>
             </div>
             <div style={{fontSize:13,color:"var(--text2)",marginBottom:6}}>AI Replies: {profile.used_count || 0} / {plan.reply_limit === Infinity ? "Unlimited" : plan.reply_limit} used this period</div>
             {plan.reply_limit !== Infinity && (
@@ -1441,6 +1493,58 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
+
+          {/* Upgrade options — every paid plan above the current one. */}
+          {(() => {
+            const currentRank = PLAN_ORDER.indexOf(planKey);
+            const options = PLAN_ORDER
+              .filter((k) => k !== "free_trial" && PLAN_ORDER.indexOf(k) > currentRank);
+            if (options.length === 0) {
+              // Already on the top plan.
+              return (
+                <div className="card" style={{marginTop:12}}>
+                  <div style={{fontSize:13.5,color:"var(--text2)",lineHeight:1.6}}>
+                    You're on our top plan. Need multiple locations or custom limits?{" "}
+                    <a href="mailto:support@revuly.dev" style={{color:"var(--gold)",textDecoration:"none",fontWeight:600}}>Contact us for enterprise →</a>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div className="card" style={{marginTop:12}}>
+                <div style={{fontSize:13.5,fontWeight:700,color:"var(--text1)",marginBottom:4}}>Upgrade your plan</div>
+                <p style={{fontSize:12.5,color:"var(--text2)",marginBottom:14,lineHeight:1.55}}>
+                  Unlock more AI replies and features — secure checkout by Paddle. Cancel anytime.
+                </p>
+                {upgradeError && <div className="places-err" style={{marginBottom:12}}>{upgradeError}</div>}
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  {options.map((key) => {
+                    const p = PLANS[key];
+                    return (
+                      <div key={key} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,padding:14,background:"var(--bg2)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,flexWrap:"wrap"}}>
+                        <div style={{minWidth:0,flex:1}}>
+                          <div style={{fontSize:14,fontWeight:700,color:"var(--text1)"}}>
+                            {p.name} <span style={{color:"var(--gold-lt)"}}>${p.price}/mo</span>
+                          </div>
+                          <div style={{fontSize:12,color:"var(--text2)",marginTop:3,lineHeight:1.5}}>{UPGRADE_BLURBS[key]}</div>
+                        </div>
+                        <button
+                          className="btn-upgrade"
+                          onClick={() => handleUpgrade(key)}
+                          disabled={!!upgradeBusy}
+                        >
+                          {upgradeBusy === key ? "Opening…" : "Upgrade"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{marginTop:12,fontSize:11.5,color:"var(--text3)"}}>
+                  Need multiple locations? <a href="mailto:support@revuly.dev" style={{color:"var(--gold)",textDecoration:"none"}}>Contact us for enterprise →</a>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         <button className="btn-save" onClick={handleSave} disabled={saving}>{saving ? "Saving…" : "Save Settings"}</button>

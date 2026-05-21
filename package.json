@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
+    "@paddle/paddle-js": "^1.6.4",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "latest",
     "next": "latest",

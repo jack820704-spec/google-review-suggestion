@@ -531,7 +531,14 @@ export default function LandingPage() {
                   }
                   return <li key={typeof f === "string" ? f : idx}><span className="chk">✓</span>{f}</li>;
                 })}</ul>
-                <button className={`btn-price ${plan.popular?"btn-price-fill":"btn-price-outline"}`} onClick={() => window.location.href="/login"}>{plan.price?"Start Free Trial":"Get Started Free"}</button>
+                <button
+                  className={`btn-price ${plan.popular?"btn-price-fill":"btn-price-outline"}`}
+                  onClick={() => {
+                    // Free Trial → sign-up; paid plans → /pricing with the plan preselected.
+                    const key = plan.name.toLowerCase().replace(/\s+/g, "_");
+                    window.location.href = plan.price ? `/pricing?plan=${key}` : "/login";
+                  }}
+                >{plan.price ? "Subscribe" : "Start Free Trial"}</button>
               </div>
             ))}
           </div>

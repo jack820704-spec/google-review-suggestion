@@ -142,6 +142,14 @@ export default function LoginPage() {
 
   const supabase = createClient();
 
+  // Where to land after a successful login. Defaults to the dashboard, but a
+  // ?next=… param (e.g. resuming Paddle checkout from /pricing) takes priority.
+  const nextDest = () => {
+    if (typeof window === "undefined") return "/dashboard";
+    const n = new URL(window.location.href).searchParams.get("next");
+    return n && n.startsWith("/") ? n : "/dashboard";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); setSuccess(""); setLoading(true);
@@ -149,7 +157,7 @@ export default function LoginPage() {
       if (mode === "login") {
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
-        window.location.href = "/dashboard";
+        window.location.href = nextDest();
       } else {
         const { data, error: err } = await supabase.auth.signUp({
           email, password,

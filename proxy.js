@@ -56,11 +56,26 @@ export async function proxy(request) {
     if (pathname.startsWith("/dashboard")) {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("restaurant_name")
+        .select("restaurant_name, plan, trial_ends_at")
         .eq("id", user.id)
         .single();
       if (!profile?.restaurant_name) {
         return NextResponse.redirect(new URL("/onboarding", request.url));
+      }
+
+      // Plan gating: an expired free trial with no paid plan → /pricing.
+      // Paid plans (starter/growth/pro) are managed by Paddle and stay valid
+      // until the webhook drops them back to free_trial. Skip the gate right
+      // after checkout (?upgraded=1) so a fresh payer isn't bounced before the
+      // webhook has flipped their plan.
+      if (!request.nextUrl.searchParams.has("upgraded")) {
+        const plan = profile.plan || "free_trial";
+        if (plan === "free_trial" && profile.trial_ends_at) {
+          const endsAt = new Date(profile.trial_ends_at).getTime();
+          if (Number.isFinite(endsAt) && endsAt < Date.now()) {
+            return NextResponse.redirect(new URL("/pricing?expired=1", request.url));
+          }
+        }
       }
     }
     return supabaseResponse;
