@@ -1505,7 +1505,7 @@ export default function SettingsPage() {
                 <div className="card" style={{marginTop:12}}>
                   <div style={{fontSize:13.5,color:"var(--text2)",lineHeight:1.6}}>
                     You're on our top plan. Need multiple locations or custom limits?{" "}
-                    <a href="mailto:support@revuly.dev" style={{color:"var(--gold)",textDecoration:"none",fontWeight:600}}>Contact us for enterprise →</a>
+                    <a href="mailto:revuly.support@gmail.com" style={{color:"var(--gold)",textDecoration:"none",fontWeight:600}}>Contact us for enterprise →</a>
                   </div>
                 </div>
               );
@@ -1540,7 +1540,7 @@ export default function SettingsPage() {
                   })}
                 </div>
                 <div style={{marginTop:12,fontSize:11.5,color:"var(--text3)"}}>
-                  Need multiple locations? <a href="mailto:support@revuly.dev" style={{color:"var(--gold)",textDecoration:"none"}}>Contact us for enterprise →</a>
+                  Need multiple locations? <a href="mailto:revuly.support@gmail.com" style={{color:"var(--gold)",textDecoration:"none"}}>Contact us for enterprise →</a>
                 </div>
               </div>
             );

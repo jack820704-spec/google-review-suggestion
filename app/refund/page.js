@@ -43,21 +43,21 @@ export default function RefundPage() {
         <p>Every new account starts with a 14-day free trial. During this period you have full access to your plan's features at no cost. You can cancel at any time before the trial ends and you will never be charged. No payment is taken until the trial period concludes.</p>
 
         <h2>2. 7-Day Refund Window</h2>
-        <p>If you are charged after your free trial and run into a problem or are not satisfied, you may request a refund within 7 days of the charge. Simply email <a href="mailto:support@revuly.dev">support@revuly.dev</a> with your account email and the reason for your request, and our team will process eligible refunds back to your original payment method.</p>
+        <p>If you are charged after your free trial and run into a problem or are not satisfied, you may request a refund within 7 days of the charge. Simply email <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a> with your account email and the reason for your request, and our team will process eligible refunds back to your original payment method.</p>
 
         <h2>3. Cancellation & Service Period</h2>
         <p>You can cancel your subscription at any time from your account settings. When you cancel, your subscription will not renew, but your service remains active until the end of the current billing period that you have already paid for. You keep full access until that period ends.</p>
 
         <h2>4. How to Request a Refund</h2>
         <ul>
-          <li>Email <a href="mailto:support@revuly.dev">support@revuly.dev</a> within 7 days of the charge.</li>
+          <li>Email <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a> within 7 days of the charge.</li>
           <li>Include the email address associated with your Revuly account.</li>
           <li>Briefly describe the issue or reason for your request.</li>
           <li>We will review and respond, typically within 2 business days. Approved refunds are returned to your original payment method.</li>
         </ul>
 
         <h2>5. Contact Us</h2>
-        <p>Questions about billing or refunds? We're happy to help. Reach our support team at <a href="mailto:support@revuly.dev">support@revuly.dev</a> and we'll get back to you as soon as possible.</p>
+        <p>Questions about billing or refunds? We're happy to help. Reach our support team at <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a> and we'll get back to you as soon as possible.</p>
       </div>
     </>
   );

@@ -44,7 +44,7 @@ export default function PrivacyPage() {
         </div>
 
         <h2>1. Who We Are</h2>
-        <p>Revuly Inc. operates the Revuly platform at <a href="https://revuly.dev">revuly.dev</a>. We are the data controller for personal data collected through the Service. Contact us at <a href="mailto:privacy@revuly.dev">privacy@revuly.dev</a>.</p>
+        <p>Revuly Inc. operates the Revuly platform at <a href="https://revuly.dev">revuly.dev</a>. We are the data controller for personal data collected through the Service. Contact us at <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a>.</p>
 
         <h2>2. Data We Collect</h2>
         <table>
@@ -117,7 +117,7 @@ export default function PrivacyPage() {
           <li><strong>Objection:</strong> Object to processing based on legitimate interests</li>
           <li><strong>Withdraw consent:</strong> Withdraw marketing consent at any time</li>
         </ul>
-        <p>To exercise these rights, email <a href="mailto:privacy@revuly.dev">privacy@revuly.dev</a>. We will respond within 30 days.</p>
+        <p>To exercise these rights, email <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a>. We will respond within 30 days.</p>
 
         <h2>9. Cookies</h2>
         <p>Revuly uses essential session cookies for authentication only. We do not use advertising or tracking cookies. You can clear cookies through your browser settings; this will log you out of the Service.</p>
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
         <p>We will notify you of material changes to this Privacy Policy via email and in-app notice at least 14 days before changes take effect.</p>
 
         <h2>14. Contact & Supervisory Authority</h2>
-        <p>Questions? Contact our privacy team at <a href="mailto:privacy@revuly.dev">privacy@revuly.dev</a>. If you are in the EEA and believe we have not adequately addressed your concern, you have the right to lodge a complaint with your local data protection authority.</p>
+        <p>Questions? Contact our privacy team at <a href="mailto:revuly.support@gmail.com">revuly.support@gmail.com</a>. If you are in the EEA and believe we have not adequately addressed your concern, you have the right to lodge a complaint with your local data protection authority.</p>
       </div>
     </>
   );

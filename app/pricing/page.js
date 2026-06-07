@@ -205,7 +205,7 @@ export default function PricingPage() {
               {plan.key === "pro" && (
                 <div className="enterprise">
                   Multiple locations or enterprise needs?{" "}
-                  <a href="mailto:support@revuly.dev">Contact us →</a>
+                  <a href="mailto:revuly.support@gmail.com">Contact us →</a>
                 </div>
               )}
             </div>
