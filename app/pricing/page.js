@@ -95,7 +95,7 @@ const PLANS = [
     price: "199",
     period: "/month, billed monthly",
     desc: "Unlimited scale for elite portfolios.",
-    feats: ["Unlimited AI replies", "AI learns your style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", "Everything in Growth"],
+    feats: ["Unlimited AI replies", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", "Everything in Growth"],
     cta: "Subscribe",
     popular: false,
   },

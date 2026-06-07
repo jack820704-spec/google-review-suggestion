@@ -16,7 +16,7 @@ const T = {
     hero_eyebrow: "Product Tour",
     hero_title_a: "See Revuly",
     hero_title_b: "in Action",
-    hero_sub: "A 2-minute tour of how Revuly helps restaurants manage their reputation effortlessly — from connecting Google Business to AI-crafted replies and competitor benchmarking.",
+    hero_sub: "A 2-minute tour of how Revuly helps restaurants manage their reputation effortlessly — from connecting Google Business to smart reply suggestions and competitor benchmarking.",
     hero_cta_primary: "Start Free Trial — No Card Required",
     hero_cta_secondary: "Skip to Pricing →",
     step_label: (n) => `Step ${n}`,
@@ -26,10 +26,10 @@ const T = {
     s2_title: "Reviews Sync Automatically",
     s2_body: "New reviews are detected automatically. Every review is analysed for sentiment and keywords the moment it arrives — no copy-paste, no manual import.",
     s2_bullets: ["Daily Google Places sync", "Sentiment auto-tagged", "Crisis alerts for 1–2★ spikes"],
-    s3_title: "AI Generates Three Reply Styles",
+    s3_title: "Get Three Reply Styles Instantly",
     s3_body: "Get three reply options instantly — Warm & Personal, Professional & Gracious, or Brief & Direct. All crafted to sound like a real owner, not a PR team.",
     s3_bullets: ["Owner-voice prompt, never corporate", "Reply in 7 languages", "Pro: 4th tab learns your personal voice"],
-    s4_title: "Email Notifications With AI Replies Inside",
+    s4_title: "Email Notifications With Reply Suggestions Inside",
     s4_body: "The moment a new review lands, you get an email with the full review and three ready-to-use reply suggestions. Just copy the one you like best.",
     s4_bullets: ["Immediate / daily / weekly cadence", "Crisis emails fire regardless", "Reply suggestions inside the email"],
     s5_title: "Analytics That Show What Guests Love",
@@ -54,7 +54,7 @@ const T = {
     mock_style_brief: "Brief & Direct",
     mock_copy: "Copy",
     mock_email_subject: "New 5★ review for your restaurant",
-    mock_email_preview: "Sarah just left a glowing review — three AI replies ready to send.",
+    mock_email_preview: "Sarah just left a glowing review — three smart replies ready to send.",
     mock_email_btn: "View in Dashboard",
     mock_pie_title: "Keyword Categories",
     mock_kw_food: "Food",
@@ -511,7 +511,7 @@ export default function TourPage() {
             <div className="mock-frame">
               <div className="mock-chrome">
                 <span className="mock-dot r" /><span className="mock-dot y" /><span className="mock-dot g" />
-                <span className="mock-url">revuly.dev/dashboard — AI editor</span>
+                <span className="mock-url">revuly.dev/dashboard — reply editor</span>
               </div>
               <div className="m3-tabs">
                 {[

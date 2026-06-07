@@ -248,8 +248,8 @@ const BRAND_VOICE_MAX = 100;
 
 const T = {
   en: {
-    pref_section: "AI Reply Preferences",
-    pref_help: "These preferences fine-tune all three reply styles (Warm & Personal, Professional & Gracious, Brief & Direct) to match your restaurant's personality. The more you customise, the more the AI sounds like you.",
+    pref_section: "Reply Preferences",
+    pref_help: "These preferences fine-tune all three reply styles (Warm & Personal, Professional & Gracious, Brief & Direct) to match your restaurant's personality. The more you customise, the more it sounds like you.",
     pref_restaurant_style: "Restaurant Style",
     pref_restaurant_style_help: "Sets the overall voice the AI uses for your venue.",
     pref_tone_formality: "Tone — Formality",
@@ -420,7 +420,7 @@ const PLAN_ORDER = ["free_trial", "starter", "growth", "pro"];
 const UPGRADE_BLURBS = {
   starter: "30 AI replies / month · sentiment analysis · email support",
   growth: "150 AI replies · auto Google sync · crisis alerts · multi-language",
-  pro: "Unlimited replies · AI learns your style · competitor tracking",
+  pro: "Unlimited replies · Learns your unique style · competitor tracking",
 };
 
 export default function SettingsPage() {
@@ -492,7 +492,7 @@ export default function SettingsPage() {
   }, []);
 
   const handleResetStyle = async () => {
-    if (!confirm("Reset your AI Style Learning? Your past replies stay on file, but the AI will need to re-learn your voice the next time you Mark Replied.")) return;
+    if (!confirm("Reset your Style Learning? Your past replies stay on file, but Revuly will need to re-learn your voice the next time you Mark Replied.")) return;
     setStyleResetting(true);
     const { data: { user } } = await supabase.auth.getUser();
     await supabase.from("profiles")
@@ -833,13 +833,13 @@ export default function SettingsPage() {
                   Wrong business connected? Click <strong>Disconnect</strong> and search again.
                 </div>
                 <p style={{fontSize:12.5,color:"var(--text2)",margin:"12px 0 0",lineHeight:1.6}}>
-                  New Google reviews are pulled automatically every day. You'll receive AI reply suggestions by email the moment a new review lands.
+                  New Google reviews are pulled automatically every day. You'll receive smart reply suggestions by email the moment a new review lands.
                 </p>
               </>
             ) : (
               <>
                 <p style={{fontSize:13.5,color:"var(--text2)",marginBottom:12,lineHeight:1.6}}>
-                  Search for your restaurant on Google to enable automatic review sync. We'll fetch new reviews every 6 hours and email AI reply suggestions to you.
+                  Search for your restaurant on Google to enable automatic review sync. We'll fetch new reviews every 6 hours and email smart reply suggestions to you.
                 </p>
                 <div className="places-search-row">
                   <input
@@ -1329,7 +1329,7 @@ export default function SettingsPage() {
         {/* AI STYLE LEARNING — Pro only */}
         {planKey === "pro" && (
           <div className="section">
-            <div className="section-header">AI Style Learning (Pro)</div>
+            <div className="section-header">Style Learning (Pro)</div>
             <div className="card">
               {(() => {
                 const have = styleStatus?.samples_have ?? 0;
@@ -1429,7 +1429,7 @@ export default function SettingsPage() {
           <div className="section-header">Email Notifications</div>
           <div className="card">
             <div className="toggle-item">
-              <div className="toggle-info"><h4>Email Notifications</h4><p>Receive email alerts with AI reply suggestions for new reviews</p></div>
+              <div className="toggle-info"><h4>Email Notifications</h4><p>Receive email alerts with smart reply suggestions for new reviews</p></div>
               <label className="toggle"><input type="checkbox" checked={!!profile.email_notifications} onChange={(e) => update("email_notifications", e.target.checked)} /><div className="toggle-track" /><div className="toggle-thumb" /></label>
             </div>
             {profile.email_notifications && (

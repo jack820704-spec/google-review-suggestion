@@ -276,19 +276,19 @@ const CSS = `
 `;
 
 const FEATURES = [
-  { icon: "✦", title: "AI Reply Generation",   desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Claude AI",        more: "Every reply opens with the guest's first name, picks the right tone for the star rating, and reads like a real owner — never corporate filler. Pro plans add a fourth 'Your Style' tab that learns from your actual posted replies." },
-  { icon: "◉", title: "Real-Time Monitoring",  desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.",                                          tag: "Instant Alerts",   more: "Choose Immediate / Daily Digest / Weekly cadences. Every email ships with all three AI reply suggestions inside — copy and paste straight into Google Business Profile." },
-  { icon: "◈", title: "Sentiment Analysis",    desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.",                            tag: "AI-Powered",       more: "Sentiment is tagged at sync time and surfaces in the dashboard filter rail, the keyword bars, and the 6-month sentiment trend chart on the Analytics page." },
+  { icon: "✦", title: "Smart Reply Suggestions",   desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Smart Engine",        more: "Every reply opens with the guest's first name, picks the right tone for the star rating, and reads like a real owner — never corporate filler. Pro plans add a fourth 'Your Style' tab that learns from your actual posted replies." },
+  { icon: "◉", title: "Real-Time Monitoring",  desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.",                                          tag: "Instant Alerts",   more: "Choose Immediate / Daily Digest / Weekly cadences. Every email ships with all three smart reply suggestions inside — copy and paste straight into Google Business Profile." },
+  { icon: "◈", title: "Sentiment Analysis",    desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.",                            tag: "Smart",       more: "Sentiment is tagged at sync time and surfaces in the dashboard filter rail, the keyword bars, and the 6-month sentiment trend chart on the Analytics page." },
   { icon: "⚠", title: "Crisis Alerts",         desc: "Detect patterns of negative feedback before they escalate. Receive immediate alerts when 3+ low-rating reviews appear in 24 hours.",                            tag: "Growth & Pro",     more: "Crisis emails ignore your notification cadence — they always send immediately with a red banner and a one-click jump to the affected reviews so you can respond inside the hour." },
   { icon: "▦", title: "Competitor Tracking",   desc: "Monitor up to 3 competitor restaurants' review trends. Understand what your market peers are doing right — and wrong.",                                          tag: "Pro Only",         more: "Add competitors by Google name + city search. The dashboard shows side-by-side rating cards, keyword comparison bars, and their latest reviews. Daily sync keeps everything fresh." },
-  { icon: "⬡", title: "Multi-Language",        desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.",                tag: "6+ Languages",     more: "Pick the reply language per-review from the AI editor. The full UI ships with EN ↔ 中文 toggle, persisted across dashboard, settings, analytics, and the product tour." },
+  { icon: "⬡", title: "Multi-Language",        desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.",                tag: "6+ Languages",     more: "Pick the reply language per-review from the reply editor. The full UI ships with EN ↔ 中文 toggle, persisted across dashboard, settings, analytics, and the product tour." },
 ];
 
 const PRICING = [
   { name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
   { name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
-  { name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto email review detection", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
-  { name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "AI learns your style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
+  { name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
+  { name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
 ];
 
 const TESTIMONIALS = [
@@ -298,11 +298,11 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  { q: "How does the AI generate contextually relevant replies?", a: "Revuly uses Anthropic's Claude AI to analyse each review's specific content — identifying sentiment, concerns, and compliments — then generates three distinct reply styles that directly address the reviewer's experience. No templates, no filler." },
+  { q: "How does the AI generate contextually relevant replies?", a: "Revuly uses an intelligent suggestion engine to analyse each review's specific content — identifying sentiment, concerns, and compliments — then generates three distinct reply styles that directly address the reviewer's experience. No templates, no filler." },
   { q: "Can I customise the tone to match my brand voice?", a: "Yes. Growth and Pro subscribers can provide brand guidelines and example replies to fine-tune the AI. Pro users benefit from an adaptive model that learns your unique vocabulary and style over time." },
   { q: "Which languages are supported?", a: "Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Additional languages are added regularly based on subscriber demand." },
   { q: "Is there a free trial, and does it require a credit card?", a: "Every new account receives a 14-day free trial of the platform with 5 AI reply credits — no credit card required. You can explore all features before any commitment." },
-  { q: "How does multi-location management work?", a: "Each venue is added as a separate property within your account. View consolidated analytics across all locations, switch between them seamlessly, or assign team members to specific venues. Enterprise clients can configure role-based permissions across their entire group." },
+  { q: "Can I manage more than one restaurant?", a: "Revuly is built around a single restaurant location per account — connect your Google Business Profile and everything stays focused on that one venue. If you run several restaurants and want to manage them together, email us at revuly.support@gmail.com and we'll help you set that up." },
 ];
 
 export default function LandingPage() {
@@ -406,7 +406,7 @@ export default function LandingPage() {
       <section className="hero">
         <div className="hero-bg" /><div className="hero-grid" />
         <div className="hero-inner">
-          <div className="hero-badge"><span className="badge-dot" />AI-Powered Reputation Management</div>
+          <div className="hero-badge"><span className="badge-dot" />Intelligent Reputation Management</div>
           <h1>Turn Every Review Into<br /><span className="accent">Customer Trust</span></h1>
           <p className="hero-sub">The intelligent Google review management platform built exclusively for elite hospitality brands. Reply perfectly in seconds. Monitor sentiment in real time.</p>
           <div className="hero-ctas">
@@ -594,8 +594,8 @@ export default function LandingPage() {
             <p>The intelligent reputation management platform for elite hospitality brands. Every review, handled with precision.</p>
           </div>
           <div className="footer-col"><h4>Product</h4><ul>{["Features","Pricing","Changelog","Help Centre","API Docs"].map(l=><li key={l}><a href="#">{l}</a></li>)}</ul></div>
-          <div className="footer-col"><h4>Company</h4><ul>{["About","Blog","Careers","Press Kit","Contact"].map(l=><li key={l}><a href="#">{l}</a></li>)}</ul></div>
-          <div className="footer-col"><h4>Legal</h4><ul><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Service</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">GDPR</a></li><li><a href="#">Security</a></li></ul></div>
+          <div className="footer-col"><h4>Company</h4><ul>{["About","Blog","Careers","Press Kit","Contact"].map(l=><li key={l}><a href={l==="Contact"?"mailto:revuly.support@gmail.com":"#"}>{l}</a></li>)}</ul></div>
+          <div className="footer-col"><h4>Legal</h4><ul><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Service</a></li><li><a href="/refund">Refund Policy</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">GDPR</a></li><li><a href="#">Security</a></li></ul></div>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Revuly Inc. All rights reserved.</span>
