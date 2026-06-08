@@ -313,7 +313,7 @@ export default function OnboardingPage() {
             <p className="card-sub">Link your verified Google Business Profile to start monitoring reviews automatically. You'll need a verified business account.</p>
             <div className="google-card">
               <h4>🔗 Why connect Google Business?</h4>
-              <p>Once connected, Revuly will automatically sync new reviews, analyse sentiment, and pre-generate AI reply suggestions — delivered straight to your inbox before you even open the dashboard.</p>
+              <p>Once connected, Revuly will automatically sync new reviews, analyse sentiment, and pre-generate smart reply suggestions — delivered straight to your inbox before you even open the dashboard.</p>
               {!googleConnected ? (
                 <>
                   <button className="btn-connect" onClick={handleGoogleConnect}>Connect Google Business Account</button>
@@ -337,7 +337,7 @@ export default function OnboardingPage() {
             <h2 className="card-title">Notification Preferences</h2>
             <p className="card-sub">Choose how and when Revuly keeps you informed. You can change these anytime in Settings.</p>
             <div className="toggle-item">
-              <div className="toggle-info"><h4>Email Notifications</h4><p>Receive an email with AI reply suggestions for each new review</p></div>
+              <div className="toggle-info"><h4>Email Notifications</h4><p>Receive an email with smart reply suggestions for each new review</p></div>
               <label className="toggle"><input type="checkbox" checked={notif.email_notifications} onChange={(e) => setNotif({ ...notif, email_notifications: e.target.checked })} /><div className="toggle-track" /><div className="toggle-thumb" /></label>
             </div>
             {notif.email_notifications && (

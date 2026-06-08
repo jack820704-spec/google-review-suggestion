@@ -116,7 +116,7 @@ const CSS = `
 // so all six fit comfortably alongside the testimonial + CTA below.
 const BRAND_FEATS = [
   { icon: "✦", label: "Auto-detect new Google reviews" },
-  { icon: "◉", label: "AI reply suggestions in seconds" },
+  { icon: "◉", label: "smart reply suggestions in seconds" },
   { icon: "◈", label: "Three reply styles — sounds like you" },
   { icon: "⚠", label: "Crisis alerts & weekly reports" },
   { icon: "▦", label: "Keyword Intelligence analytics" },

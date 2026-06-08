@@ -521,7 +521,7 @@ const CSS = `
 const FEATURES = [
   {
     icon: "✦",
-    title: "AI Reply Generation",
+    title: "Smart Reply Generation",
     desc: "Generate three distinct reply styles — Sophisticated, Professional, and Diplomatic — in seconds. Each reply is contextually tailored to the specific review content.",
     tag: "Powered by Claude AI",
   },
@@ -623,7 +623,7 @@ const TESTIMONIALS = [
     role: "Director of Operations",
     restaurant: "The Hartwell Collection, London",
     quote:
-      "Managing reviews across seven properties used to consume two full-time staff members. Now it takes one person less than an hour a day. The quality and consistency of replies has actually improved dramatically.",
+      "Managing reviews used to take hours every week. Now it takes 15 minutes — and the quality has genuinely improved.",
   },
   {
     initial: "L",

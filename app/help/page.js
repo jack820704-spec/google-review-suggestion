@@ -54,7 +54,7 @@ const NAV = [
   { id:"connect-google", label:"Connect Google Business" },
   { id:"csv-import", label:"CSV Import" },
   { id:"smart-paste", label:"Smart Paste" },
-  { id:"ai-reply", label:"Using AI Reply" },
+  { id:"ai-reply", label:"Using Smart Reply" },
   { id:"keyword-intel", label:"Keyword Intelligence" },
   { id:"notifications", label:"Email Notifications" },
   { id:"competitor-link", label:"Competitor: Full URL Guide" },
@@ -63,16 +63,16 @@ const NAV = [
 ];
 
 const FAQS = [
-  { q:"Can I try Revuly without a Google Business account?", a:"Absolutely. During your free trial, you can manually add review text directly into the dashboard. The AI reply generation works for any review you add, regardless of Google connection." },
+  { q:"Can I try Revuly without a Google Business account?", a:"Absolutely. During your free trial, you can manually add review text directly into the dashboard. The smart reply generation works for any review you add, regardless of Google connection." },
   { q:"What if I have multiple Google Business locations?", a:"Growth and Pro plans support multiple locations. Each location is managed as a separate property within your account. Enterprise clients can also assign team members to specific venues." },
   { q:"How many smart replies does each plan include?", a:"Free Trial includes 5 replies to explore the platform. Starter gives you 30/month. Growth gives you 150/month. Pro is unlimited — no caps, ever." },
-  { q:"Can the AI reply in my restaurant's specific style?", a:"Pro subscribers benefit from adaptive AI that learns from your past replies and brand guidelines you provide. Over time, the AI begins to sound more and more like you specifically." },
+  { q:"Can replies match my restaurant's specific style?", a:"Pro subscribers benefit from an adaptive model that learns from your past replies and brand guidelines you provide. Over time, it begins to sound more and more like you specifically." },
   { q:"Why can't I see my Google Business account after connecting?", a:"Ensure you're signing in with the Google account that owns or manages your Google Business Profile. If your profile is still pending verification, you won't be able to access review data until verification is complete." },
   { q:"Are my reviews and data private?", a:"Yes. Your review data is private and is never shared with or sold to third parties. Review text is sent to Anthropic's Claude API solely to generate reply suggestions, and Anthropic does not use this data for training." },
   { q:"Can I cancel my subscription at any time?", a:"Yes. Cancel anytime from your dashboard settings. Your access continues until the end of the current billing period. No cancellation fees." },
   { q:"What languages can Revuly reply in?", a:"Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Select your preferred reply language in the AI editor on the right-hand panel of the dashboard." },
-  { q:"How do I actually post the AI reply to Google?", a:"Revuly doesn't post directly to Google on your behalf (this is by design — you stay in control). Copy the reply you like, then paste it directly into your Google Business Profile manager on business.google.com." },
-  { q:"What counts as a 'crisis' alert?", a:"A crisis is automatically detected when 3 or more reviews with a rating of 2 stars or below appear within any 24-hour period. You'll receive an immediate email alert with a red 'Crisis' banner and AI reply suggestions." },
+  { q:"How do I actually post the smart reply to Google?", a:"Revuly doesn't post directly to Google on your behalf (this is by design — you stay in control). Copy the reply you like, then paste it directly into your Google Business Profile manager on business.google.com." },
+  { q:"What counts as a 'crisis' alert?", a:"A crisis is automatically detected when 3 or more reviews with a rating of 2 stars or below appear within any 24-hour period. You'll receive an immediate email alert with a red 'Crisis' banner and smart reply suggestions." },
 ];
 
 export default function HelpPage() {
@@ -195,7 +195,7 @@ export default function HelpPage() {
           <div className="section">
             <div id="ai-reply" className="section-anchor" />
             <div className="section-badge">04</div>
-            <h2>Using AI Reply</h2>
+            <h2>Using Smart Reply</h2>
             <p>Revuly uses Anthropic's Claude AI to generate contextually relevant, genuine-sounding replies that match your restaurant's voice.</p>
             <h3>Step-by-Step</h3>
             <ol>
@@ -242,7 +242,7 @@ export default function HelpPage() {
             <div id="notifications" className="section-anchor" />
             <div className="section-badge">06</div>
             <h2>Email Notifications</h2>
-            <p>Revuly sends beautifully formatted emails whenever you receive a new review, including the review content and pre-generated AI reply suggestions — so you can respond even before opening the dashboard.</p>
+            <p>Revuly sends beautifully formatted emails whenever you receive a new review, including the review content and pre-generated smart reply suggestions — so you can respond even before opening the dashboard.</p>
             <h3>Setting Up Notifications</h3>
             <p>Go to <strong>Settings → Email Notifications</strong> and toggle on "Email Notifications". Choose your preferred frequency: Immediately, Daily Digest, or Weekly Only.</p>
             <h3>What the Email Contains</h3>
