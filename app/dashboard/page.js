@@ -875,9 +875,7 @@ export default function DashboardPage() {
   const [modalError, setModalError] = useState("");
   const [generateError, setGenerateError] = useState("");
   const [yourStyleStatus, setYourStyleStatus] = useState({});
-  const [competitorInput, setCompetitorInput] = useState({ url: "", name: "" });
-  const [savingCompetitor, setSavingCompetitor] = useState(false);
-  const [competitorError, setCompetitorError] = useState("");
+  // Competitor add/remove lives in Settings now (writes the competitors table directly).
   const [lang, setLangRaw] = useState("en");
   // Hydrate language from localStorage on mount so Settings/Help see the
   // same preference, and persist on every toggle.
@@ -1017,8 +1015,6 @@ export default function DashboardPage() {
   const overLimit = isOverLimit(planKey, usedCount);
   const daysLeft = trialDaysLeft(planKey, profile?.trial_ends_at);
   const trialExpired = isTrialExpired(planKey, profile?.trial_ends_at);
-  const competitorUrls = profile?.competitor_urls || [];
-  const competitorLimit = plan.competitor_limit || 0;
   const isPro = canUseFeature(planKey, "ai_style_learning");
   const stylesLocalized = lang === "zh" ? STYLES_ZH : STYLES_EN;
   const yourStyleLocalized = lang === "zh" ? STYLE_YOUR_STYLE_ZH : STYLE_YOUR_STYLE_EN;
@@ -1089,27 +1085,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleAddCompetitor = async () => {
-    setCompetitorError("");
-    const url = competitorInput.url.trim();
-    if (!url) { setCompetitorError("Enter a Google Business URL"); return; }
-    if (competitorUrls.length >= competitorLimit) { setCompetitorError(`Max ${competitorLimit} competitors`); return; }
-    if (competitorUrls.includes(url)) { setCompetitorError("Already tracking this URL"); return; }
-    setSavingCompetitor(true);
-    const next = [...competitorUrls, url];
-    const { error } = await supabase.from("profiles").update({ competitor_urls: next }).eq("id", profile.id);
-    setSavingCompetitor(false);
-    if (error) { setCompetitorError(error.message); return; }
-    setProfile((p) => ({ ...p, competitor_urls: next }));
-    setCompetitorInput({ url: "", name: "" });
-  };
-
-  const handleRemoveCompetitor = async (urlToRemove) => {
-    const next = competitorUrls.filter((u) => u !== urlToRemove);
-    const { error } = await supabase.from("profiles").update({ competitor_urls: next }).eq("id", profile.id);
-    if (error) { setCompetitorError(error.message); return; }
-    setProfile((p) => ({ ...p, competitor_urls: next }));
-  };
+  // Competitor tracking is managed in Settings (competitors table) — the dashboard
+  // Competitors tab is analysis-only, so no add/remove handlers live here.
 
   const handleCsvUpload = async () => {
     if (!csvFile) return;

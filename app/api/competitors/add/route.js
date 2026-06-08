@@ -97,24 +97,6 @@ export async function POST(req) {
       return Response.json({ error: insertErr.message }, { status: 500 });
     }
 
-    // ── Mirror into profiles.competitor_urls (text[]) for backward compat ──
-    try {
-      const { data: prof } = await supa
-        .from("profiles")
-        .select("competitor_urls")
-        .eq("id", user.id)
-        .single();
-      const current = Array.isArray(prof?.competitor_urls) ? prof.competitor_urls : [];
-      if (!current.includes(competitorUrl)) {
-        await supa
-          .from("profiles")
-          .update({ competitor_urls: [...current, competitorUrl] })
-          .eq("id", user.id);
-      }
-    } catch (e) {
-      console.warn("[competitors/add] profiles.competitor_urls mirror failed:", e.message);
-    }
-
     // ── Pull initial reviews ──
     let reviewsInserted = 0;
     try {

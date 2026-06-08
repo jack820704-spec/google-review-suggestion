@@ -40,24 +40,6 @@ export async function POST(req) {
 
     await supa.from("competitors").delete().eq("id", id).eq("user_id", user.id);
 
-    // Mirror removal in profiles.competitor_urls (text[]) — best-effort.
-    if (comp.maps_uri) {
-      try {
-        const { data: prof } = await supa
-          .from("profiles")
-          .select("competitor_urls")
-          .eq("id", user.id)
-          .single();
-        const current = Array.isArray(prof?.competitor_urls) ? prof.competitor_urls : [];
-        const next = current.filter((u) => u !== comp.maps_uri);
-        if (next.length !== current.length) {
-          await supa.from("profiles").update({ competitor_urls: next }).eq("id", user.id);
-        }
-      } catch (e) {
-        console.warn("[competitors/remove] profiles.competitor_urls mirror failed:", e.message);
-      }
-    }
-
     return Response.json({ ok: true });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
