@@ -128,12 +128,12 @@ const T = {
 // asked specifically for 船饗大漁-style content as the example.
 const SAMPLE_REVIEWS = {
   en: [
-    { name: "Sarah Chen",  stars: 5, days: 0, text: "Hands down the freshest seafood I've had in Taipei. The salmon sashimi melts. Owner came over to greet us — felt like family." },
+    { name: "Sarah Chen",  stars: 5, days: 0, text: "Hands down the freshest seafood I've had in Paris. The salmon sashimi melts. Owner came over to greet us — felt like family." },
     { name: "Marcus T.",   stars: 4, days: 1, text: "Great vibe, generous portions. Service was a tiny bit slow at peak hours but the food more than made up for it." },
     { name: "Jenny W.",    stars: 5, days: 2, text: "Best izakaya in the area. The grilled mackerel and sake pairing — chef's kiss. Coming back next week." },
   ],
   zh: [
-    { name: "陳小姐", stars: 5, days: 0, text: "台北最新鮮的海鮮!鮭魚生魚片入口即化,老闆親自過來打招呼,有家的感覺。" },
+    { name: "陳小姐", stars: 5, days: 0, text: "巴黎最新鮮的海鮮!鮭魚生魚片入口即化,老闆親自過來打招呼,有家的感覺。" },
     { name: "Marcus", stars: 4, days: 1, text: "氣氛超好、份量大方。尖峰時段上菜稍慢,但食物完全值得。" },
     { name: "Jenny",  stars: 5, days: 2, text: "這區最好的居酒屋!烤鯖魚配清酒——主廚必殺技。下週還要再來。" },
   ],
@@ -309,9 +309,14 @@ const CSS = `
   .cta-btns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;position:relative}
 
   /* FOOTER */
-  .foot{border-top:1px solid rgba(255,255,255,.06);padding:32px 6vw;text-align:center;color:var(--text3);font-size:12.5px}
-  .foot a{color:var(--text3);text-decoration:none;margin:0 8px}
-  .foot a:hover{color:var(--gold)}
+  .foot{border-top:1px solid rgba(255,255,255,.06);padding:44px 6vw 32px}
+  .foot-inner{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+  .foot-tagline{font-size:13px;color:var(--text2);line-height:1.65;max-width:380px;margin-top:12px}
+  .foot-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--text3)}
+  .foot-links{display:flex;gap:18px;flex-wrap:wrap}
+  .foot-bottom a{color:var(--text3);text-decoration:none;transition:color .2s}
+  .foot-bottom a:hover{color:var(--gold)}
+  @media(max-width:640px){.foot-bottom{flex-direction:column;align-items:flex-start;gap:10px}}
 
   /* MOBILE */
   @media (max-width: 860px) {
@@ -699,8 +704,25 @@ export default function TourPage() {
         </div>
       </section>
 
+      {/* FOOTER — consistent with the landing page */}
       <footer className="foot">
-        <a href="/">{t.nav_back}</a>
+        <div className="foot-inner">
+          <div>
+            <a className="logo" href="/"><span className="logo-icon">✦</span>Revuly</a>
+            <p className="foot-tagline">{lang === "zh" ? "專為頂級餐飲品牌打造的智慧品牌聲譽管理平台。每一則評論，都精準處理。" : "The intelligent reputation management platform for elite hospitality brands. Every review, handled with precision."}</p>
+          </div>
+          <div className="foot-bottom">
+            <span>© 2026 Revuly Inc. {lang === "zh" ? "版權所有。" : "All rights reserved."}</span>
+            <div className="foot-links">
+              <a href="/#pricing">{lang === "zh" ? "方案" : "Pricing"}</a>
+              <a href="/privacy">{lang === "zh" ? "隱私" : "Privacy"}</a>
+              <a href="/terms">{lang === "zh" ? "條款" : "Terms"}</a>
+              <a href="/refund">{lang === "zh" ? "退款" : "Refund"}</a>
+              <a href="/help">{lang === "zh" ? "幫助" : "Help"}</a>
+              <a href="/">{t.nav_back}</a>
+            </div>
+          </div>
+        </div>
       </footer>
     </>
   );

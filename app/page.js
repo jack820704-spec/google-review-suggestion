@@ -329,7 +329,7 @@ const CONTENT = {
     testiHead: { label: "Testimonials", titleA: "Trusted by", titleB: "Industry Leaders" },
     testimonials: [
       { init: "M", name: "Marcus Renaud", role: "Executive Chef & Owner", rest: "Maison Renaud, New York", quote: "Our Google rating climbed from 4.2 to 4.8 in three months. The replies are indistinguishable from our own voice — guests have actually complimented how thoughtful our responses are." },
-      { init: "S", name: "Sophia Hartwell", role: "Director of Operations", rest: "The Hartwell Collection, London", quote: "Managing reviews across seven properties used to consume two full-time staff. Now it takes one person under an hour a day — and the quality has genuinely improved." },
+      { init: "S", name: "Sophia Hartwell", role: "Director of Operations", rest: "The Hartwell Collection, London", quote: "Managing reviews used to take hours every week. Now it takes 15 minutes — and the quality has genuinely improved." },
       { init: "L", name: "Laurent Beaumont", role: "General Manager", rest: "Château Beaumont, Paris", quote: "The multi-language capability is exceptional. We serve guests from around the world and can respond in their native language with complete confidence. Indispensable." },
     ],
     faqHead: { label: "FAQ", titleA: "Frequently Asked", titleB: "Questions" },
@@ -398,7 +398,7 @@ const CONTENT = {
     testiHead: { label: "客戶見證", titleA: "深受", titleB: "業界領袖信賴" },
     testimonials: [
       { init: "M", name: "Marcus Renaud", role: "行政主廚／老闆", rest: "Maison Renaud，紐約", quote: "我們的 Google 評分三個月內從 4.2 升到 4.8。回覆和我們自己的口吻幾乎一樣——顧客甚至稱讚我們的回覆很用心。" },
-      { init: "S", name: "Sophia Hartwell", role: "營運總監", rest: "The Hartwell Collection，倫敦", quote: "以前管理七家分店的評論要兩名全職員工，現在一個人每天不到一小時就搞定——而且品質確實更好了。" },
+      { init: "S", name: "Sophia Hartwell", role: "營運總監", rest: "The Hartwell Collection，倫敦", quote: "以前管理評論每週要花好幾個小時，現在只要 15 分鐘——而且品質確實更好了。" },
       { init: "L", name: "Laurent Beaumont", role: "總經理", rest: "Château Beaumont，巴黎", quote: "多語言能力非常出色。我們服務來自世界各地的顧客，能用他們的母語自信回覆，不可或缺。" },
     ],
     faqHead: { label: "常見問題", titleA: "常見", titleB: "問題" },
