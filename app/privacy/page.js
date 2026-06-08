@@ -63,7 +63,7 @@ export default function PrivacyPage() {
         <h2>3. Google Data — Limited Use Disclosure</h2>
         <p>Revuly's use of information received from Google APIs is limited to the following, in compliance with the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Services User Data Policy</a>:</p>
         <ul>
-          <li><strong>Reading reviews:</strong> We access your Google Business Profile reviews solely to display them within your Revuly dashboard and generate AI reply suggestions.</li>
+          <li><strong>Reading reviews:</strong> We access your Google Business Profile reviews solely to display them within your Revuly dashboard and generate smart reply suggestions.</li>
           <li><strong>No data sharing:</strong> Google review data is not shared with, sold to, or used by any third party for advertising or other purposes.</li>
           <li><strong>No autonomous posting:</strong> Revuly never posts replies to Google on your behalf without your explicit manual action.</li>
           <li><strong>Token storage:</strong> OAuth access and refresh tokens are stored encrypted and used only to fetch review data on your behalf.</li>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
         <h2>4. How We Use Your Data</h2>
         <ul>
           <li>To provide, maintain, and improve the Revuly platform</li>
-          <li>To generate AI reply suggestions using Anthropic Claude</li>
+          <li>To generate smart reply suggestions using our intelligent suggestion engine</li>
           <li>To send email notifications about new reviews (with your consent)</li>
           <li>To send weekly reports (Growth/Pro plans, with your consent)</li>
           <li>To process subscription billing via our payment processor</li>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
         <p>We do not sell your personal data. We share data only with:</p>
         <ul>
           <li><strong>Supabase</strong> — Database and authentication infrastructure (data stored in EU region)</li>
-          <li><strong>Anthropic</strong> — Review text is sent to Claude API to generate reply suggestions (not retained by Anthropic for training)</li>
+          <li><strong>AI suggestion provider</strong> — Review text is sent to a third-party AI provider solely to generate reply suggestions; it is not retained for model training</li>
           <li><strong>Resend</strong> — Email delivery service for notifications and reports</li>
           <li><strong>Vercel</strong> — Hosting and deployment platform</li>
         </ul>

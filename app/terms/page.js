@@ -43,7 +43,7 @@ export default function TermsPage() {
         <p>These Terms of Service ("Terms") govern your access to and use of Revuly ("Service"), operated by Revuly Inc. ("Company", "we", "us", or "our"). By creating an account or using the Service, you agree to these Terms and our Privacy Policy.</p>
 
         <h2>2. Description of Service</h2>
-        <p>Revuly is a Google Business review management platform that enables restaurant owners and hospitality professionals to monitor, analyse, and respond to customer reviews using artificial intelligence. The Service includes AI-generated reply suggestions, sentiment analysis, keyword intelligence, and email notifications.</p>
+        <p>Revuly is a Google Business review management platform that enables restaurant owners and hospitality professionals to monitor, analyse, and respond to customer reviews using intelligent automation. The Service includes AI-generated reply suggestions, sentiment analysis, keyword intelligence, and email notifications.</p>
 
         <h2>3. Google API Usage</h2>
         <p>Revuly integrates with Google Business Profile API to retrieve review data on your behalf. By connecting your Google Business account, you:</p>
@@ -60,8 +60,8 @@ export default function TermsPage() {
         <ul>
           <li><strong>Free Trial:</strong> 14-day trial with 5 smart reply credits. No credit card required.</li>
           <li><strong>Starter:</strong> $39/month — 30 smart replies, 1 location, manual input.</li>
-          <li><strong>Growth:</strong> $99/month — 150 smart replies, up to 5 locations, auto-sync, full features.</li>
-          <li><strong>Pro:</strong> $199/month — Unlimited replies, all locations, AI style learning, priority support.</li>
+          <li><strong>Growth:</strong> $99/month — 150 smart replies, 1 location, auto-sync, full features.</li>
+          <li><strong>Pro:</strong> $199/month — Unlimited replies, 1 location (contact us for multi-location), AI style learning, priority support.</li>
         </ul>
         <p>All prices are in USD. Subscriptions renew automatically on a monthly basis. You may cancel at any time from your account settings, effective at the end of the current billing period.</p>
 
@@ -79,7 +79,7 @@ export default function TermsPage() {
         </ul>
 
         <h2>7. AI-Generated Content</h2>
-        <p>Revuly uses Anthropic's Claude AI to generate reply suggestions. You acknowledge that:</p>
+        <p>Revuly uses our intelligent suggestion engine to generate reply suggestions. You acknowledge that:</p>
         <ul>
           <li>AI-generated replies are suggestions only — you are responsible for reviewing before publishing</li>
           <li>Revuly does not guarantee the accuracy, appropriateness, or legal compliance of AI output</li>
