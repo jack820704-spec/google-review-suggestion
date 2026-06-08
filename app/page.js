@@ -321,7 +321,7 @@ const CONTENT = {
     pricingHead: { label: "Pricing", titleA: "Transparent Plans for", titleB: "Every Scale", sub: "All plans include a 14-day free trial. No credit card required to start." },
     perMonth: "/month, billed monthly", free: "Free", subscribe: "Subscribe", startTrial: "Start Free Trial", mostPopular: "Most Popular",
     pricing: [
-      { key: "free_trial", name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
+      { key: "free_trial", name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 smart reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
       { key: "starter", name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
       { key: "growth", name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
       { key: "pro", name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
@@ -337,16 +337,16 @@ const CONTENT = {
       { q: "How does the AI generate contextually relevant replies?", a: "Revuly uses our intelligent suggestion engine to analyse each review's specific content — identifying sentiment, concerns, and compliments — then generates three distinct reply styles that directly address the reviewer's experience. No templates, no filler." },
       { q: "Can I customise the tone to match my brand voice?", a: "Yes. Growth and Pro subscribers can provide brand guidelines and example replies to fine-tune the suggestions. Pro users benefit from an adaptive model that learns your unique vocabulary and style over time." },
       { q: "Which languages are supported?", a: "Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Additional languages are added regularly based on subscriber demand." },
-      { q: "Is there a free trial, and does it require a credit card?", a: "Every new account receives a 14-day free trial of the platform with 5 AI reply credits — no credit card required. You can explore all features before any commitment." },
+      { q: "Is there a free trial, and does it require a credit card?", a: "Every new account receives a 14-day free trial of the platform with 5 smart reply credits — no credit card required. You can explore all features before any commitment." },
       { q: "Can I manage more than one restaurant?", a: "Revuly is built around a single restaurant location per account — connect your Google Business Profile and everything stays focused on that one venue. If you run several restaurants and want to manage them together, email us at revuly.support@gmail.com and we'll help you set that up." },
     ],
     cta: { hA: "Ready to", hB: "Elevate Your Reputation?", p: "Join 10,000+ elite restaurants managing their guest experience with Revuly.", b1: "Start Free Trial — No Card Required", b2: "View Pricing" },
     footer: {
       brand: "The intelligent reputation management platform for elite hospitality brands. Every review, handled with precision.",
       productH: "Product", companyH: "Company", legalH: "Legal",
-      product: ["Features", "Pricing", "Changelog", "Help Centre", "API Docs"],
-      company: ["About", "Blog", "Careers", "Press Kit", "Contact"],
-      legal: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Refund Policy", href: "/refund" }, { label: "Cookie Policy", href: "#" }, { label: "GDPR", href: "#" }, { label: "Security", href: "#" }],
+      product: [{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "Help Centre", href: "/help" }],
+      company: [{ label: "Contact", href: "mailto:revuly.support@gmail.com" }],
+      legal: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Refund Policy", href: "/refund" }, { label: "Cookie Policy", href: "/privacy" }, { label: "GDPR", href: "/privacy" }, { label: "Security", href: "/terms" }],
       rights: "© 2026 Revuly Inc. All rights reserved.",
       bottom: [{ label: "Terms", href: "/terms" }, { label: "Privacy", href: "/privacy" }, { label: "Help", href: "/help" }],
     },
@@ -413,9 +413,9 @@ const CONTENT = {
     footer: {
       brand: "專為頂級餐飲品牌打造的智慧品牌聲譽管理平台。每一則評論，都精準處理。",
       productH: "產品", companyH: "公司", legalH: "法律",
-      product: ["功能", "方案", "更新日誌", "幫助中心", "API 文件"],
-      company: ["關於我們", "部落格", "徵才", "媒體資料", "聯絡我們"],
-      legal: [{ label: "隱私政策", href: "/privacy" }, { label: "服務條款", href: "/terms" }, { label: "退款政策", href: "/refund" }, { label: "Cookie 政策", href: "#" }, { label: "GDPR", href: "#" }, { label: "資訊安全", href: "#" }],
+      product: [{ label: "功能", href: "#features" }, { label: "方案", href: "#pricing" }, { label: "幫助中心", href: "/help" }],
+      company: [{ label: "聯絡我們", href: "mailto:revuly.support@gmail.com" }],
+      legal: [{ label: "隱私政策", href: "/privacy" }, { label: "服務條款", href: "/terms" }, { label: "退款政策", href: "/refund" }, { label: "Cookie 政策", href: "/privacy" }, { label: "GDPR", href: "/privacy" }, { label: "資訊安全", href: "/terms" }],
       rights: "© 2026 Revuly Inc. 版權所有。",
       bottom: [{ label: "條款", href: "/terms" }, { label: "隱私", href: "/privacy" }, { label: "幫助", href: "/help" }],
     },
@@ -721,8 +721,8 @@ export default function LandingPage() {
             <a className="logo" href="#"><span className="logo-icon">✦</span>Revuly</a>
             <p>{c.footer.brand}</p>
           </div>
-          <div className="footer-col"><h4>{c.footer.productH}</h4><ul>{c.footer.product.map(l=><li key={l}><a href="#">{l}</a></li>)}</ul></div>
-          <div className="footer-col"><h4>{c.footer.companyH}</h4><ul>{c.footer.company.map((l,i)=><li key={l}><a href={i===c.footer.company.length-1?"mailto:revuly.support@gmail.com":"#"}>{l}</a></li>)}</ul></div>
+          <div className="footer-col"><h4>{c.footer.productH}</h4><ul>{c.footer.product.map((l)=><li key={l.label}><a href={l.href}>{l.label}</a></li>)}</ul></div>
+          <div className="footer-col"><h4>{c.footer.companyH}</h4><ul>{c.footer.company.map((l)=><li key={l.label}><a href={l.href}>{l.label}</a></li>)}</ul></div>
           <div className="footer-col"><h4>{c.footer.legalH}</h4><ul>{c.footer.legal.map((l)=><li key={l.label}><a href={l.href}>{l.label}</a></li>)}</ul></div>
         </div>
         <div className="footer-bottom">

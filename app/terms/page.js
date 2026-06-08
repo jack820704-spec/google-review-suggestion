@@ -58,7 +58,7 @@ export default function TermsPage() {
         <h2>4. Subscription Plans & Billing</h2>
         <p>Revuly offers the following subscription plans:</p>
         <ul>
-          <li><strong>Free Trial:</strong> 14-day trial with 5 AI reply credits. No credit card required.</li>
+          <li><strong>Free Trial:</strong> 14-day trial with 5 smart reply credits. No credit card required.</li>
           <li><strong>Starter:</strong> $39/month — 30 AI replies, 1 location, manual input.</li>
           <li><strong>Growth:</strong> $99/month — 150 AI replies, up to 5 locations, auto-sync, full features.</li>
           <li><strong>Pro:</strong> $199/month — Unlimited replies, all locations, AI style learning, priority support.</li>

@@ -65,7 +65,7 @@ const PLANS = [
     price: null,
     period: "14-day trial",
     desc: "Explore the full platform risk-free.",
-    feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"],
+    feats: ["14-day trial", "5 smart reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"],
     cta: "Start Free Trial",
     popular: false,
   },
