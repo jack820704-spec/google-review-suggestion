@@ -178,6 +178,9 @@ export async function POST(req) {
         stars,
         content,
         source: "google",
+        // CSV/manual imports have no clear place provenance — keep place_id NULL
+        // so they stay visible across Google business reconnects.
+        place_id: null,
         sentiment: sentimentFromStars(stars),
         is_crisis: stars <= 2,
         replied: false,
