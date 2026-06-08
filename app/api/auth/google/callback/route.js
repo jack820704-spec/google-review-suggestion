@@ -71,11 +71,9 @@ async function handleSupabaseLogin(code, req) {
       plan: "free_trial",
       used_count: 0,
     });
-    return NextResponse.redirect(new URL("/onboarding", req.url));
   }
-  if (!profile.restaurant_name) {
-    return NextResponse.redirect(new URL("/onboarding", req.url));
-  }
+  // New and returning users both land on the dashboard. First-time users (no
+  // restaurant set up yet) get the onboarding guide as a modal there.
   return NextResponse.redirect(new URL("/dashboard", req.url));
 }
 

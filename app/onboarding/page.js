@@ -182,6 +182,7 @@ export default function OnboardingPage() {
         google_connected: googleConnected,
         plan: "free_trial",
         used_count: 0,
+        onboarding_completed: true,
       });
       if (upsertError) throw upsertError;
 

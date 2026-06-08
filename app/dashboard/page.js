@@ -868,6 +868,7 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState("all");
   const [kwFilter, setKwFilter] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [newReview, setNewReview] = useState({ reviewer_name: "", stars: 5, content: "" });
   const [savingReview, setSavingReview] = useState(false);
@@ -931,6 +932,13 @@ export default function DashboardPage() {
     setProfile(prof);
     setReviews(revs || []);
 
+    // First-visit onboarding guide: show the welcome modal instead of forcing
+    // a redirect to /onboarding. Signalled by a profile that hasn't set up a
+    // restaurant yet and hasn't already dismissed the guide.
+    if (prof && !prof.restaurant_name && !prof.onboarding_completed) {
+      setShowOnboarding(true);
+    }
+
     // Pro plan: load competitors + their reviews in parallel
     if (prof?.plan === "pro") {
       const [{ data: comps }, { data: compRevs }] = await Promise.all([
@@ -945,6 +953,17 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Onboarding guide actions. "Complete setup" routes to the full /onboarding
+  // form; "explore first" dismisses and marks it done so it won't pop again.
+  const goToSetup = () => { window.location.href = "/onboarding"; };
+  const dismissOnboarding = async () => {
+    setShowOnboarding(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await supabase.from("profiles").update({ onboarding_completed: true }).eq("id", user.id);
+    } catch {}
+  };
 
   // Auto-open the bottom drawer on mobile when a review is selected;
   // desktop just shows the editor in the right column as usual.
@@ -1720,6 +1739,35 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* FIRST-VISIT ONBOARDING GUIDE */}
+      {showOnboarding && (
+        <div className="modal-overlay" onClick={dismissOnboarding}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{lang === "zh" ? "歡迎使用 Revuly 🎉" : "Welcome to Revuly 🎉"}</h3>
+            <p className="modal-sub">{lang === "zh" ? "三個步驟，就能把 Google 評論變成完美回覆。" : "You're three quick steps from turning Google reviews into perfect replies."}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, margin: "4px 0 4px" }}>
+              {[
+                { icon: "🔗", en: "Connect your Google Business Profile", zh: "連接你的 Google 商家檔案", en2: "We'll start syncing your reviews automatically.", zh2: "我們會自動開始同步你的評論。" },
+                { icon: "✦", en: "Get smart reply suggestions", zh: "取得智慧回覆建議", en2: "Three styles per review — Warm, Professional, Brief.", zh2: "每則評論三種風格——溫暖、專業、簡潔。" },
+                { icon: "📊", en: "Track sentiment & keywords", zh: "追蹤情緒與關鍵字", en2: "See trends and what guests love, all in one place.", zh2: "趨勢與顧客的喜好，一站掌握。" },
+              ].map((s, i) => (
+                <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <span style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 9, background: "rgba(201,168,76,.12)", border: "1px solid var(--gold-border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text1)", marginBottom: 2 }}>{lang === "zh" ? s.zh : s.en}</div>
+                    <div style={{ fontSize: 12.5, color: "var(--text2)", lineHeight: 1.5 }}>{lang === "zh" ? s.zh2 : s.en2}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={dismissOnboarding}>{lang === "zh" ? "先看看再說" : "I'll explore first"}</button>
+              <button className="modal-save" onClick={goToSetup}>{lang === "zh" ? "完成設定 →" : "Complete setup →"}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD REVIEW MODAL */}
       {showAddModal && (

@@ -59,9 +59,8 @@ export async function proxy(request) {
         .select("restaurant_name, plan, trial_ends_at")
         .eq("id", user.id)
         .single();
-      if (!profile?.restaurant_name) {
-        return NextResponse.redirect(new URL("/onboarding", request.url));
-      }
+      // First-time users (no restaurant yet) are NOT forced to /onboarding —
+      // the dashboard shows an onboarding guide modal on first visit instead.
 
       // Plan gating: an expired free trial with no paid plan → /pricing.
       // Paid plans (starter/growth/pro) are managed by Paddle and stay valid
@@ -81,15 +80,9 @@ export async function proxy(request) {
     return supabaseResponse;
   }
 
-  // Already logged in → skip login page
+  // Already logged in → skip login page (always land on the dashboard; the
+  // onboarding guide appears there as a modal for first-time users).
   if (pathname === "/login" && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("restaurant_name")
-      .eq("id", user.id)
-      .single();
-    if (!profile?.restaurant_name)
-      return NextResponse.redirect(new URL("/onboarding", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

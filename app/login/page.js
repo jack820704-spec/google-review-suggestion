@@ -173,8 +173,8 @@ export default function LoginPage() {
             plan: "free_trial",
             used_count: 0,
           });
-          setSuccess("Account created! Check your email to confirm, then continue.");
-          setTimeout(() => { window.location.href = "/onboarding"; }, 1500);
+          setSuccess("Account created! Taking you to your dashboard…");
+          setTimeout(() => { window.location.href = "/dashboard"; }, 1200);
         }
       }
     } catch (err) {

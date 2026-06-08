@@ -30,6 +30,8 @@ const CSS = `
   .btn-ghost:hover{color:var(--gold-lt);border-color:var(--gold)}
   .btn-gold{padding:8px 20px;border-radius:8px;font-size:13.5px;font-weight:700;font-family:inherit;color:#000;background:linear-gradient(135deg,var(--gold-lt),var(--gold));border:none;cursor:pointer;transition:all .22s;box-shadow:0 2px 12px rgba(201,168,76,.3)}
   .btn-gold:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(201,168,76,.45)}
+  .lang-toggle{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--gold-border);background:transparent;color:var(--text2);font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;flex-shrink:0}
+  .lang-toggle:hover{border-color:var(--gold);color:var(--gold-lt)}
 
   /* HERO */
   .hero{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 6vw 80px;overflow:hidden}
@@ -229,6 +231,7 @@ const CSS = `
     .nav-ctas{gap:6px}
     .nav-ctas .btn-ghost{padding:6px 12px;font-size:12px}
     .nav-ctas .btn-gold{padding:6px 14px;font-size:12px}
+    .lang-toggle{height:32px;padding:0 9px;font-size:11.5px}
 
     .hero{padding:100px 5vw 60px;min-height:auto}
     .hero h1{font-size:38px;letter-spacing:-.3px;line-height:1.15}
@@ -275,35 +278,149 @@ const CSS = `
   }
 `;
 
-const FEATURES = [
-  { icon: "✦", title: "Smart Reply Suggestions",   desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Smart Engine",        more: "Every reply opens with the guest's first name, picks the right tone for the star rating, and reads like a real owner — never corporate filler. Pro plans add a fourth 'Your Style' tab that learns from your actual posted replies." },
-  { icon: "◉", title: "Real-Time Monitoring",  desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.",                                          tag: "Instant Alerts",   more: "Choose Immediate / Daily Digest / Weekly cadences. Every email ships with all three smart reply suggestions inside — copy and paste straight into Google Business Profile." },
-  { icon: "◈", title: "Sentiment Analysis",    desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.",                            tag: "Smart",       more: "Sentiment is tagged at sync time and surfaces in the dashboard filter rail, the keyword bars, and the 6-month sentiment trend chart on the Analytics page." },
-  { icon: "⚠", title: "Crisis Alerts",         desc: "Detect patterns of negative feedback before they escalate. Receive immediate alerts when 3+ low-rating reviews appear in 24 hours.",                            tag: "Growth & Pro",     more: "Crisis emails ignore your notification cadence — they always send immediately with a red banner and a one-click jump to the affected reviews so you can respond inside the hour." },
-  { icon: "▦", title: "Competitor Tracking",   desc: "Monitor up to 3 competitor restaurants' review trends. Understand what your market peers are doing right — and wrong.",                                          tag: "Pro Only",         more: "Add competitors by Google name + city search. The dashboard shows side-by-side rating cards, keyword comparison bars, and their latest reviews. Daily sync keeps everything fresh." },
-  { icon: "⬡", title: "Multi-Language",        desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.",                tag: "6+ Languages",     more: "Pick the reply language per-review from the reply editor. The full UI ships with EN ↔ 中文 toggle, persisted across dashboard, settings, analytics, and the product tour." },
-];
-
-const PRICING = [
-  { name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
-  { name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
-  { name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
-  { name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
-];
-
-const TESTIMONIALS = [
-  { init: "M", name: "Marcus Renaud", role: "Executive Chef & Owner", rest: "Maison Renaud, New York", quote: "Our Google rating climbed from 4.2 to 4.8 in three months. The AI replies are indistinguishable from our own voice — guests have actually complimented how thoughtful our responses are." },
-  { init: "S", name: "Sophia Hartwell", role: "Director of Operations", rest: "The Hartwell Collection, London", quote: "Managing reviews across seven properties used to consume two full-time staff. Now it takes one person under an hour a day — and the quality has genuinely improved." },
-  { init: "L", name: "Laurent Beaumont", role: "General Manager", rest: "Château Beaumont, Paris", quote: "The multi-language capability is exceptional. We serve guests from around the world and can respond in their native language with complete confidence. Indispensable." },
-];
-
-const FAQS = [
-  { q: "How does the AI generate contextually relevant replies?", a: "Revuly uses an intelligent suggestion engine to analyse each review's specific content — identifying sentiment, concerns, and compliments — then generates three distinct reply styles that directly address the reviewer's experience. No templates, no filler." },
-  { q: "Can I customise the tone to match my brand voice?", a: "Yes. Growth and Pro subscribers can provide brand guidelines and example replies to fine-tune the AI. Pro users benefit from an adaptive model that learns your unique vocabulary and style over time." },
-  { q: "Which languages are supported?", a: "Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Additional languages are added regularly based on subscriber demand." },
-  { q: "Is there a free trial, and does it require a credit card?", a: "Every new account receives a 14-day free trial of the platform with 5 AI reply credits — no credit card required. You can explore all features before any commitment." },
-  { q: "Can I manage more than one restaurant?", a: "Revuly is built around a single restaurant location per account — connect your Google Business Profile and everything stays focused on that one venue. If you run several restaurants and want to manage them together, email us at revuly.support@gmail.com and we'll help you set that up." },
-];
+// ─────────────── Bilingual content (EN + 繁中) ───────────────
+// The navbar 中文 toggle switches `lang` and persists it to localStorage
+// ("revuly-lang") so the dashboard, settings, and product tour stay in sync.
+const CONTENT = {
+  en: {
+    nav: { tour: "Product Tour", links: ["Features", "Pricing", "Testimonials", "FAQ"], login: "Login", trial: "Start Free Trial", signOut: "Sign Out", dashboard: "Dashboard" },
+    hero: {
+      badge: "Intelligent Reputation Management",
+      h1a: "Turn Every Review Into", h1b: "Customer Trust",
+      sub: "The intelligent Google review management platform built exclusively for elite hospitality brands. Reply perfectly in seconds. Monitor sentiment in real time.",
+      cta1: "Start Free Trial — No Card Required", cta2: "See How It Works →",
+      trust: "Trusted by restaurants in 12 countries",
+    },
+    mock: {
+      avg: "Avg rating", reply: "Reply rate", month: "This month", copy: "📋 Copy",
+      reviews: [
+        { name: "Sarah Chen", stars: 5, text: "Hands down the freshest seafood — the salmon sashimi melts. Came back twice this week." },
+        { name: "Marcus T.",  stars: 4, text: "Great vibe, generous portions. Service was a tiny bit slow at peak but worth it." },
+        { name: "Jenny W.",   stars: 5, text: "Best izakaya in the area. The grilled mackerel and sake pairing — chef's kiss." },
+      ],
+      tabs: ["Warm", "Pro", "Brief"],
+      replyText: "Sarah! You just made our night. Save us a seat next time — we want to send out something special. — James, Owner",
+    },
+    stats: [["10,000+", "Restaurants worldwide"], ["4.8★", "Average platform rating"], ["2M+", "Replies generated"], ["< 30s", "Reply crafted"]],
+    featuresHead: { label: "Platform Features", titleA: "Everything Your", titleB: "Reputation Demands", sub: "Precision-engineered for establishments where guest experience is the brand." },
+    features: [
+      { icon: "✦", title: "Smart Reply Suggestions", desc: "Three distinct reply styles — Warm & Personal, Professional & Gracious, Brief & Direct — crafted in seconds and contextually tailored to each review.", tag: "Smart Engine", more: "Every reply opens with the guest's first name, picks the right tone for the star rating, and reads like a real owner — never corporate filler. Pro plans add a fourth 'Your Style' tab that learns from your actual posted replies." },
+      { icon: "◉", title: "Real-Time Monitoring", desc: "Never miss a review. Get instant email alerts the moment a guest posts, across every location in your portfolio.", tag: "Instant Alerts", more: "Choose Immediate / Daily Digest / Weekly cadences. Every email ships with all three smart reply suggestions inside — copy and paste straight into Google Business Profile." },
+      { icon: "◈", title: "Sentiment Analysis", desc: "Automatic classification of every review as positive, neutral, or negative — so you can prioritise where to focus your attention.", tag: "Smart", more: "Sentiment is tagged at sync time and surfaces in the dashboard filter rail, the keyword bars, and the 6-month sentiment trend chart on the Analytics page." },
+      { icon: "⚠", title: "Crisis Alerts", desc: "Detect patterns of negative feedback before they escalate. Receive immediate alerts when 3+ low-rating reviews appear in 24 hours.", tag: "Growth & Pro", more: "Crisis emails ignore your notification cadence — they always send immediately with a red banner and a one-click jump to the affected reviews so you can respond inside the hour." },
+      { icon: "▦", title: "Competitor Tracking", desc: "Monitor up to 3 competitor restaurants' review trends. Understand what your market peers are doing right — and wrong.", tag: "Pro Only", more: "Add competitors by Google name + city search. The dashboard shows side-by-side rating cards, keyword comparison bars, and their latest reviews. Daily sync keeps everything fresh." },
+      { icon: "⬡", title: "Multi-Language", desc: "Reply fluently in English, Traditional Chinese, Vietnamese, French, Spanish, and more. Authentic communication across every guest demographic.", tag: "6+ Languages", more: "Pick the reply language per-review from the reply editor. The full UI ships with EN ↔ 中文 toggle, persisted across dashboard, settings, analytics, and the product tour." },
+    ],
+    moreShow: "Learn more →", moreHide: "Show less ↑",
+    howHead: { label: "How It Works", titleA: "Up and Running in", titleB: "3 Minutes" },
+    how: [
+      ["1", "Connect Google Business", "Link your verified Google Business Profile. Revuly begins monitoring immediately."],
+      ["2", "Get Notified Instantly", "Receive a beautifully formatted email the moment a new review appears — with full review details."],
+      ["3", "Reply with Confidence", "Select a reply style, review the suggestion, copy it, and paste directly into Google. Done."],
+    ],
+    pricingHead: { label: "Pricing", titleA: "Transparent Plans for", titleB: "Every Scale", sub: "All plans include a 14-day free trial. No credit card required to start." },
+    perMonth: "/month, billed monthly", free: "Free", subscribe: "Subscribe", startTrial: "Start Free Trial", mostPopular: "Most Popular",
+    pricing: [
+      { key: "free_trial", name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 AI reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
+      { key: "starter", name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
+      { key: "growth", name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
+      { key: "pro", name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
+    ],
+    testiHead: { label: "Testimonials", titleA: "Trusted by", titleB: "Industry Leaders" },
+    testimonials: [
+      { init: "M", name: "Marcus Renaud", role: "Executive Chef & Owner", rest: "Maison Renaud, New York", quote: "Our Google rating climbed from 4.2 to 4.8 in three months. The replies are indistinguishable from our own voice — guests have actually complimented how thoughtful our responses are." },
+      { init: "S", name: "Sophia Hartwell", role: "Director of Operations", rest: "The Hartwell Collection, London", quote: "Managing reviews across seven properties used to consume two full-time staff. Now it takes one person under an hour a day — and the quality has genuinely improved." },
+      { init: "L", name: "Laurent Beaumont", role: "General Manager", rest: "Château Beaumont, Paris", quote: "The multi-language capability is exceptional. We serve guests from around the world and can respond in their native language with complete confidence. Indispensable." },
+    ],
+    faqHead: { label: "FAQ", titleA: "Frequently Asked", titleB: "Questions" },
+    faqs: [
+      { q: "How does the AI generate contextually relevant replies?", a: "Revuly uses our intelligent suggestion engine to analyse each review's specific content — identifying sentiment, concerns, and compliments — then generates three distinct reply styles that directly address the reviewer's experience. No templates, no filler." },
+      { q: "Can I customise the tone to match my brand voice?", a: "Yes. Growth and Pro subscribers can provide brand guidelines and example replies to fine-tune the suggestions. Pro users benefit from an adaptive model that learns your unique vocabulary and style over time." },
+      { q: "Which languages are supported?", a: "Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Additional languages are added regularly based on subscriber demand." },
+      { q: "Is there a free trial, and does it require a credit card?", a: "Every new account receives a 14-day free trial of the platform with 5 AI reply credits — no credit card required. You can explore all features before any commitment." },
+      { q: "Can I manage more than one restaurant?", a: "Revuly is built around a single restaurant location per account — connect your Google Business Profile and everything stays focused on that one venue. If you run several restaurants and want to manage them together, email us at revuly.support@gmail.com and we'll help you set that up." },
+    ],
+    cta: { hA: "Ready to", hB: "Elevate Your Reputation?", p: "Join 10,000+ elite restaurants managing their guest experience with Revuly.", b1: "Start Free Trial — No Card Required", b2: "View Pricing" },
+    footer: {
+      brand: "The intelligent reputation management platform for elite hospitality brands. Every review, handled with precision.",
+      productH: "Product", companyH: "Company", legalH: "Legal",
+      product: ["Features", "Pricing", "Changelog", "Help Centre", "API Docs"],
+      company: ["About", "Blog", "Careers", "Press Kit", "Contact"],
+      legal: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Refund Policy", href: "/refund" }, { label: "Cookie Policy", href: "#" }, { label: "GDPR", href: "#" }, { label: "Security", href: "#" }],
+      rights: "© 2026 Revuly Inc. All rights reserved.",
+      bottom: [{ label: "Terms", href: "/terms" }, { label: "Privacy", href: "/privacy" }, { label: "Help", href: "/help" }],
+    },
+  },
+  zh: {
+    nav: { tour: "產品導覽", links: ["功能", "方案", "客戶見證", "常見問題"], login: "登入", trial: "免費試用", signOut: "登出", dashboard: "控制台" },
+    hero: {
+      badge: "智慧品牌聲譽管理",
+      h1a: "把每一則評論", h1b: "變成顧客信任",
+      sub: "專為頂級餐飲品牌打造的智慧 Google 評論管理平台。幾秒內回覆得體，即時掌握顧客情緒。",
+      cta1: "免費試用——無需信用卡", cta2: "看看怎麼運作 →",
+      trust: "12 個國家的餐廳都在使用",
+    },
+    mock: {
+      avg: "平均評分", reply: "回覆率", month: "本月新增", copy: "📋 複製",
+      reviews: [
+        { name: "Sarah Chen", stars: 5, text: "海鮮新鮮到不行——鮭魚生魚片入口即化。這禮拜已經來第二次了。" },
+        { name: "Marcus T.",  stars: 4, text: "氣氛很好，份量大方。尖峰時段服務稍慢，但很值得。" },
+        { name: "Jenny W.",   stars: 5, text: "這區最棒的居酒屋。炭烤鯖魚配清酒——主廚之吻。" },
+      ],
+      tabs: ["溫暖", "專業", "簡潔"],
+      replyText: "Sarah！你讓我們今晚超開心。下次來記得跟我們說一聲，想為你準備點特別的。—— James，老闆",
+    },
+    stats: [["10,000+", "全球餐廳"], ["4.8★", "平台平均評分"], ["2M+", "已生成回覆"], ["< 30s", "完成一則回覆"]],
+    featuresHead: { label: "平台功能", titleA: "你的品牌聲譽", titleB: "所需的一切", sub: "為「顧客體驗即品牌」的餐廳精心打造。" },
+    features: [
+      { icon: "✦", title: "智慧回覆建議", desc: "三種不同風格——溫暖親切、專業得體、簡潔直接——幾秒內生成，並貼合每則評論的內容。", tag: "智慧引擎", more: "每則回覆都以顧客的名字開頭，依星等選擇合適語氣，讀起來就像真正的老闆親自寫的，絕非罐頭文字。Pro 方案再加上第四個『你的風格』分頁，從你實際發出的回覆中學習。" },
+      { icon: "◉", title: "即時監控", desc: "再也不漏接任何評論。顧客一發布，立即收到 Email 提醒。", tag: "即時提醒", more: "可選擇即時／每日摘要／每週的通知頻率。每封 Email 都附上三種智慧回覆建議——直接複製貼到 Google 商家檔案即可。" },
+      { icon: "◈", title: "情緒分析", desc: "自動將每則評論分類為正面、中性或負面，讓你優先處理最該關注的地方。", tag: "智慧", more: "情緒會在同步時自動標記，並呈現在控制台的篩選列、關鍵字長條圖，以及分析頁的六個月情緒趨勢圖中。" },
+      { icon: "⚠", title: "危機警示", desc: "在負評擴大之前就察覺。當 24 小時內出現 3 則以上低分評論，立即收到警示。", tag: "Growth & Pro", more: "危機 Email 不受通知頻率限制——一律立即寄出，附紅色橫幅與一鍵跳轉到相關評論，讓你能在一小時內回應。" },
+      { icon: "▦", title: "競爭對手追蹤", desc: "監控最多 3 家競爭餐廳的評論趨勢，看清同業做對與做錯了什麼。", tag: "僅限 Pro", more: "用 Google 名稱＋城市搜尋加入競爭對手。控制台會並排顯示評分卡、關鍵字比較長條圖與對方最新評論，每日同步保持最新。" },
+      { icon: "⬡", title: "多國語言", desc: "以英文、繁體中文、越南文、法文、西班牙文等語言流暢回覆，與各種客群真誠溝通。", tag: "6+ 語言", more: "在回覆編輯器中可逐則選擇回覆語言。整個介面內建 EN ↔ 中文 切換，並在控制台、設定、分析與產品導覽間保持一致。" },
+    ],
+    moreShow: "了解更多 →", moreHide: "收合 ↑",
+    howHead: { label: "運作方式", titleA: "只要", titleB: "3 分鐘上手" },
+    how: [
+      ["1", "連接 Google 商家", "綁定你已驗證的 Google 商家檔案，Revuly 立即開始監控。"],
+      ["2", "即時收到通知", "新評論一出現，就收到排版精美的 Email，附完整評論內容。"],
+      ["3", "安心回覆", "選擇回覆風格、檢視建議、複製後直接貼到 Google，完成。"],
+    ],
+    pricingHead: { label: "方案", titleA: "適合", titleB: "各種規模的透明方案", sub: "所有方案都含 14 天免費試用，開始無需信用卡。" },
+    perMonth: "／月，按月計費", free: "免費", subscribe: "訂閱", startTrial: "免費試用", mostPopular: "最受歡迎",
+    pricing: [
+      { key: "free_trial", name: "Free Trial", price: null, period: "14 天試用", desc: "零風險體驗完整平台。", feats: ["14 天試用", "5 則回覆額度", "1 個店家", "手動輸入評論", "基本情緒標籤", "Email 客服"], popular: false },
+      { key: "starter", name: "Starter", price: "39", desc: "適合獨立經營的精緻餐廳。", feats: ["每月 30 則回覆", "1 個店家", "手動輸入評論", "情緒分析", "Email 客服"], popular: false },
+      { key: "growth", name: "Growth", price: "99", desc: "成長中餐飲集團的完整方案。", feats: ["每月 150 則回覆", "1 個店家", "自動同步 Google 評論", "危機警示＋每週報告", "自訂關鍵字", "多語言回覆", "回覆範本"], popular: true },
+      { key: "pro", name: "Pro", price: "199", desc: "頂級品牌的無限規模。", feats: ["無限回覆", "1 個店家", "學習你的專屬風格", "競爭對手追蹤（最多 3 家）", "回覆成效追蹤", "24/7 優先客服", { label: "多店需求——聯絡我們", href: "mailto:revuly.support@gmail.com" }], popular: false },
+    ],
+    testiHead: { label: "客戶見證", titleA: "深受", titleB: "業界領袖信賴" },
+    testimonials: [
+      { init: "M", name: "Marcus Renaud", role: "行政主廚／老闆", rest: "Maison Renaud，紐約", quote: "我們的 Google 評分三個月內從 4.2 升到 4.8。回覆和我們自己的口吻幾乎一樣——顧客甚至稱讚我們的回覆很用心。" },
+      { init: "S", name: "Sophia Hartwell", role: "營運總監", rest: "The Hartwell Collection，倫敦", quote: "以前管理七家分店的評論要兩名全職員工，現在一個人每天不到一小時就搞定——而且品質確實更好了。" },
+      { init: "L", name: "Laurent Beaumont", role: "總經理", rest: "Château Beaumont，巴黎", quote: "多語言能力非常出色。我們服務來自世界各地的顧客，能用他們的母語自信回覆，不可或缺。" },
+    ],
+    faqHead: { label: "常見問題", titleA: "常見", titleB: "問題" },
+    faqs: [
+      { q: "回覆建議是怎麼產生的？", a: "Revuly 透過我們的智慧建議引擎分析每則評論的具體內容——辨識情緒、疑慮與讚美——再生成三種不同風格、直接回應顧客體驗的回覆。沒有罐頭、沒有廢話。" },
+      { q: "可以調整語氣來符合我的品牌嗎？", a: "可以。Growth 與 Pro 訂閱者能提供品牌指南與範例回覆來微調建議。Pro 用戶更享有會隨時間學習你專屬用詞與風格的適應式模型。" },
+      { q: "支援哪些語言？", a: "目前支援：英文、繁體中文、簡體中文、越南文、法文、西班牙文與日文。我們會依訂閱者需求持續新增語言。" },
+      { q: "有免費試用嗎？需要信用卡嗎？", a: "每個新帳號都享有 14 天免費試用與 5 則回覆額度——無需信用卡。你可以在做任何決定前體驗所有功能。" },
+      { q: "可以管理多家餐廳嗎？", a: "Revuly 以單一店家為核心——連接你的 Google 商家檔案，一切都聚焦於那家店。如果你經營多家餐廳並想一起管理，來信 revuly.support@gmail.com，我們會協助你設定。" },
+    ],
+    cta: { hA: "準備好", hB: "提升你的品牌聲譽了嗎？", p: "加入超過 10,000 家頂級餐廳，用 Revuly 管理顧客體驗。", b1: "免費試用——無需信用卡", b2: "查看方案" },
+    footer: {
+      brand: "專為頂級餐飲品牌打造的智慧品牌聲譽管理平台。每一則評論，都精準處理。",
+      productH: "產品", companyH: "公司", legalH: "法律",
+      product: ["功能", "方案", "更新日誌", "幫助中心", "API 文件"],
+      company: ["關於我們", "部落格", "徵才", "媒體資料", "聯絡我們"],
+      legal: [{ label: "隱私政策", href: "/privacy" }, { label: "服務條款", href: "/terms" }, { label: "退款政策", href: "/refund" }, { label: "Cookie 政策", href: "#" }, { label: "GDPR", href: "#" }, { label: "資訊安全", href: "#" }],
+      rights: "© 2026 Revuly Inc. 版權所有。",
+      bottom: [{ label: "條款", href: "/terms" }, { label: "隱私", href: "/privacy" }, { label: "幫助", href: "/help" }],
+    },
+  },
+};
 
 export default function LandingPage() {
   const [navScrolled, setNavScrolled] = useState(false);
@@ -313,8 +430,24 @@ export default function LandingPage() {
   // null = still resolving (so the navbar doesn't flash the wrong CTAs),
   // true/false = signed-in state.
   const [isAuthed, setIsAuthed] = useState(null);
+  const [lang, setLangRaw] = useState("en");
   const revealRefs = useRef([]);
   const supabase = useRef(null);
+
+  // Hydrate the language from localStorage so the landing page matches the
+  // preference set on the dashboard / product tour.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = window.localStorage.getItem("revuly-lang");
+      if (saved === "zh" || saved === "en") setLangRaw(saved);
+    } catch {}
+  }, []);
+  const toggleLang = () => {
+    const next = lang === "en" ? "zh" : "en";
+    setLangRaw(next);
+    try { window.localStorage.setItem("revuly-lang", next); } catch {}
+  };
 
   useEffect(() => {
     const fn = () => setNavScrolled(window.scrollY > 20);
@@ -354,6 +487,7 @@ export default function LandingPage() {
 
   const r = (delay = "") => ({ ref: (el) => revealRefs.current.push(el), className: `reveal${delay ? ` d${delay}` : ""}` });
   const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const c = CONTENT[lang];
 
   return (
     <>
@@ -364,31 +498,32 @@ export default function LandingPage() {
         <ul className={`nav-links${mobileMenuOpen ? " open" : ""}`}>
           {/* Product Tour navigates to a real page; the rest scroll to in-page sections. */}
           <li>
-            <a href="/tour" onClick={() => setMobileMenuOpen(false)}>Product Tour</a>
+            <a href="/tour" onClick={() => setMobileMenuOpen(false)}>{c.nav.tour}</a>
           </li>
-          {["Features", "Pricing", "Testimonials", "FAQ"].map((l) => (
-            <li key={l}>
+          {["Features", "Pricing", "Testimonials", "FAQ"].map((id, i) => (
+            <li key={id}>
               <a
-                href={`#${l.toLowerCase()}`}
-                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); go(l.toLowerCase()); }}
-              >{l}</a>
+                href={`#${id.toLowerCase()}`}
+                onClick={(e) => { e.preventDefault(); setMobileMenuOpen(false); go(id.toLowerCase()); }}
+              >{c.nav.links[i]}</a>
             </li>
           ))}
         </ul>
         <div className="nav-ctas">
+          <button className="lang-toggle" onClick={toggleLang} aria-label="Toggle language">{lang === "en" ? "中文" : "EN"}</button>
           {isAuthed === null ? (
             // Reserve space while the session check is in flight so the nav
             // doesn't visibly snap between Login/Dashboard on slow networks.
             <span style={{width:174,height:34,display:"inline-block"}} aria-hidden="true" />
           ) : isAuthed ? (
             <>
-              <button className="btn-ghost" onClick={handleSignOut}>Sign Out</button>
-              <button className="btn-gold" onClick={() => window.location.href = "/dashboard"}>Dashboard</button>
+              <button className="btn-ghost" onClick={handleSignOut}>{c.nav.signOut}</button>
+              <button className="btn-gold" onClick={() => window.location.href = "/dashboard"}>{c.nav.dashboard}</button>
             </>
           ) : (
             <>
-              <button className="btn-ghost" onClick={() => window.location.href = "/login"}>Login</button>
-              <button className="btn-gold" onClick={() => window.location.href = "/login"}>Start Free Trial</button>
+              <button className="btn-ghost" onClick={() => window.location.href = "/login"}>{c.nav.login}</button>
+              <button className="btn-gold" onClick={() => window.location.href = "/login"}>{c.nav.trial}</button>
             </>
           )}
           <button
@@ -406,17 +541,17 @@ export default function LandingPage() {
       <section className="hero">
         <div className="hero-bg" /><div className="hero-grid" />
         <div className="hero-inner">
-          <div className="hero-badge"><span className="badge-dot" />Intelligent Reputation Management</div>
-          <h1>Turn Every Review Into<br /><span className="accent">Customer Trust</span></h1>
-          <p className="hero-sub">The intelligent Google review management platform built exclusively for elite hospitality brands. Reply perfectly in seconds. Monitor sentiment in real time.</p>
+          <div className="hero-badge"><span className="badge-dot" />{c.hero.badge}</div>
+          <h1>{c.hero.h1a}<br /><span className="accent">{c.hero.h1b}</span></h1>
+          <p className="hero-sub">{c.hero.sub}</p>
           <div className="hero-ctas">
-            <button className="btn-primary" onClick={() => window.location.href = "/login"}>Start Free Trial — No Card Required</button>
-            <button className="btn-secondary" onClick={() => window.location.href = "/tour"}>See How It Works →</button>
+            <button className="btn-primary" onClick={() => window.location.href = "/login"}>{c.hero.cta1}</button>
+            <button className="btn-secondary" onClick={() => window.location.href = "/tour"}>{c.hero.cta2}</button>
           </div>
 
           {/* Social proof strip — sits between the CTAs and the stat block */}
           <div className="trust-strip">
-            <span className="trust-dot" />Trusted by restaurants in 12 countries
+            <span className="trust-dot" />{c.hero.trust}
           </div>
 
           {/* Dashboard preview mockup (HTML/CSS — no real screenshot) */}
@@ -427,41 +562,35 @@ export default function LandingPage() {
             </div>
             <div className="hero-mock-body">
               <div className="hero-mock-side">
-                <div className="hero-mock-stat"><div className="hero-mock-stat-n">4.8★</div><div className="hero-mock-stat-l">Avg rating</div></div>
-                <div className="hero-mock-stat"><div className="hero-mock-stat-n">94%</div><div className="hero-mock-stat-l">Reply rate</div></div>
-                <div className="hero-mock-stat"><div className="hero-mock-stat-n">+12</div><div className="hero-mock-stat-l">This month</div></div>
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">4.8★</div><div className="hero-mock-stat-l">{c.mock.avg}</div></div>
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">94%</div><div className="hero-mock-stat-l">{c.mock.reply}</div></div>
+                <div className="hero-mock-stat"><div className="hero-mock-stat-n">+12</div><div className="hero-mock-stat-l">{c.mock.month}</div></div>
               </div>
               <div className="hero-mock-mid">
-                {[
-                  { name: "Sarah Chen", stars: 5, text: "Hands down the freshest seafood — the salmon sashimi melts. Came back twice this week." },
-                  { name: "Marcus T.",  stars: 4, text: "Great vibe, generous portions. Service was a tiny bit slow at peak but worth it." },
-                  { name: "Jenny W.",   stars: 5, text: "Best izakaya in the area. The grilled mackerel and sake pairing — chef's kiss." },
-                ].map((r, i) => (
+                {c.mock.reviews.map((rev, i) => (
                   <div key={i} className="hero-mock-rev">
                     <div className="hero-mock-rev-head">
-                      <span className="hero-mock-rev-name">{r.name}</span>
-                      <span className="hero-mock-rev-stars">{"★".repeat(r.stars)}</span>
+                      <span className="hero-mock-rev-name">{rev.name}</span>
+                      <span className="hero-mock-rev-stars">{"★".repeat(rev.stars)}</span>
                     </div>
-                    <div className="hero-mock-rev-text">{r.text}</div>
+                    <div className="hero-mock-rev-text">{rev.text}</div>
                   </div>
                 ))}
               </div>
               <div className="hero-mock-right">
                 <div className="hero-mock-tab-row">
-                  <div className="hero-mock-tab active">Warm</div>
-                  <div className="hero-mock-tab">Pro</div>
-                  <div className="hero-mock-tab">Brief</div>
+                  <div className="hero-mock-tab active">{c.mock.tabs[0]}</div>
+                  <div className="hero-mock-tab">{c.mock.tabs[1]}</div>
+                  <div className="hero-mock-tab">{c.mock.tabs[2]}</div>
                 </div>
-                <div className="hero-mock-reply">
-                  "Sarah! You just made our night. Save us a seat next time — we want to send out something special. — James, Owner"
-                </div>
-                <button className="hero-mock-copy">📋 Copy</button>
+                <div className="hero-mock-reply">“{c.mock.replyText}”</div>
+                <button className="hero-mock-copy">{c.mock.copy}</button>
               </div>
             </div>
           </div>
 
           <div className="hero-stats">
-            {[["10,000+","Restaurants worldwide"],["4.8★","Average platform rating"],["2M+","AI replies generated"],["< 30s","Reply crafted"]].map(([n,l]) => (
+            {c.stats.map(([n, l]) => (
               <div key={l} style={{textAlign:"center"}}><div className="stat-n">{n}</div><div className="stat-l">{l}</div></div>
             ))}
           </div>
@@ -471,12 +600,12 @@ export default function LandingPage() {
       {/* FEATURES */}
       <section className="feat-bg" id="features">
         <div className="section-wrap">
-          <div className="section-header center" {...r()}><div className="section-label">Platform Features</div><h2 className="section-title">Everything Your <span className="accent">Reputation Demands</span></h2><p className="section-sub">Precision-engineered for establishments where guest experience is the brand.</p></div>
+          <div className="section-header center" {...r()}><div className="section-label">{c.featuresHead.label}</div><h2 className="section-title">{c.featuresHead.titleA} <span className="accent">{c.featuresHead.titleB}</span></h2><p className="section-sub">{c.featuresHead.sub}</p></div>
           <div className="feat-grid">
-            {FEATURES.map((f, i) => {
-              const open = openFeat === f.title;
+            {c.features.map((f, i) => {
+              const open = openFeat === i;
               return (
-                <div key={f.title} className={`feat-card${open ? " expanded" : ""}`} {...r(Math.min(i+1,5))}>
+                <div key={i} className={`feat-card${open ? " expanded" : ""}`} {...r(Math.min(i+1,5))}>
                   <div className="feat-icon">{f.icon}</div>
                   <h3>{f.title}</h3><p>{f.desc}</p>
                   {f.more && (
@@ -485,10 +614,10 @@ export default function LandingPage() {
                       <button
                         type="button"
                         className="feat-more-btn"
-                        onClick={() => setOpenFeat(open ? null : f.title)}
+                        onClick={() => setOpenFeat(open ? null : i)}
                         aria-expanded={open}
                       >
-                        {open ? "Show less ↑" : "Learn more →"}
+                        {open ? c.moreHide : c.moreShow}
                       </button>
                     </>
                   )}
@@ -503,9 +632,9 @@ export default function LandingPage() {
       {/* HOW IT WORKS */}
       <section>
         <div className="section-wrap">
-          <div className="section-header center" {...r()}><div className="section-label">How It Works</div><h2 className="section-title">Up and Running in <span className="accent">3 Minutes</span></h2></div>
+          <div className="section-header center" {...r()}><div className="section-label">{c.howHead.label}</div><h2 className="section-title">{c.howHead.titleA} <span className="accent">{c.howHead.titleB}</span></h2></div>
           <div className="how-grid">
-            {[["1","Connect Google Business","Link your verified Google Business Profile. Revuly begins monitoring immediately."],["2","Get Notified Instantly","Receive a beautifully formatted email the moment a new review appears — with full review details."],["3","Reply with AI","Select a reply style, review the suggestion, copy it, and paste directly into Google. Done."]].map(([n,t,d]) => (
+            {c.how.map(([n, t, d]) => (
               <div key={n} className="how-step" {...r(n)}><div className="how-num">{n}</div><h3>{t}</h3><p>{d}</p></div>
             ))}
           </div>
@@ -515,14 +644,14 @@ export default function LandingPage() {
       {/* PRICING */}
       <section style={{background:"var(--bg2)"}} id="pricing">
         <div className="section-wrap">
-          <div className="section-header center" {...r()}><div className="section-label">Pricing</div><h2 className="section-title">Transparent Plans for <span className="accent">Every Scale</span></h2><p className="section-sub">All plans include a 14-day free trial. No credit card required to start.</p></div>
+          <div className="section-header center" {...r()}><div className="section-label">{c.pricingHead.label}</div><h2 className="section-title">{c.pricingHead.titleA} <span className="accent">{c.pricingHead.titleB}</span></h2><p className="section-sub">{c.pricingHead.sub}</p></div>
           <div className="price-grid">
-            {PRICING.map((plan, i) => (
-              <div key={plan.name} className={`price-card${plan.popular?" popular":""}`} {...r(i+1)}>
-                {plan.popular && <span className="popular-badge">Most Popular</span>}
+            {c.pricing.map((plan, i) => (
+              <div key={plan.key} className={`price-card${plan.popular?" popular":""}`} {...r(i+1)}>
+                {plan.popular && <span className="popular-badge">{c.mostPopular}</span>}
                 <div className="price-name">{plan.name}</div>
-                {plan.price ? <div className="price-row"><span className="price-cur">$</span><span className="price-amt">{plan.price}</span></div> : <div className="price-custom">Free</div>}
-                <div className="price-period">{plan.price ? "/month, billed monthly" : plan.period}</div>
+                {plan.price ? <div className="price-row"><span className="price-cur">$</span><span className="price-amt">{plan.price}</span></div> : <div className="price-custom">{c.free}</div>}
+                <div className="price-period">{plan.price ? c.perMonth : plan.period}</div>
                 <p className="price-desc">{plan.desc}</p>
                 <div className="price-div" />
                 <ul className="price-feats">{plan.feats.map((f, idx) => {
@@ -535,10 +664,9 @@ export default function LandingPage() {
                   className={`btn-price ${plan.popular?"btn-price-fill":"btn-price-outline"}`}
                   onClick={() => {
                     // Free Trial → sign-up; paid plans → /pricing with the plan preselected.
-                    const key = plan.name.toLowerCase().replace(/\s+/g, "_");
-                    window.location.href = plan.price ? `/pricing?plan=${key}` : "/login";
+                    window.location.href = plan.price ? `/pricing?plan=${plan.key}` : "/login";
                   }}
-                >{plan.price ? "Subscribe" : "Start Free Trial"}</button>
+                >{plan.price ? c.subscribe : c.startTrial}</button>
               </div>
             ))}
           </div>
@@ -548,9 +676,9 @@ export default function LandingPage() {
       {/* TESTIMONIALS */}
       <section className="testi-bg" id="testimonials">
         <div className="section-wrap">
-          <div className="section-header center" {...r()}><div className="section-label">Testimonials</div><h2 className="section-title">Trusted by <span className="accent">Industry Leaders</span></h2></div>
+          <div className="section-header center" {...r()}><div className="section-label">{c.testiHead.label}</div><h2 className="section-title">{c.testiHead.titleA} <span className="accent">{c.testiHead.titleB}</span></h2></div>
           <div className="testi-grid">
-            {TESTIMONIALS.map((t, i) => (
+            {c.testimonials.map((t, i) => (
               <div key={t.name} className="testi-card" {...r(i+1)}>
                 <div className="testi-stars">★★★★★</div>
                 <p className="testi-quote">{t.quote}</p>
@@ -564,9 +692,9 @@ export default function LandingPage() {
       {/* FAQ */}
       <section id="faq">
         <div className="section-wrap">
-          <div className="section-header center" {...r()}><div className="section-label">FAQ</div><h2 className="section-title">Frequently Asked <span className="accent">Questions</span></h2></div>
+          <div className="section-header center" {...r()}><div className="section-label">{c.faqHead.label}</div><h2 className="section-title">{c.faqHead.titleA} <span className="accent">{c.faqHead.titleB}</span></h2></div>
           <div className="faq-wrap" {...r(1)}>
-            {FAQS.map((faq, i) => (
+            {c.faqs.map((faq, i) => (
               <div key={i} className="faq-item">
                 <button className="faq-q" onClick={() => setOpenFaq(openFaq===i?null:i)}>{faq.q}<span className={`faq-icon${openFaq===i?" open":""}`}>+</span></button>
                 <div className={`faq-a${openFaq===i?" open":""}`}>{faq.a}</div>
@@ -578,11 +706,11 @@ export default function LandingPage() {
 
       {/* CTA BANNER */}
       <div className="cta-banner" {...r()}>
-        <h2>Ready to <span className="accent">Elevate Your Reputation?</span></h2>
-        <p>Join 10,000+ elite restaurants managing their guest experience with Revuly.</p>
+        <h2>{c.cta.hA} <span className="accent">{c.cta.hB}</span></h2>
+        <p>{c.cta.p}</p>
         <div className="cta-btns">
-          <button className="btn-primary" onClick={() => window.location.href="/login"}>Start Free Trial — No Card Required</button>
-          <button className="btn-secondary" onClick={() => go("pricing")}>View Pricing</button>
+          <button className="btn-primary" onClick={() => window.location.href="/login"}>{c.cta.b1}</button>
+          <button className="btn-secondary" onClick={() => go("pricing")}>{c.cta.b2}</button>
         </div>
       </div>
 
@@ -591,15 +719,15 @@ export default function LandingPage() {
         <div className="footer-top">
           <div className="footer-brand">
             <a className="logo" href="#"><span className="logo-icon">✦</span>Revuly</a>
-            <p>The intelligent reputation management platform for elite hospitality brands. Every review, handled with precision.</p>
+            <p>{c.footer.brand}</p>
           </div>
-          <div className="footer-col"><h4>Product</h4><ul>{["Features","Pricing","Changelog","Help Centre","API Docs"].map(l=><li key={l}><a href="#">{l}</a></li>)}</ul></div>
-          <div className="footer-col"><h4>Company</h4><ul>{["About","Blog","Careers","Press Kit","Contact"].map(l=><li key={l}><a href={l==="Contact"?"mailto:revuly.support@gmail.com":"#"}>{l}</a></li>)}</ul></div>
-          <div className="footer-col"><h4>Legal</h4><ul><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Service</a></li><li><a href="/refund">Refund Policy</a></li><li><a href="#">Cookie Policy</a></li><li><a href="#">GDPR</a></li><li><a href="#">Security</a></li></ul></div>
+          <div className="footer-col"><h4>{c.footer.productH}</h4><ul>{c.footer.product.map(l=><li key={l}><a href="#">{l}</a></li>)}</ul></div>
+          <div className="footer-col"><h4>{c.footer.companyH}</h4><ul>{c.footer.company.map((l,i)=><li key={l}><a href={i===c.footer.company.length-1?"mailto:revuly.support@gmail.com":"#"}>{l}</a></li>)}</ul></div>
+          <div className="footer-col"><h4>{c.footer.legalH}</h4><ul>{c.footer.legal.map((l)=><li key={l.label}><a href={l.href}>{l.label}</a></li>)}</ul></div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 Revuly Inc. All rights reserved.</span>
-          <div className="foot-links"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/help">Help</a></div>
+          <span>{c.footer.rights}</span>
+          <div className="foot-links">{c.footer.bottom.map((l)=><a key={l.label} href={l.href}>{l.label}</a>)}</div>
         </div>
       </footer>
     </>
