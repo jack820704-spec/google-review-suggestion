@@ -417,7 +417,7 @@ function buildReminderHtml({ restaurantName, items }) {
       <span style="font-size:20px;font-weight:700;color:#e8c96a;font-family:Georgia,serif">Revuly</span>
     </div>
     <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#f0ede6;margin:0 0 6px">⏰ ${items.length} review${items.length === 1 ? "" : "s"} still waiting for a reply</h1>
-    <p style="font-size:13.5px;color:#a09888;margin:0 0 24px;line-height:1.65">These reviews at <strong style="color:#e8c96a">${restaurantName}</strong> are 24+ hours old and haven't been replied to yet. AI replies are already drafted — just pick one and post it on Google.</p>
+    <p style="font-size:13.5px;color:#a09888;margin:0 0 24px;line-height:1.65">These reviews at <strong style="color:#e8c96a">${restaurantName}</strong> are 24+ hours old and haven't been replied to yet. smart replies are already drafted — just pick one and post it on Google.</p>
     ${blocks}
     <div style="text-align:center;margin:28px 0">
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="display:inline-block;padding:13px 32px;background:linear-gradient(135deg,#e8c96a,#c9a84c);color:#000;font-weight:700;font-size:14px;border-radius:10px;text-decoration:none">Open Dashboard →</a>

@@ -224,7 +224,7 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="card">
             <h2 className="card-title">Tell us about your restaurant</h2>
-            <p className="card-sub">This helps Revuly personalise AI replies to match your establishment's voice and context.</p>
+            <p className="card-sub">This helps Revuly personalise smart replies to match your establishment's voice and context.</p>
             <div className="form-group">
               <label>Restaurant Name *</label>
               <input className="form-input" placeholder="e.g. Maison Renaud" value={info.restaurant_name} onChange={(e) => setInfo({ ...info, restaurant_name: e.target.value })} />

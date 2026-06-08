@@ -78,8 +78,8 @@ export async function POST(req) {
     }
 
     const subject = isInitialSync
-      ? `🎉 Welcome — ${items.length} reviews + AI replies ready for ${restaurantName}`
-      : `📬 ${items.length} new reviews + AI replies for ${restaurantName}`;
+      ? `🎉 Welcome — ${items.length} reviews + smart replies ready for ${restaurantName}`
+      : `📬 ${items.length} new reviews + smart replies for ${restaurantName}`;
 
     const { data, error } = await resend.emails.send({
       from: "Revuly <notifications@revuly.dev>",
@@ -100,8 +100,8 @@ export async function sendDigestEmail({ to, restaurantName, items, isInitialSync
   if (!to || !Array.isArray(items) || items.length === 0) return { error: "no recipients/items" };
 
   const subject = isInitialSync
-    ? `🎉 Welcome — ${items.length} reviews + AI replies ready for ${restaurantName}`
-    : `📬 ${items.length} new reviews + AI replies for ${restaurantName}`;
+    ? `🎉 Welcome — ${items.length} reviews + smart replies ready for ${restaurantName}`
+    : `📬 ${items.length} new reviews + smart replies for ${restaurantName}`;
 
   return resend.emails.send({
     from: "Revuly <notifications@revuly.dev>",

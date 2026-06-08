@@ -418,8 +418,8 @@ const csvToArray = (s) => String(s || "").split(",").map((x) => x.trim()).filter
 // Plan tiering for the Settings upgrade panel.
 const PLAN_ORDER = ["free_trial", "starter", "growth", "pro"];
 const UPGRADE_BLURBS = {
-  starter: "30 AI replies / month · sentiment analysis · email support",
-  growth: "150 AI replies · auto Google sync · crisis alerts · multi-language",
+  starter: "30 smart replies / month · sentiment analysis · email support",
+  growth: "150 smart replies · auto Google sync · crisis alerts · multi-language",
   pro: "Unlimited replies · Learns your unique style · competitor tracking",
 };
 
@@ -628,7 +628,7 @@ export default function SettingsPage() {
       setPlacesResults(null);
       setPlacesQuery("");
       if (data.new_reviews > 0) {
-        setSuccess(`✓ Connected. We've synced ${data.new_reviews} review${data.new_reviews === 1 ? "" : "s"}${data.email_sent ? " and emailed AI replies to you" : ""}.`);
+        setSuccess(`✓ Connected. We've synced ${data.new_reviews} review${data.new_reviews === 1 ? "" : "s"}${data.email_sent ? " and emailed smart replies to you" : ""}.`);
         setTimeout(() => setSuccess(""), 5000);
       } else if (data.alreadySynced) {
         setSuccess("✓ Connected.");
@@ -1486,7 +1486,7 @@ export default function SettingsPage() {
                 })()}
               </div>
             </div>
-            <div style={{fontSize:13,color:"var(--text2)",marginBottom:6}}>AI Replies: {profile.used_count || 0} / {plan.reply_limit === Infinity ? "Unlimited" : plan.reply_limit} used this period</div>
+            <div style={{fontSize:13,color:"var(--text2)",marginBottom:6}}>Smart Replies: {profile.used_count || 0} / {plan.reply_limit === Infinity ? "Unlimited" : plan.reply_limit} used this period</div>
             {plan.reply_limit !== Infinity && (
               <div className="usage-bar-wrap">
                 <div className="usage-bar-fill" style={{width:`${pct}%`,background:pct>=80?(pct>=100?"var(--neg)":"var(--neu-fg)"):"linear-gradient(90deg,var(--gold-dim),var(--gold-lt))"}} />
@@ -1514,7 +1514,7 @@ export default function SettingsPage() {
               <div className="card" style={{marginTop:12}}>
                 <div style={{fontSize:13.5,fontWeight:700,color:"var(--text1)",marginBottom:4}}>Upgrade your plan</div>
                 <p style={{fontSize:12.5,color:"var(--text2)",marginBottom:14,lineHeight:1.55}}>
-                  Unlock more AI replies and features — secure checkout by Paddle. Cancel anytime.
+                  Unlock more smart replies and features — secure checkout by Paddle. Cancel anytime.
                 </p>
                 {upgradeError && <div className="places-err" style={{marginBottom:12}}>{upgradeError}</div>}
                 <div style={{display:"flex",flexDirection:"column",gap:10}}>

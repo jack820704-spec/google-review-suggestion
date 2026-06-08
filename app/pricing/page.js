@@ -75,7 +75,7 @@ const PLANS = [
     price: "39",
     period: "/month, billed monthly",
     desc: "For independent fine dining establishments.",
-    feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"],
+    feats: ["30 smart replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"],
     cta: "Subscribe",
     popular: false,
   },
@@ -85,7 +85,7 @@ const PLANS = [
     price: "99",
     period: "/month, billed monthly",
     desc: "The complete solution for growing groups.",
-    feats: ["150 AI replies / month", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"],
+    feats: ["150 smart replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"],
     cta: "Subscribe",
     popular: true,
   },
@@ -95,7 +95,7 @@ const PLANS = [
     price: "199",
     period: "/month, billed monthly",
     desc: "Unlimited scale for elite portfolios.",
-    feats: ["Unlimited AI replies", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", "Everything in Growth"],
+    feats: ["Unlimited smart replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", "Everything in Growth", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }],
     cta: "Subscribe",
     popular: false,
   },
@@ -191,9 +191,12 @@ export default function PricingPage() {
               <p className="desc">{plan.desc}</p>
               <div className="div" />
               <ul className="feats">
-                {plan.feats.map((f) => (
-                  <li key={f}><span className="chk">✓</span>{f}</li>
-                ))}
+                {plan.feats.map((f, idx) => {
+                  if (typeof f === "object" && f.href) {
+                    return <li key={idx}><span className="chk">✓</span><a href={f.href} style={{color:"var(--gold-lt)",textDecoration:"underline"}}>{f.label}</a></li>;
+                  }
+                  return <li key={typeof f === "string" ? f : idx}><span className="chk">✓</span>{f}</li>;
+                })}
               </ul>
               <button
                 className={`btn ${plan.popular ? "btn-fill" : "btn-outline"}`}
@@ -202,12 +205,6 @@ export default function PricingPage() {
               >
                 {busyPlan === plan.key ? "Opening checkout…" : plan.cta}
               </button>
-              {plan.key === "pro" && (
-                <div className="enterprise">
-                  Multiple locations or enterprise needs?{" "}
-                  <a href="mailto:revuly.support@gmail.com">Contact us →</a>
-                </div>
-              )}
             </div>
           ))}
         </div>

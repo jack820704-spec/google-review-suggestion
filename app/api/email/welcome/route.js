@@ -23,7 +23,7 @@ export async function POST(req) {
       <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.06)">
         <div style="display:flex;gap:14px;align-items:flex-start">
           <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#8a6e2f,#c9a84c);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#000;flex-shrink:0;text-align:center;line-height:32px">1</div>
-          <div><div style="font-size:15px;font-weight:700;color:#f0ede6;margin-bottom:4px">Add Your First Review</div><div style="font-size:13.5px;color:#a09888;line-height:1.6">In your dashboard, click "Add Review" and paste a real customer review. Your AI replies will be generated instantly.</div></div>
+          <div><div style="font-size:15px;font-weight:700;color:#f0ede6;margin-bottom:4px">Add Your First Review</div><div style="font-size:13.5px;color:#a09888;line-height:1.6">In your dashboard, click "Add Review" and paste a real customer review. Your smart replies will be generated instantly.</div></div>
         </div>
       </div>
       <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.06)">

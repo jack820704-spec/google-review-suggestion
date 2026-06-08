@@ -322,9 +322,9 @@ const CONTENT = {
     perMonth: "/month, billed monthly", free: "Free", subscribe: "Subscribe", startTrial: "Start Free Trial", mostPopular: "Most Popular",
     pricing: [
       { key: "free_trial", name: "Free Trial", price: null, period: "14-day trial", desc: "Explore the full platform risk-free.", feats: ["14-day trial", "5 smart reply credits", "1 location", "Manual review input", "Basic sentiment labels", "Email support"], popular: false },
-      { key: "starter", name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 AI replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
-      { key: "growth", name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 AI replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
-      { key: "pro", name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited AI replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
+      { key: "starter", name: "Starter", price: "39", desc: "For independent fine dining establishments.", feats: ["30 smart replies / month", "1 location", "Manual review input", "Sentiment analysis", "Email support"], popular: false },
+      { key: "growth", name: "Growth", price: "99", desc: "The complete solution for growing groups.", feats: ["150 smart replies / month", "1 location", "Auto Google review sync", "Crisis alerts + weekly reports", "Custom keywords", "Multi-language replies", "Reply templates"], popular: true },
+      { key: "pro", name: "Pro", price: "199", desc: "Unlimited scale for elite portfolios.", feats: ["Unlimited smart replies", "1 location", "Learns your unique style", "Competitor tracking (up to 3)", "Reply effect tracking", "Priority 24/7 support", { label: "Multiple locations — Contact us", href: "mailto:revuly.support@gmail.com" }], popular: false },
     ],
     testiHead: { label: "Testimonials", titleA: "Trusted by", titleB: "Industry Leaders" },
     testimonials: [

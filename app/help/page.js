@@ -64,7 +64,7 @@ const NAV = [
 const FAQS = [
   { q:"Can I try Revuly without a Google Business account?", a:"Absolutely. During your free trial, you can manually add review text directly into the dashboard. The AI reply generation works for any review you add, regardless of Google connection." },
   { q:"What if I have multiple Google Business locations?", a:"Growth and Pro plans support multiple locations. Each location is managed as a separate property within your account. Enterprise clients can also assign team members to specific venues." },
-  { q:"How many AI replies does each plan include?", a:"Free Trial includes 5 replies to explore the platform. Starter gives you 30/month. Growth gives you 150/month. Pro is unlimited — no caps, ever." },
+  { q:"How many smart replies does each plan include?", a:"Free Trial includes 5 replies to explore the platform. Starter gives you 30/month. Growth gives you 150/month. Pro is unlimited — no caps, ever." },
   { q:"Can the AI reply in my restaurant's specific style?", a:"Pro subscribers benefit from adaptive AI that learns from your past replies and brand guidelines you provide. Over time, the AI begins to sound more and more like you specifically." },
   { q:"Why can't I see my Google Business account after connecting?", a:"Ensure you're signing in with the Google account that owns or manages your Google Business Profile. If your profile is still pending verification, you won't be able to access review data until verification is complete." },
   { q:"Are my reviews and data private?", a:"Yes. Your review data is private and is never shared with or sold to third parties. Review text is sent to Anthropic's Claude API solely to generate reply suggestions, and Anthropic does not use this data for training." },
@@ -114,7 +114,7 @@ export default function HelpPage() {
             <div className="step-card"><div className="step-n">1</div><div className="step-body"><h4>Complete Onboarding</h4><p>Enter your restaurant name, type, city, and country. This context is used by the AI to write replies that sound genuinely from you.</p></div></div>
             <div className="step-card"><div className="step-n">2</div><div className="step-body"><h4>Connect Google Business (or skip)</h4><p>Connect your verified Google Business Profile for automatic review sync. If you're on the trial, you can skip this and add reviews manually.</p></div></div>
             <div className="step-card"><div className="step-n">3</div><div className="step-body"><h4>Add a Review</h4><p>On the dashboard, click "Add Review" to manually paste a customer review. On Growth/Pro, reviews sync automatically.</p></div></div>
-            <div className="step-card"><div className="step-n">4</div><div className="step-body"><h4>Generate AI Replies</h4><p>Click on any review, select your preferred reply style (Warm & Personal, Professional & Gracious, or Brief & Direct), and click "Generate AI Replies".</p></div></div>
+            <div className="step-card"><div className="step-n">4</div><div className="step-body"><h4>Generate Smart Replies</h4><p>Click on any review, select your preferred reply style (Warm & Personal, Professional & Gracious, or Brief & Direct), and click "Generate Smart Replies".</p></div></div>
             <div className="step-card"><div className="step-n">5</div><div className="step-body"><h4>Copy & Post to Google</h4><p>Choose the reply you like best, click "Copy", then paste it into your Google Business Profile manager. Click "Mark Replied" in Revuly to track your response rate.</p></div></div>
           </div>
 
@@ -175,7 +175,7 @@ export default function HelpPage() {
               <li>Go to the dashboard and click <strong>📄 Upload CSV</strong> next to <strong>+ Add Review</strong></li>
               <li>Pick your <code>.csv</code> file</li>
               <li>Click <strong>Upload</strong> — you'll see a summary like <em>"Imported 47 new · skipped 3 duplicates · 50 rows total"</em></li>
-              <li>The new reviews appear in your dashboard immediately. AI replies are <em>not</em> auto-generated for bulk imports (to avoid burning your monthly quota); click a review and use <strong>Generate AI Replies</strong> when you're ready to reply.</li>
+              <li>The new reviews appear in your dashboard immediately. smart replies are <em>not</em> auto-generated for bulk imports (to avoid burning your monthly quota); click a review and use <strong>Generate Smart Replies</strong> when you're ready to reply.</li>
             </ol>
 
             <div className="highlight-box"><p>✓ Tip: Upload limit is 1000 rows per request. For larger historical archives, split the CSV into multiple files.</p></div>
@@ -193,7 +193,7 @@ export default function HelpPage() {
               <li>The review appears in the right-hand AI Editor panel</li>
               <li>Select a <strong>Reply Style</strong>: Warm & Personal, Professional & Gracious, or Brief & Direct</li>
               <li>Select your preferred <strong>Language</strong> (English, 繁中, Tiếng Việt, etc.)</li>
-              <li>Click <strong>"Generate AI Replies"</strong></li>
+              <li>Click <strong>"Generate Smart Replies"</strong></li>
               <li>All three styles are generated simultaneously</li>
               <li>Review, edit if needed, then click <strong>"Copy"</strong></li>
               <li>Paste your reply into your Google Business Profile manager</li>

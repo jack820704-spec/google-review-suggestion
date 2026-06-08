@@ -483,7 +483,7 @@ const STYLES = STYLES_EN;
 const T = {
   en: {
     live: "Live",
-    ai_replies_used: "AI Replies Used",
+    ai_replies_used: "Smart Replies Used",
     avg_rating: "Avg Rating",
     total_reviews: "Total Reviews",
     reply_rate: "Reply Rate",
@@ -646,7 +646,7 @@ const T = {
   },
   zh: {
     live: "即時",
-    ai_replies_used: "已用 AI 回覆",
+    ai_replies_used: "已用智慧回覆",
     avg_rating: "平均評分",
     total_reviews: "評論總數",
     reply_rate: "回覆率",
