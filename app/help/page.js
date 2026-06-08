@@ -53,6 +53,7 @@ const NAV = [
   { id:"getting-started", label:"Getting Started" },
   { id:"connect-google", label:"Connect Google Business" },
   { id:"csv-import", label:"CSV Import" },
+  { id:"smart-paste", label:"Smart Paste" },
   { id:"ai-reply", label:"Using AI Reply" },
   { id:"keyword-intel", label:"Keyword Intelligence" },
   { id:"notifications", label:"Email Notifications" },
@@ -179,6 +180,15 @@ export default function HelpPage() {
             </ol>
 
             <div className="highlight-box"><p>✓ Tip: Upload limit is 1000 rows per request. For larger historical archives, split the CSV into multiple files.</p></div>
+
+            <div id="smart-paste" className="section-anchor" />
+            <h3>How to Import Your Review History (Smart Paste)</h3>
+            <p>No spreadsheet needed. <strong>Smart Paste</strong> lets you copy reviews straight off your Google Maps page — our parser turns the raw text into structured reviews automatically (reviewer name, star rating, text, and date).</p>
+            <div className="step-card"><div className="step-n">1</div><div className="step-body"><h4>Open Google Maps → search your restaurant</h4><p>Go to <a href="https://maps.google.com" target="_blank">maps.google.com</a> and open your business listing.</p></div></div>
+            <div className="step-card"><div className="step-n">2</div><div className="step-body"><h4>Click "Reviews" to see all reviews</h4><p>Open the Reviews tab and scroll down to load the reviews you'd like to import.</p></div></div>
+            <div className="step-card"><div className="step-n">3</div><div className="step-body"><h4>Select the review text → Ctrl+C (⌘+C) to copy</h4><p>Drag your mouse to highlight the reviews, then copy them.</p></div></div>
+            <div className="step-card"><div className="step-n">4</div><div className="step-body"><h4>Back in Revuly → click "✨ Smart Paste" → Ctrl+V → "Parse & Import"</h4><p>Paste into the Smart Paste box and click <strong>Parse & Import</strong>. Revuly detects each review, removes duplicates, and adds them to your dashboard.</p></div></div>
+            <div className="highlight-box"><p>✓ Tip: Smart Paste reads even messy copied text — no exact formatting required.</p></div>
           </div>
 
           {/* AI REPLY */}

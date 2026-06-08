@@ -105,7 +105,7 @@ const CSS = `
   .tab.active{color:var(--gold-lt);border-bottom-color:var(--gold)}
   .tab-count{display:inline-block;padding:1px 8px;border-radius:999px;background:rgba(201,168,76,.14);font-size:10.5px;color:var(--gold);font-weight:700;letter-spacing:.3px}
   .tab.active .tab-count{background:rgba(201,168,76,.22)}
-  .mid-actions{display:flex;align-items:center;gap:8px}
+  .mid-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .btn-csv{padding:6px 12px;border-radius:8px;font-size:12.5px;font-weight:600;font-family:inherit;color:var(--gold);background:transparent;border:1px solid var(--gold-border);cursor:pointer;transition:all .2s}
   .btn-csv:hover{background:rgba(201,168,76,.08);color:var(--gold-lt)}
 
@@ -558,6 +558,13 @@ const T = {
     csv_format: "Expected columns: reviewer_name, stars, content, review_date",
     csv_help: "How to export from Google Maps →",
     csv_result: (i, d, t) => `Imported ${i} new · skipped ${d} duplicate${d === 1 ? "" : "s"} · ${t} rows total`,
+    smart_paste: "Smart Paste",
+    smart_title: "Paste Reviews from Google Maps",
+    smart_sub: "Copy reviews from your Google Maps page and paste them here. We'll automatically detect each review.",
+    smart_ph: "Paste your copied reviews here…",
+    smart_parsing: "Parsing…",
+    smart_import: "Parse & Import",
+    smart_result: (i, s, tot) => `Imported ${i} new · skipped ${s} duplicate${s === 1 ? "" : "s"} · ${tot} detected`,
     mr_title: "Mark as Replied",
     mr_sub: "Paste the exact reply you posted on Google. We use this to learn your personal voice and improve future suggestions (Pro plan).",
     mr_placeholder: "The exact text you posted on Google…",
@@ -721,6 +728,13 @@ const T = {
     csv_format: "欄位：reviewer_name, stars, content, review_date",
     csv_help: "如何從 Google Maps 匯出？→",
     csv_result: (i, d, t) => `匯入 ${i} 則 · 跳過 ${d} 則重複 · 共 ${t} 列`,
+    smart_paste: "智慧貼上",
+    smart_title: "從 Google Maps 貼上評論",
+    smart_sub: "從你的 Google Maps 頁面複製評論後貼到這裡，系統會自動辨識每一則評論。",
+    smart_ph: "把複製的評論貼到這裡…",
+    smart_parsing: "解析中…",
+    smart_import: "解析並匯入",
+    smart_result: (i, s, tot) => `匯入 ${i} 則 · 跳過 ${s} 則重複 · 共偵測 ${tot} 則`,
     mr_title: "標記為已回覆",
     mr_sub: "貼上你在 Google 實際發出的回覆內容。系統會用這些資料學習你的個人語氣，提升「你的風格」的 AI 建議準確度（Pro 方案）。",
     mr_placeholder: "你在 Google 發出的實際文字…",
@@ -896,6 +910,11 @@ export default function DashboardPage() {
   const [csvUploading, setCsvUploading] = useState(false);
   const [csvResult, setCsvResult] = useState(null);
   const [csvError, setCsvError] = useState("");
+  const [showSmartModal, setShowSmartModal] = useState(false);
+  const [smartText, setSmartText] = useState("");
+  const [smartBusy, setSmartBusy] = useState(false);
+  const [smartResult, setSmartResult] = useState(null);
+  const [smartError, setSmartError] = useState("");
   const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
   const [keywordExpanded, setKeywordExpanded] = useState(false);
   const [showMarkRepliedModal, setShowMarkRepliedModal] = useState(false);
@@ -1087,6 +1106,26 @@ export default function DashboardPage() {
 
   // Competitor tracking is managed in Settings (competitors table) — the dashboard
   // Competitors tab is analysis-only, so no add/remove handlers live here.
+
+  const handleSmartPaste = async () => {
+    if (!smartText.trim()) return;
+    setSmartBusy(true); setSmartError(""); setSmartResult(null);
+    try {
+      const res = await fetch("/api/reviews/smart-paste", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: smartText }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) { setSmartError(data.error || "Parsing failed"); return; }
+      setSmartResult(data);
+      loadData();
+    } catch (err) {
+      setSmartError(err.message);
+    } finally {
+      setSmartBusy(false);
+    }
+  };
 
   const handleCsvUpload = async () => {
     if (!csvFile) return;
@@ -1381,6 +1420,7 @@ export default function DashboardPage() {
               {reviewTab !== "competitors" && (
                 <div className="mid-actions">
                   <button className="btn-csv" onClick={() => { setShowCsvModal(true); setCsvResult(null); setCsvError(""); setCsvFile(null); }}>📄 {t.upload_csv}</button>
+                  <button className="btn-csv" onClick={() => { setShowSmartModal(true); setSmartResult(null); setSmartError(""); setSmartText(""); }}>✨ {t.smart_paste}</button>
                   <button className="btn-add" onClick={() => setShowAddModal(true)}>{t.add_review}</button>
                 </div>
               )}
@@ -1845,6 +1885,36 @@ export default function DashboardPage() {
               <button className="modal-cancel" onClick={() => setShowCsvModal(false)}>{t.cancel}</button>
               <button className="modal-save" onClick={handleCsvUpload} disabled={!csvFile || csvUploading}>
                 {csvUploading ? t.csv_uploading : t.csv_upload}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SMART PASTE MODAL */}
+      {showSmartModal && (
+        <div className="modal-overlay" onClick={() => { if (!smartBusy) setShowSmartModal(false); }}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{t.smart_title}</h3>
+            <p className="modal-sub">{t.smart_sub}</p>
+            <textarea
+              className="modal-input modal-textarea"
+              style={{ minHeight: 170, lineHeight: 1.6 }}
+              placeholder={t.smart_ph}
+              value={smartText}
+              onChange={(e) => setSmartText(e.target.value)}
+              disabled={smartBusy}
+            />
+            {smartError && (
+              <div style={{padding:"8px 12px",background:"rgba(224,96,96,.12)",border:"1px solid rgba(224,96,96,.3)",borderRadius:8,fontSize:13,color:"var(--neg)",marginTop:12}}>{smartError}</div>
+            )}
+            {smartResult && (
+              <div className="csv-success">{t.smart_result(smartResult.inserted, smartResult.skipped, smartResult.total)}</div>
+            )}
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => setShowSmartModal(false)} disabled={smartBusy}>{t.cancel}</button>
+              <button className="modal-save" onClick={handleSmartPaste} disabled={!smartText.trim() || smartBusy}>
+                {smartBusy ? t.smart_parsing : t.smart_import}
               </button>
             </div>
           </div>
