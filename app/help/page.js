@@ -68,9 +68,9 @@ const FAQS = [
   { q:"How many smart replies does each plan include?", a:"Free Trial includes 5 replies to explore the platform. Starter gives you 30/month. Growth gives you 150/month. Pro is unlimited — no caps, ever." },
   { q:"Can replies match my restaurant's specific style?", a:"Pro subscribers benefit from an adaptive model that learns from your past replies and brand guidelines you provide. Over time, it begins to sound more and more like you specifically." },
   { q:"Why can't I see my Google Business account after connecting?", a:"Ensure you're signing in with the Google account that owns or manages your Google Business Profile. If your profile is still pending verification, you won't be able to access review data until verification is complete." },
-  { q:"Are my reviews and data private?", a:"Yes. Your review data is private and is never shared with or sold to third parties. Review text is sent to Anthropic's Claude API solely to generate reply suggestions, and Anthropic does not use this data for training." },
+  { q:"Are my reviews and data private?", a:"Yes. Your review data is private and is never shared with or sold to third parties. Review text is sent to our intelligent suggestion engine solely to generate reply suggestions, and is not used for training." },
   { q:"Can I cancel my subscription at any time?", a:"Yes. Cancel anytime from your dashboard settings. Your access continues until the end of the current billing period. No cancellation fees." },
-  { q:"What languages can Revuly reply in?", a:"Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Select your preferred reply language in the AI editor on the right-hand panel of the dashboard." },
+  { q:"What languages can Revuly reply in?", a:"Currently: English, Traditional Chinese, Simplified Chinese, Vietnamese, French, Spanish, and Japanese. Select your preferred reply language in the reply editor on the right-hand panel of the dashboard." },
   { q:"How do I actually post the smart reply to Google?", a:"Revuly doesn't post directly to Google on your behalf (this is by design — you stay in control). Copy the reply you like, then paste it directly into your Google Business Profile manager on business.google.com." },
   { q:"What counts as a 'crisis' alert?", a:"A crisis is automatically detected when 3 or more reviews with a rating of 2 stars or below appear within any 24-hour period. You'll receive an immediate email alert with a red 'Crisis' banner and smart reply suggestions." },
 ];
@@ -196,7 +196,7 @@ export default function HelpPage() {
             <div id="ai-reply" className="section-anchor" />
             <div className="section-badge">04</div>
             <h2>Using Smart Reply</h2>
-            <p>Revuly uses Anthropic's Claude AI to generate contextually relevant, genuine-sounding replies that match your restaurant's voice.</p>
+            <p>Revuly uses our intelligent suggestion engine to generate contextually relevant, genuine-sounding replies that match your restaurant's voice.</p>
             <h3>Step-by-Step</h3>
             <ol>
               <li>Click any review in the middle panel of your dashboard</li>
